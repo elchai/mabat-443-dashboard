@@ -2637,7 +2637,38 @@ document.addEventListener('keydown', (e) => {
 });
 
 // ═══════ DEMO DATA ═══════
+let isDemoMode = false;
+let realNewsData = {};
+let realAllNewsData = {};
+let realSummaryData = null;
+let realMetaData = null;
+
 function loadDemoData() {
+    const btn = document.querySelector('[onclick="loadDemoData()"]');
+
+    // Toggle off
+    if (isDemoMode) {
+        isDemoMode = false;
+        newsData = realNewsData;
+        allNewsData = realAllNewsData;
+        summaryData = realSummaryData;
+        metaData = realMetaData;
+        renderAll();
+        if (btn) {
+            btn.style.color = 'var(--yellow)';
+            btn.style.borderColor = 'var(--yellow-dim)';
+            btn.innerHTML = '<span class="btn-icon">&#9881;</span><span>הדגמה</span>';
+        }
+        return;
+    }
+
+    // Save real data before overwriting
+    realNewsData = { ...newsData };
+    realAllNewsData = { ...allNewsData };
+    realSummaryData = summaryData;
+    realMetaData = metaData;
+    isDemoMode = true;
+
     const now = Date.now();
     const hour = 3600000;
 
