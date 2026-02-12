@@ -3,12 +3,12 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>MABAT 443 | Sector Intelligence Platform</title>
+<title>מבט 443 | פלטפורמת מודיעין גזרתית</title>
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
 <style>
 /* ═══════════════════════════════════════
    MABAT 443 - CYBER DEFENSE DASHBOARD
-   Futuristic Military Intelligence UI
+   Futuristic Military Intelligence UI v2
    ═══════════════════════════════════════ */
 
 @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;500;700;900&family=Rajdhani:wght@300;400;500;600;700&family=Share+Tech+Mono&display=swap');
@@ -31,6 +31,8 @@
     --yellow: #ffd000;
     --yellow-dim: #ffd00044;
     --blue: #4488ff;
+    --purple: #a855f7;
+    --purple-dim: #a855f744;
     --text-primary: #e0e8f0;
     --text-secondary: #7088a0;
     --text-dim: #3a4a5c;
@@ -164,7 +166,7 @@ body {
 }
 
 .logo-hex::before {
-    content: '⬡';
+    content: '\2B21';
     font-size: 20px;
     color: var(--bg-primary);
     font-weight: bold;
@@ -202,7 +204,7 @@ body {
 .header-center {
     display: flex;
     align-items: center;
-    gap: 30px;
+    gap: 15px;
 }
 
 .status-badge {
@@ -214,6 +216,32 @@ body {
     border-radius: 4px;
     font-family: var(--font-mono);
     font-size: 12px;
+}
+
+.header-btn {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding: 6px 14px;
+    border: 1px solid var(--border-primary);
+    border-radius: 4px;
+    font-family: var(--font-mono);
+    font-size: 12px;
+    color: var(--cyan);
+    background: transparent;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    letter-spacing: 1px;
+}
+
+.header-btn:hover {
+    background: rgba(0, 212, 255, 0.1);
+    border-color: var(--cyan);
+    box-shadow: 0 0 15px var(--cyan-dim);
+}
+
+.header-btn .btn-icon {
+    font-size: 14px;
 }
 
 .status-dot {
@@ -272,6 +300,7 @@ body {
     height: 1px;
     background: linear-gradient(90deg, transparent, var(--border-glow), transparent);
     opacity: 0.5;
+    z-index: 1;
 }
 
 .panel-header {
@@ -288,7 +317,6 @@ body {
     font-size: 11px;
     letter-spacing: 3px;
     color: var(--cyan);
-    text-transform: uppercase;
 }
 
 .panel-indicator {
@@ -311,7 +339,7 @@ body {
 .panel-body::-webkit-scrollbar-thumb { background: var(--border-primary); border-radius: 2px; }
 .panel-body::-webkit-scrollbar-thumb:hover { background: var(--cyan-dim); }
 
-/* ═══════ LEFT PANEL - THREAT & STATS ═══════ */
+/* ═══════ LEFT PANEL ═══════ */
 .left-panel {
     grid-row: 2 / 4;
     display: flex;
@@ -320,9 +348,7 @@ body {
 }
 
 /* Threat Level */
-.threat-container {
-    flex: 0 0 200px;
-}
+.threat-container { flex: 0 0 200px; }
 
 .threat-gauge {
     display: flex;
@@ -409,9 +435,7 @@ body {
 }
 
 /* Stats */
-.stats-container {
-    flex: 1;
-}
+.stats-container { flex: 1; }
 
 .stat-row {
     display: flex;
@@ -440,9 +464,7 @@ body {
 .stat-value.green { color: var(--green); }
 
 /* Sources */
-.sources-container {
-    flex: 0 0 auto;
-}
+.sources-container { flex: 0 0 auto; }
 
 .source-item {
     display: flex;
@@ -472,14 +494,33 @@ body {
     white-space: nowrap;
 }
 
+.source-type {
+    font-size: 9px;
+    padding: 1px 5px;
+    border-radius: 2px;
+    border: 1px solid var(--border-primary);
+}
+
+.source-type.local { color: var(--green); border-color: var(--green-dim); }
+.source-type.regional { color: var(--orange); border-color: var(--orange-dim); }
+.source-type.national { color: var(--cyan); border-color: var(--cyan-dim); }
+.source-type.news { color: var(--yellow); border-color: var(--yellow-dim); }
+
 .source-count {
     color: var(--cyan);
     font-size: 10px;
 }
 
 /* ═══════ CENTER - MAP ═══════ */
-.map-panel {
-    position: relative;
+.map-panel { position: relative; transition: all 0.4s ease; }
+
+.map-panel.fullscreen {
+    position: fixed !important;
+    top: 0; left: 0; right: 0; bottom: 0;
+    z-index: 9000;
+    border-radius: 0;
+    grid-row: auto;
+    grid-column: auto;
 }
 
 #map {
@@ -495,10 +536,7 @@ body {
 
 .map-overlay {
     position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
+    top: 0; left: 0; right: 0; bottom: 0;
     pointer-events: none;
     z-index: 1000;
     border: 1px solid var(--border-primary);
@@ -508,9 +546,7 @@ body {
 .map-overlay::before {
     content: '';
     position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
+    top: 0; left: 0; right: 0;
     height: 2px;
     background: repeating-linear-gradient(90deg, transparent, transparent 4px, var(--cyan-dim) 4px, var(--cyan-dim) 5px);
 }
@@ -539,27 +575,26 @@ body {
     text-shadow: 0 0 10px var(--cyan-dim);
 }
 
-/* Custom map markers */
-.marker-pulse {
-    width: 20px;
-    height: 20px;
-    border-radius: 50%;
-    position: relative;
-}
-
-.marker-pulse::after {
-    content: '';
+.map-btn {
     position: absolute;
-    inset: -5px;
-    border-radius: 50%;
-    border: 2px solid currentColor;
-    animation: markerPulse 2s ease-out infinite;
-    opacity: 0;
+    top: 10px;
+    left: 10px;
+    z-index: 1001;
+    background: var(--bg-panel);
+    border: 1px solid var(--border-primary);
+    color: var(--cyan);
+    padding: 6px 10px;
+    border-radius: 4px;
+    cursor: pointer;
+    font-family: var(--font-mono);
+    font-size: 12px;
+    transition: all 0.3s ease;
 }
 
-@keyframes markerPulse {
-    0% { transform: scale(0.5); opacity: 0.8; }
-    100% { transform: scale(2); opacity: 0; }
+.map-btn:hover {
+    background: rgba(0, 212, 255, 0.15);
+    border-color: var(--cyan);
+    box-shadow: 0 0 10px var(--cyan-dim);
 }
 
 /* ═══════ RIGHT PANEL - AI SUMMARY ═══════ */
@@ -603,12 +638,12 @@ body {
 }
 
 .ai-badge::before {
-    content: '◆';
+    content: '\25C6';
     font-size: 6px;
     animation: dotPulse 1.5s ease-in-out infinite;
 }
 
-/* Config Panel (right bottom) */
+/* Config Panel */
 .config-panel {
     grid-row: 3 / 4;
     grid-column: 3 / 4;
@@ -624,21 +659,110 @@ body {
     font-size: 11px;
 }
 
-.config-key {
-    color: var(--text-secondary);
-}
-
-.config-val {
-    color: var(--cyan);
-}
+.config-key { color: var(--text-secondary); }
+.config-val { color: var(--cyan); }
 
 /* ═══════ BOTTOM - ALERT FEED ═══════ */
-.alert-feed {
-    grid-column: 2 / 3;
+.alert-feed { grid-column: 2 / 3; display: flex; flex-direction: column; }
+
+.alert-toolbar {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 6px 12px;
+    border-bottom: 1px solid var(--border-primary);
+    background: rgba(0, 0, 0, 0.2);
+    flex-shrink: 0;
 }
+
+.filter-chip {
+    padding: 3px 10px;
+    border: 1px solid var(--border-primary);
+    border-radius: 3px;
+    font-family: var(--font-mono);
+    font-size: 10px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    background: transparent;
+    color: var(--text-dim);
+    letter-spacing: 1px;
+}
+
+.filter-chip:hover { border-color: var(--cyan-dim); color: var(--text-secondary); }
+.filter-chip.active { border-color: var(--cyan); color: var(--cyan); background: rgba(0, 212, 255, 0.08); }
+.filter-chip.active.red { border-color: var(--red); color: var(--red); background: var(--red-dim); }
+.filter-chip.active.orange { border-color: var(--orange); color: var(--orange); background: var(--orange-dim); }
+.filter-chip.active.yellow { border-color: var(--yellow); color: var(--yellow); background: var(--yellow-dim); }
+.filter-chip.active.blue { border-color: var(--blue); color: var(--blue); background: rgba(68,136,255,0.12); }
+.filter-chip.active.purple { border-color: var(--purple); color: var(--purple); background: var(--purple-dim); }
+
+/* Anarchist toggle */
+.toggle-container {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-family: var(--font-mono);
+    font-size: 10px;
+    color: var(--purple);
+    padding: 0 8px;
+}
+
+.toggle-switch {
+    position: relative;
+    width: 32px;
+    height: 16px;
+    background: var(--bg-primary);
+    border: 1px solid var(--border-primary);
+    border-radius: 8px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.toggle-switch.active {
+    background: var(--purple-dim);
+    border-color: var(--purple);
+}
+
+.toggle-switch::after {
+    content: '';
+    position: absolute;
+    top: 2px;
+    left: 2px;
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    background: var(--text-dim);
+    transition: all 0.3s ease;
+}
+
+.toggle-switch.active::after {
+    left: 18px;
+    background: var(--purple);
+    box-shadow: 0 0 6px var(--purple);
+}
+
+.search-input {
+    flex: 1;
+    max-width: 220px;
+    padding: 4px 10px;
+    border: 1px solid var(--border-primary);
+    border-radius: 3px;
+    background: rgba(0, 0, 0, 0.3);
+    color: var(--text-primary);
+    font-family: var(--font-mono);
+    font-size: 11px;
+    outline: none;
+    direction: rtl;
+    transition: border-color 0.3s ease;
+}
+
+.search-input::placeholder { color: var(--text-dim); }
+.search-input:focus { border-color: var(--cyan); box-shadow: 0 0 8px var(--cyan-dim); }
 
 .alert-feed .panel-body {
     padding: 0;
+    flex: 1;
+    overflow-y: auto;
 }
 
 .alert-item {
@@ -649,19 +773,29 @@ body {
     border-bottom: 1px solid rgba(15, 52, 96, 0.3);
     transition: background 0.3s ease;
     direction: rtl;
+    cursor: pointer;
 }
 
-.alert-item:hover {
-    background: rgba(0, 212, 255, 0.03);
+.alert-item:hover { background: rgba(0, 212, 255, 0.03); }
+
+.alert-item.expanded {
+    background: rgba(0, 212, 255, 0.05);
+    flex-direction: column;
+    gap: 8px;
 }
 
-.alert-item.new-alert {
-    animation: alertFlash 1s ease;
-}
+.alert-item.new-alert { animation: alertFlash 2s ease; }
 
 @keyframes alertFlash {
-    0% { background: rgba(0, 212, 255, 0.15); }
+    0% { background: rgba(0, 212, 255, 0.2); }
     100% { background: transparent; }
+}
+
+.alert-row {
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+    width: 100%;
 }
 
 .alert-time {
@@ -674,9 +808,7 @@ body {
 }
 
 .alert-urgency {
-    width: 8px;
-    min-width: 8px;
-    height: 8px;
+    width: 8px; min-width: 8px; height: 8px;
     border-radius: 50%;
     margin-top: 5px;
     flex-shrink: 0;
@@ -687,11 +819,9 @@ body {
 .alert-urgency.urgency-3 { background: var(--yellow); box-shadow: 0 0 6px var(--yellow); }
 .alert-urgency.urgency-2 { background: var(--blue); box-shadow: 0 0 6px var(--blue); }
 .alert-urgency.urgency-1 { background: #666; }
+.alert-urgency.urgency-anarchist { background: var(--purple); box-shadow: 0 0 8px var(--purple); }
 
-.alert-content {
-    flex: 1;
-    min-width: 0;
-}
+.alert-content { flex: 1; min-width: 0; }
 
 .alert-title {
     font-family: var(--font-body);
@@ -713,6 +843,28 @@ body {
     white-space: nowrap;
 }
 
+.alert-full-text {
+    font-family: var(--font-body);
+    font-size: 13px;
+    line-height: 1.6;
+    color: var(--text-secondary);
+    padding: 8px 12px;
+    border: 1px solid var(--border-primary);
+    border-radius: 4px;
+    background: rgba(0, 0, 0, 0.2);
+    white-space: pre-wrap;
+    direction: rtl;
+}
+
+.alert-meta-row {
+    display: flex;
+    gap: 10px;
+    align-items: center;
+    font-family: var(--font-mono);
+    font-size: 9px;
+    color: var(--text-dim);
+}
+
 .alert-source {
     font-family: var(--font-mono);
     font-size: 9px;
@@ -724,7 +876,270 @@ body {
     margin-top: 2px;
 }
 
-/* ═══════ EMPTY / LOADING STATES ═══════ */
+/* ═══════ TIMELINE GRAPH ═══════ */
+.timeline-graph {
+    padding: 8px 12px;
+    border-bottom: 1px solid var(--border-primary);
+    background: rgba(0, 0, 0, 0.2);
+    flex-shrink: 0;
+}
+
+.timeline-label {
+    font-family: var(--font-mono);
+    font-size: 9px;
+    color: var(--text-dim);
+    margin-bottom: 4px;
+    letter-spacing: 1px;
+}
+
+.timeline-bars {
+    display: flex;
+    align-items: flex-end;
+    gap: 2px;
+    height: 35px;
+}
+
+.timeline-bar {
+    flex: 1;
+    min-width: 2px;
+    background: var(--cyan-dim);
+    border-radius: 1px 1px 0 0;
+    transition: all 0.3s ease;
+    position: relative;
+}
+
+.timeline-bar:hover {
+    opacity: 0.8;
+}
+
+.timeline-bar.has-red { background: var(--red); box-shadow: 0 0 4px var(--red-dim); }
+.timeline-bar.has-orange { background: var(--orange); }
+.timeline-bar.has-yellow { background: var(--yellow); }
+.timeline-bar.has-blue { background: var(--blue); }
+
+.timeline-hours {
+    display: flex;
+    justify-content: space-between;
+    font-family: var(--font-mono);
+    font-size: 8px;
+    color: var(--text-dim);
+    margin-top: 2px;
+}
+
+/* ═══════ HISTORY OVERLAY ═══════ */
+.history-overlay {
+    position: fixed;
+    top: 0; left: 0; right: 0; bottom: 0;
+    background: rgba(4, 8, 16, 0.95);
+    z-index: 8000;
+    display: none;
+    flex-direction: column;
+    animation: fadeIn 0.3s ease;
+}
+
+.history-overlay.visible {
+    display: flex;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+}
+
+.history-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 15px 25px;
+    border-bottom: 1px solid var(--border-primary);
+    background: linear-gradient(180deg, rgba(0, 212, 255, 0.06), transparent);
+}
+
+.history-title {
+    font-family: var(--font-display);
+    font-size: 18px;
+    letter-spacing: 4px;
+    color: var(--cyan);
+}
+
+.history-close {
+    background: transparent;
+    border: 1px solid var(--border-primary);
+    color: var(--text-secondary);
+    padding: 6px 14px;
+    border-radius: 4px;
+    cursor: pointer;
+    font-family: var(--font-mono);
+    font-size: 12px;
+    transition: all 0.3s ease;
+}
+
+.history-close:hover {
+    border-color: var(--red);
+    color: var(--red);
+}
+
+.history-filters {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 12px 25px;
+    border-bottom: 1px solid var(--border-primary);
+    flex-wrap: wrap;
+}
+
+.history-search {
+    flex: 1;
+    max-width: 300px;
+    padding: 6px 14px;
+    border: 1px solid var(--border-primary);
+    border-radius: 4px;
+    background: rgba(0, 0, 0, 0.3);
+    color: var(--text-primary);
+    font-family: var(--font-mono);
+    font-size: 12px;
+    outline: none;
+    direction: rtl;
+}
+
+.history-search:focus { border-color: var(--cyan); }
+
+.history-date-filter {
+    padding: 5px 10px;
+    border: 1px solid var(--border-primary);
+    border-radius: 4px;
+    background: rgba(0, 0, 0, 0.3);
+    color: var(--text-primary);
+    font-family: var(--font-mono);
+    font-size: 11px;
+}
+
+.history-body {
+    flex: 1;
+    overflow-y: auto;
+    padding: 15px 25px;
+}
+
+.history-body::-webkit-scrollbar { width: 6px; }
+.history-body::-webkit-scrollbar-track { background: var(--bg-primary); }
+.history-body::-webkit-scrollbar-thumb { background: var(--border-primary); border-radius: 3px; }
+
+.history-date-group {
+    margin-bottom: 20px;
+}
+
+.history-date-header {
+    font-family: var(--font-display);
+    font-size: 12px;
+    letter-spacing: 2px;
+    color: var(--cyan);
+    padding: 8px 0;
+    border-bottom: 1px solid var(--border-primary);
+    margin-bottom: 8px;
+    position: sticky;
+    top: 0;
+    background: rgba(4, 8, 16, 0.95);
+    z-index: 1;
+}
+
+.history-item {
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+    padding: 10px 12px;
+    border-bottom: 1px solid rgba(15, 52, 96, 0.2);
+    border-radius: 4px;
+    transition: background 0.2s ease;
+    direction: rtl;
+}
+
+.history-item:hover {
+    background: rgba(0, 212, 255, 0.03);
+}
+
+.history-item-time {
+    font-family: var(--font-mono);
+    font-size: 11px;
+    color: var(--text-dim);
+    min-width: 50px;
+    padding-top: 2px;
+}
+
+.history-item-urgency {
+    width: 10px; height: 10px;
+    border-radius: 50%;
+    margin-top: 4px;
+    flex-shrink: 0;
+}
+
+.history-item-content {
+    flex: 1;
+}
+
+.history-item-title {
+    font-family: var(--font-body);
+    font-size: 14px;
+    font-weight: 600;
+    margin-bottom: 4px;
+}
+
+.history-item-text {
+    font-family: var(--font-mono);
+    font-size: 11px;
+    color: var(--text-secondary);
+    line-height: 1.5;
+}
+
+.history-item-source {
+    font-family: var(--font-mono);
+    font-size: 10px;
+    color: var(--text-dim);
+    margin-top: 4px;
+}
+
+.history-stat-bar {
+    display: flex;
+    gap: 15px;
+    padding: 10px 25px;
+    border-bottom: 1px solid var(--border-primary);
+    font-family: var(--font-mono);
+    font-size: 12px;
+}
+
+.history-stat {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    color: var(--text-secondary);
+}
+
+.history-stat strong {
+    color: var(--cyan);
+    font-family: var(--font-display);
+}
+
+/* ═══════ RED ALERT FLASH ═══════ */
+.red-alert-flash {
+    position: fixed;
+    top: 0; left: 0; right: 0; bottom: 0;
+    z-index: 9999;
+    pointer-events: none;
+    opacity: 0;
+}
+
+.red-alert-flash.active {
+    animation: redFlash 3s ease-out;
+}
+
+@keyframes redFlash {
+    0% { opacity: 1; background: rgba(255, 0, 64, 0.3); }
+    10% { opacity: 0.8; background: rgba(255, 0, 64, 0.15); }
+    20% { opacity: 1; background: rgba(255, 0, 64, 0.25); }
+    30% { opacity: 0.5; background: rgba(255, 0, 64, 0.1); }
+    100% { opacity: 0; }
+}
+
+/* ═══════ LOADING / EMPTY ═══════ */
 .loading-state {
     display: flex;
     flex-direction: column;
@@ -738,17 +1153,14 @@ body {
 }
 
 .loading-spinner {
-    width: 40px;
-    height: 40px;
+    width: 40px; height: 40px;
     border: 2px solid var(--border-primary);
     border-top-color: var(--cyan);
     border-radius: 50%;
     animation: spin 1s linear infinite;
 }
 
-@keyframes spin {
-    to { transform: rotate(360deg); }
-}
+@keyframes spin { to { transform: rotate(360deg); } }
 
 .empty-state {
     text-align: center;
@@ -758,29 +1170,15 @@ body {
     font-size: 12px;
 }
 
-/* ═══════ REFRESH INDICATOR ═══════ */
+/* ═══════ REFRESH BAR ═══════ */
 .refresh-bar {
     position: fixed;
-    bottom: 0;
-    left: 0;
+    bottom: 0; left: 0;
     height: 2px;
     background: var(--cyan);
     z-index: 1001;
     transition: width 1s linear;
     box-shadow: 0 0 10px var(--cyan);
-}
-
-/* ═══════ NO DATA OVERLAY ═══════ */
-.no-data-msg {
-    position: absolute;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
-    font-family: var(--font-mono);
-    font-size: 12px;
-    color: var(--text-dim);
-    text-align: center;
-    z-index: 500;
 }
 
 /* ═══════ URGENCY TAG ═══════ */
@@ -798,25 +1196,145 @@ body {
 .urgency-tag.orange { background: var(--orange-dim); color: var(--orange); border: 1px solid var(--orange); }
 .urgency-tag.yellow { background: var(--yellow-dim); color: var(--yellow); border: 1px solid var(--yellow); }
 .urgency-tag.blue { background: rgba(68,136,255,0.15); color: var(--blue); border: 1px solid var(--blue); }
-.urgency-tag.gray { background: rgba(100,100,100,0.15); color: #888; border: 1px solid #555; }
 
 /* ═══════ RESPONSIVE ═══════ */
 @media (max-width: 1200px) {
-    .dashboard {
-        grid-template-columns: 220px 1fr 260px;
-    }
+    .dashboard { grid-template-columns: 220px 1fr 260px; }
 }
 
 @media (max-width: 900px) {
+    body { overflow-y: auto; overflow-x: hidden; }
+
     .dashboard {
-        grid-template-columns: 1fr;
-        grid-template-rows: 60px auto auto auto auto;
+        display: flex;
+        flex-direction: column;
+        height: auto;
+        min-height: 100vh;
+        padding: 4px;
+        gap: 4px;
     }
-    .left-panel { grid-row: auto; flex-direction: row; flex-wrap: wrap; }
-    .threat-container { flex: 1 1 200px; }
-    .map-panel { min-height: 300px; }
-    .alert-feed { min-height: 200px; }
+
+    .header {
+        flex-wrap: wrap;
+        padding: 8px 12px;
+        gap: 8px;
+        min-height: 60px;
+        height: auto;
+    }
+
+    .system-title { font-size: 16px; letter-spacing: 2px; }
+    .system-subtitle { font-size: 9px; display: none; }
+    .logo-hex { width: 35px; height: 35px; }
+    .header-center { gap: 6px; flex-wrap: wrap; }
+    .header-center .status-badge { padding: 3px 8px; font-size: 10px; }
+    .header-right { display: none; }
+
+    .map-panel {
+        height: 45vh;
+        min-height: 280px;
+        order: 1;
+    }
+
+    .alert-feed {
+        min-height: 300px;
+        max-height: 50vh;
+        order: 2;
+    }
+
+    .alert-toolbar { flex-wrap: wrap; gap: 4px; padding: 4px 8px; }
+    .filter-chip { padding: 4px 8px; font-size: 9px; }
+    .search-input { max-width: 100%; min-width: 120px; }
+
+    .timeline-graph { padding: 4px 8px; }
+    .timeline-bars { height: 25px; }
+
+    .alert-item { padding: 8px 10px; gap: 8px; }
+    .alert-title { font-size: 12px; }
+    .alert-snippet { font-size: 9px; }
+    .alert-source { font-size: 8px; padding: 1px 4px; }
+
+    .left-panel {
+        flex-direction: row;
+        flex-wrap: wrap;
+        gap: 4px;
+        order: 3;
+    }
+
+    .threat-container {
+        flex: 1 1 160px;
+        max-width: 50%;
+    }
+
+    .threat-gauge { padding: 10px; }
+    .threat-circle { width: 90px; height: 90px; }
+    .threat-level-num { font-size: 28px; }
+
+    .stats-container {
+        flex: 1 1 160px;
+        max-width: 50%;
+    }
+
+    .sources-container {
+        flex: 1 1 100%;
+    }
+
+    .right-panel {
+        order: 4;
+        min-height: 200px;
+    }
+
+    .config-panel {
+        order: 5;
+    }
+
+    .panel-title { font-size: 9px; letter-spacing: 2px; }
+    .stat-label { font-size: 10px; }
+    .stat-value { font-size: 14px; }
+
+    .map-btn { font-size: 10px; padding: 4px 8px; }
+
+    .history-header { padding: 10px 15px; }
+    .history-title { font-size: 14px; }
+    .history-filters { padding: 8px 15px; gap: 6px; }
+    .history-body { padding: 10px 15px; }
+    .history-item { padding: 8px; }
+    .history-stat-bar { padding: 8px 15px; gap: 8px; font-size: 10px; flex-wrap: wrap; }
+
+    .corner-decor { display: none; }
 }
+
+@media (max-width: 480px) {
+    .header-center .status-badge:nth-child(2),
+    .header-center .status-badge:nth-child(3) { display: none; }
+    .header-btn { padding: 4px 8px; font-size: 10px; }
+    .header-btn .btn-icon { font-size: 12px; }
+    .logo-section { gap: 8px; }
+    .map-panel { height: 35vh; min-height: 220px; }
+    .threat-container, .stats-container { max-width: 100%; flex: 1 1 100%; }
+    .alert-toolbar .toggle-container span:last-child { display: none; }
+}
+
+/* Dark tooltip */
+.dark-tooltip {
+    background: rgba(8, 16, 35, 0.95) !important;
+    color: #e0e8f0 !important;
+    border: 1px solid #0f3460 !important;
+    border-radius: 4px !important;
+    font-family: 'Share Tech Mono', monospace !important;
+    font-size: 11px !important;
+    padding: 6px 10px !important;
+    box-shadow: 0 0 15px rgba(0, 212, 255, 0.2) !important;
+}
+.dark-tooltip::before { border-top-color: #0f3460 !important; }
+
+.leaflet-popup-content-wrapper {
+    background: rgba(8, 16, 35, 0.95) !important;
+    color: #e0e8f0 !important;
+    border: 1px solid #0f3460 !important;
+    border-radius: 4px !important;
+    box-shadow: 0 0 20px rgba(0, 212, 255, 0.2) !important;
+}
+.leaflet-popup-tip { background: rgba(8, 16, 35, 0.95) !important; }
 </style>
 </head>
 <body>
@@ -829,10 +1347,13 @@ body {
 <div class="corner-decor corner-bl"></div>
 <div class="corner-decor corner-br"></div>
 
-<!-- Dashboard Grid -->
-<div class="dashboard">
+<!-- Red Alert Flash -->
+<div class="red-alert-flash" id="redAlertFlash"></div>
 
-    <!-- ═══════ HEADER ═══════ -->
+<!-- Dashboard Grid -->
+<div class="dashboard" id="mainDashboard">
+
+    <!-- HEADER -->
     <header class="header">
         <div class="logo-section">
             <div class="logo-hex"></div>
@@ -855,6 +1376,10 @@ body {
                 <span>ALERTS</span>
                 <span id="alertCount" style="color: var(--orange);">0</span>
             </div>
+            <button class="header-btn" onclick="toggleHistory()">
+                <span class="btn-icon">&#9776;</span>
+                <span>HISTORY</span>
+            </button>
         </div>
 
         <div class="header-right">
@@ -865,9 +1390,8 @@ body {
         </div>
     </header>
 
-    <!-- ═══════ LEFT PANEL ═══════ -->
+    <!-- LEFT PANEL -->
     <div class="left-panel">
-        <!-- Threat Level -->
         <div class="panel threat-container">
             <div class="panel-header">
                 <span class="panel-title">THREAT LEVEL</span>
@@ -888,7 +1412,6 @@ body {
             </div>
         </div>
 
-        <!-- Stats -->
         <div class="panel stats-container">
             <div class="panel-header">
                 <span class="panel-title">ANALYTICS</span>
@@ -896,33 +1419,32 @@ body {
             </div>
             <div class="panel-body">
                 <div class="stat-row">
-                    <span class="stat-label">TOTAL ALERTS</span>
+                    <span class="stat-label">TOTAL</span>
                     <span class="stat-value" id="statTotal">0</span>
                 </div>
                 <div class="stat-row">
-                    <span class="stat-label">RED / CRITICAL</span>
+                    <span class="stat-label">RED</span>
                     <span class="stat-value red" id="statRed">0</span>
                 </div>
                 <div class="stat-row">
-                    <span class="stat-label">ORANGE / HIGH</span>
+                    <span class="stat-label">ORANGE</span>
                     <span class="stat-value orange" id="statOrange">0</span>
                 </div>
                 <div class="stat-row">
-                    <span class="stat-label">YELLOW / MEDIUM</span>
+                    <span class="stat-label">YELLOW</span>
                     <span class="stat-value yellow" id="statYellow">0</span>
                 </div>
                 <div class="stat-row">
-                    <span class="stat-label">BLUE / LOW</span>
+                    <span class="stat-label">BLUE</span>
                     <span class="stat-value" id="statBlue">0</span>
                 </div>
                 <div class="stat-row">
-                    <span class="stat-label">SOURCES ACTIVE</span>
+                    <span class="stat-label">SOURCES</span>
                     <span class="stat-value green" id="statSources">0</span>
                 </div>
             </div>
         </div>
 
-        <!-- Sources -->
         <div class="panel sources-container">
             <div class="panel-header">
                 <span class="panel-title">SOURCES</span>
@@ -934,15 +1456,16 @@ body {
         </div>
     </div>
 
-    <!-- ═══════ CENTER - MAP ═══════ -->
-    <div class="panel map-panel">
+    <!-- CENTER - MAP -->
+    <div class="panel map-panel" id="mapPanel">
         <div id="map"></div>
         <div class="map-overlay"></div>
-        <div class="map-coords" id="mapCoords">31.870°N  35.120°E</div>
-        <div class="map-label">SECTOR 443 — TACTICAL VIEW</div>
+        <div class="map-coords">31.870N  35.120E</div>
+        <div class="map-label">SECTOR 443</div>
+        <button class="map-btn" onclick="toggleMapFullscreen()" id="mapBtn" title="F = Fullscreen">&#x26F6; EXPAND</button>
     </div>
 
-    <!-- ═══════ RIGHT PANEL - AI SUMMARY ═══════ -->
+    <!-- RIGHT PANEL - AI SUMMARY -->
     <div class="panel right-panel">
         <div class="panel-header">
             <span class="panel-title">AI BRIEFING</span>
@@ -956,111 +1479,138 @@ body {
         </div>
     </div>
 
-    <!-- ═══════ BOTTOM - ALERT FEED ═══════ -->
-    <div class="panel alert-feed">
+    <!-- BOTTOM - ALERT FEED -->
+    <div class="panel alert-feed" id="alertFeedPanel">
         <div class="panel-header">
-            <span class="panel-title">LIVE THREAT FEED</span>
-            <div style="display:flex; gap:10px; align-items:center;">
+            <span class="panel-title">LIVE FEED</span>
+            <div style="display:flex; gap:8px; align-items:center;">
                 <span class="urgency-tag red">RED</span>
                 <span class="urgency-tag orange">HIGH</span>
                 <span class="urgency-tag yellow">MED</span>
                 <span class="urgency-tag blue">LOW</span>
             </div>
         </div>
+        <div class="alert-toolbar">
+            <button class="filter-chip active" data-filter="all" onclick="setFilter('all', this)">ALL</button>
+            <button class="filter-chip red" data-filter="5" onclick="setFilter(5, this)">RED</button>
+            <button class="filter-chip orange" data-filter="4" onclick="setFilter(4, this)">ORANGE</button>
+            <button class="filter-chip yellow" data-filter="3" onclick="setFilter(3, this)">YELLOW</button>
+            <button class="filter-chip blue" data-filter="2" onclick="setFilter(2, this)">BLUE</button>
+            <button class="filter-chip purple" data-filter="anarchist" onclick="setFilter('anarchist', this)">ANARCH</button>
+            <div class="toggle-container">
+                <div class="toggle-switch active" id="anarchistToggle" onclick="toggleAnarchist()"></div>
+                <span>ACTIVISTS</span>
+            </div>
+            <input type="text" class="search-input" id="searchInput" placeholder="SEARCH..." oninput="applyFilters()">
+        </div>
+        <div class="timeline-graph">
+            <div class="timeline-label">24H ACTIVITY</div>
+            <div class="timeline-bars" id="timelineBars"></div>
+            <div class="timeline-hours" id="timelineHours"></div>
+        </div>
         <div class="panel-body" id="alertFeed">
             <div class="loading-state">
                 <div class="loading-spinner"></div>
-                <span>SCANNING THREAT CHANNELS...</span>
+                <span>SCANNING...</span>
             </div>
         </div>
     </div>
 
-    <!-- ═══════ CONFIG PANEL (RIGHT BOTTOM) ═══════ -->
+    <!-- CONFIG PANEL -->
     <div class="panel config-panel">
         <div class="panel-header">
             <span class="panel-title">SYSTEM</span>
             <div class="panel-indicator"></div>
         </div>
         <div class="panel-body">
-            <div class="config-item">
-                <span class="config-key">SECTOR</span>
-                <span class="config-val">ROUTE 443</span>
-            </div>
-            <div class="config-item">
-                <span class="config-key">RADIUS</span>
-                <span class="config-val">15 KM</span>
-            </div>
-            <div class="config-item">
-                <span class="config-key">CENTER</span>
-                <span class="config-val">31.87°N 35.12°E</span>
-            </div>
-            <div class="config-item">
-                <span class="config-key">SCAN FREQ</span>
-                <span class="config-val">10 MIN</span>
-            </div>
-            <div class="config-item">
-                <span class="config-key">AI MODEL</span>
-                <span class="config-val">GEMINI 2.0</span>
-            </div>
-            <div class="config-item">
-                <span class="config-key">RETENTION</span>
-                <span class="config-val">72 HRS</span>
-            </div>
-            <div class="config-item">
-                <span class="config-key">VERSION</span>
-                <span class="config-val">1.0.0</span>
-            </div>
-            <div class="config-item">
-                <span class="config-key">REFRESH</span>
-                <span class="config-val" id="nextRefresh">30s</span>
-            </div>
+            <div class="config-item"><span class="config-key">SECTOR</span><span class="config-val">ROUTE 443</span></div>
+            <div class="config-item"><span class="config-key">RADIUS</span><span class="config-val">15 KM</span></div>
+            <div class="config-item"><span class="config-key">CENTER</span><span class="config-val">31.87N 35.12E</span></div>
+            <div class="config-item"><span class="config-key">SCAN</span><span class="config-val">10 MIN</span></div>
+            <div class="config-item"><span class="config-key">AI</span><span class="config-val">GEMINI 2.0</span></div>
+            <div class="config-item"><span class="config-key">RETAIN</span><span class="config-val">72 HRS</span></div>
+            <div class="config-item"><span class="config-key">REFRESH</span><span class="config-val" id="nextRefresh">30s</span></div>
         </div>
     </div>
 
 </div>
 
+<!-- HISTORY OVERLAY -->
+<div class="history-overlay" id="historyOverlay">
+    <div class="history-header">
+        <div class="history-title">HISTORY LOG</div>
+        <button class="history-close" onclick="toggleHistory()">ESC CLOSE</button>
+    </div>
+    <div class="history-stat-bar" id="historyStats"></div>
+    <div class="history-filters">
+        <input type="text" class="history-search" id="historySearch" placeholder="SEARCH HISTORY..." oninput="renderHistory()">
+        <button class="filter-chip active" data-hfilter="all" onclick="setHistoryFilter('all', this)">ALL</button>
+        <button class="filter-chip red" data-hfilter="5" onclick="setHistoryFilter(5, this)">RED</button>
+        <button class="filter-chip orange" data-hfilter="4" onclick="setHistoryFilter(4, this)">ORANGE</button>
+        <button class="filter-chip yellow" data-hfilter="3" onclick="setHistoryFilter(3, this)">YELLOW</button>
+        <button class="filter-chip blue" data-hfilter="2" onclick="setHistoryFilter(2, this)">BLUE</button>
+    </div>
+    <div class="history-body" id="historyBody">
+        <div class="loading-state"><div class="loading-spinner"></div><span>LOADING HISTORY...</span></div>
+    </div>
+</div>
+
 <!-- Refresh Bar -->
 <div class="refresh-bar" id="refreshBar"></div>
 
-<!-- ═══════ SCRIPTS ═══════ -->
+<!-- SCRIPTS -->
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 <script>
 // ═══════════════════════════════════════
-// MABAT 443 - DASHBOARD ENGINE
+// MABAT 443 - DASHBOARD ENGINE v2
 // ═══════════════════════════════════════
 
 const FIREBASE_URL = 'https://project-8874611670473210078-default-rtdb.europe-west1.firebasedatabase.app';
 const SECTOR_CENTER = { lat: 31.870, lng: 35.120 };
-const REFRESH_INTERVAL = 30000; // 30 seconds
+const REFRESH_INTERVAL = 30000;
 
-// P1 Locations (High Priority)
+// KEY VILLAGES - highlighted on map with larger markers
+const KEY_VILLAGES = [
+    { he: "בית סירא", lat: 31.848, lng: 35.075 },
+    { he: "בית ליקיא", lat: 31.833, lng: 35.080 },
+    { he: "ח'רבת אל-מיסבאח", lat: 31.852, lng: 35.098 },
+    { he: "בית עור א-תחתא", lat: 31.870, lng: 35.120 },
+    { he: "ספא", lat: 31.878, lng: 35.087 },
+    { he: "מידיה", lat: 31.838, lng: 35.110 },
+    { he: "בית דורס (בן דרוס)", lat: 31.825, lng: 35.095 },
+    { he: "קיבא", lat: 31.810, lng: 35.090 },
+    { he: "רנתיס", lat: 31.815, lng: 35.060 },
+];
+
 const P1_LOCATIONS = [
-    { name: "בית עור א-תחתא", nameEn: "Beit Ur al-Tahta", lat: 31.870, lng: 35.120 },
-    { name: "בית עור אל-פוקא", nameEn: "Beit Ur al-Fauqa", lat: 31.878, lng: 35.130 },
-    { name: "ח'רבת אל-מיסבאח", nameEn: "Khirbet al-Misbah", lat: 31.852, lng: 35.098 },
-    { name: "בית חורון", nameEn: "Beit Horon", lat: 31.860, lng: 35.148 },
+    { name: "Beit Ur al-Tahta", he: "בית עור א-תחתא", lat: 31.870, lng: 35.120 },
+    { name: "Beit Ur al-Fauqa", he: "בית עור אל-פוקא", lat: 31.878, lng: 35.130 },
+    { name: "Khirbet al-Misbah", he: "ח'רבת אל-מיסבאח", lat: 31.852, lng: 35.098 },
+    { name: "Beit Horon", he: "בית חורון", lat: 31.860, lng: 35.148 },
+    { name: "Midya", he: "מידיה", lat: 31.838, lng: 35.110 },
+    { name: "Budrus", he: "בית דורס (בן דרוס)", lat: 31.825, lng: 35.095 },
+    { name: "Qibya", he: "קיבא", lat: 31.810, lng: 35.090 },
+    { name: "Rantis", he: "רנתיס", lat: 31.815, lng: 35.060 },
 ];
 
-// P2 Locations (Villages North)
 const P2_LOCATIONS = [
-    { name: "דיר איביע", nameEn: "Deir Ibzia", lat: 31.893, lng: 35.155 },
-    { name: "כפר ניעמה", nameEn: "Kafr Nimah", lat: 31.905, lng: 35.120 },
-    { name: "ספא", nameEn: "Safa", lat: 31.878, lng: 35.087 },
-    { name: "בילעין", nameEn: "Bilin", lat: 31.900, lng: 35.080 },
-    { name: "בית סירא", nameEn: "Beit Sira", lat: 31.848, lng: 35.075 },
-    { name: "בית ליקיא", nameEn: "Beit Liqya", lat: 31.833, lng: 35.080 },
-    { name: "עין עריכ", nameEn: "Ein Arik", lat: 31.895, lng: 35.175 },
-    { name: "עין קיניא", nameEn: "Ein Qiniya", lat: 31.905, lng: 35.195 },
-    { name: "טירה", nameEn: "Tira", lat: 31.845, lng: 35.155 },
+    { name: "Deir Ibzia", he: "דיר איביע", lat: 31.893, lng: 35.155 },
+    { name: "Kafr Nimah", he: "כפר ניעמה", lat: 31.905, lng: 35.120 },
+    { name: "Safa", he: "ספא", lat: 31.878, lng: 35.087 },
+    { name: "Bilin", he: "בילעין", lat: 31.900, lng: 35.080 },
+    { name: "Beit Sira", he: "בית סירא", lat: 31.848, lng: 35.075 },
+    { name: "Beit Liqya", he: "בית ליקיא", lat: 31.833, lng: 35.080 },
+    { name: "Ein Arik", he: "עין עריכ", lat: 31.895, lng: 35.175 },
+    { name: "Ein Qiniya", he: "עין קיניא", lat: 31.905, lng: 35.195 },
+    { name: "Tira", he: "טירה", lat: 31.845, lng: 35.155 },
 ];
 
-// P3 Locations (Routes/Checkpoints)
 const P3_LOCATIONS = [
-    { name: "כביש 443", nameEn: "Route 443", lat: 31.870, lng: 35.120 },
-    { name: "כביש 446", nameEn: "Route 446", lat: 31.920, lng: 35.070 },
-    { name: "מחסום מכבים", nameEn: "Maccabim CP", lat: 31.850, lng: 35.050 },
-    { name: "מודיעין עילית", nameEn: "Modi'in Illit", lat: 31.930, lng: 35.050 },
-    { name: "גבעת זאב", nameEn: "Givat Zeev", lat: 31.860, lng: 35.170 },
+    { name: "Route 443", he: "כביש 443", lat: 31.870, lng: 35.120 },
+    { name: "Route 446", he: "כביש 446", lat: 31.920, lng: 35.070 },
+    { name: "Maccabim CP", he: "מחסום מכבים", lat: 31.850, lng: 35.050 },
+    { name: "Modi'in Illit", he: "מודיעין עילית", lat: 31.930, lng: 35.050 },
+    { name: "Givat Zeev", he: "גבעת זאב", lat: 31.860, lng: 35.170 },
 ];
 
 const SOURCES = [
@@ -1077,11 +1627,32 @@ const SOURCES = [
 
 // ═══════ STATE ═══════
 let map;
-let markers = [];
+let alertMarkers = [];
 let newsData = {};
+let allNewsData = {};
 let summaryData = null;
 let metaData = null;
-let refreshTimer = 0;
+let activeFilter = 'all';
+let historyFilter = 'all';
+let knownIds = new Set();
+let isFirstLoad = true;
+let mapIsFullscreen = false;
+let showAnarchists = true;
+
+// Anarchist/activist keywords
+const ANARCHIST_KEYWORDS = [
+    'anarchist', 'activist', 'solidarity', 'protest',
+    'ISM', 'B\'Tselem', 'breaking the silence',
+    'international', 'demonstration', 'confrontation',
+    'left-wing', 'peace now',
+    'ناشط', 'ناشطين', 'تضامن', 'متظاهرين', 'اجانب',
+    'اسرائيليين ضد', 'سلام الان',
+    'פעיל', 'פעילי', 'אנרכיסט', 'אנרכיסטים',
+    'שוברים שתיקה', 'בצלם', 'שמאל',
+    'פעילי שמאל', 'מפגינים', 'סולידריות',
+    'ISM', 'בינלאומיים', 'שלום עכשיו',
+    'מחאה', 'הפגנה', 'פעילות מחאה',
+];
 
 // ═══════ CLOCK ═══════
 function updateClock() {
@@ -1096,7 +1667,7 @@ function updateClock() {
     document.getElementById('dateDisplay').textContent = `יום ${days[now.getDay()]} | ${now.getDate()} ${months[now.getMonth()]} ${now.getFullYear()}`;
 }
 
-// ═══════ MAP INITIALIZATION ═══════
+// ═══════ MAP ═══════
 function initMap() {
     map = L.map('map', {
         center: [SECTOR_CENTER.lat, SECTOR_CENTER.lng],
@@ -1105,71 +1676,59 @@ function initMap() {
         attributionControl: false
     });
 
-    // Dark military-style tiles
     L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', {
         maxZoom: 19
     }).addTo(map);
 
-    // Sector radius circle
     L.circle([SECTOR_CENTER.lat, SECTOR_CENTER.lng], {
-        radius: 15000,
-        color: '#00d4ff',
-        fillColor: '#00d4ff',
-        fillOpacity: 0.03,
-        weight: 1,
-        dashArray: '8, 8',
-        opacity: 0.3
+        radius: 15000, color: '#00d4ff', fillColor: '#00d4ff',
+        fillOpacity: 0.03, weight: 1, dashArray: '8, 8', opacity: 0.3
     }).addTo(map);
 
-    // Center marker
     L.circle([SECTOR_CENTER.lat, SECTOR_CENTER.lng], {
-        radius: 200,
-        color: '#00d4ff',
-        fillColor: '#00d4ff',
-        fillOpacity: 0.3,
-        weight: 2
+        radius: 200, color: '#00d4ff', fillColor: '#00d4ff',
+        fillOpacity: 0.3, weight: 2
     }).addTo(map);
 
-    // P1 locations - red markers
     P1_LOCATIONS.forEach(loc => {
         L.circleMarker([loc.lat, loc.lng], {
-            radius: 6,
-            color: '#ff0040',
-            fillColor: '#ff0040',
-            fillOpacity: 0.4,
-            weight: 1.5
-        }).bindTooltip(`<b>P1</b> ${loc.name}<br>${loc.nameEn}`, {
-            className: 'dark-tooltip'
-        }).addTo(map);
+            radius: 6, color: '#ff0040', fillColor: '#ff0040', fillOpacity: 0.4, weight: 1.5
+        }).bindTooltip(`<b>P1</b> ${loc.he}`, { className: 'dark-tooltip' }).addTo(map);
     });
 
-    // P2 locations - orange markers
     P2_LOCATIONS.forEach(loc => {
         L.circleMarker([loc.lat, loc.lng], {
-            radius: 5,
-            color: '#ff8800',
-            fillColor: '#ff8800',
-            fillOpacity: 0.3,
-            weight: 1
-        }).bindTooltip(`<b>P2</b> ${loc.name}<br>${loc.nameEn}`, {
-            className: 'dark-tooltip'
-        }).addTo(map);
+            radius: 5, color: '#ff8800', fillColor: '#ff8800', fillOpacity: 0.3, weight: 1
+        }).bindTooltip(`<b>P2</b> ${loc.he}`, { className: 'dark-tooltip' }).addTo(map);
     });
 
-    // P3 locations - blue markers
     P3_LOCATIONS.forEach(loc => {
         L.circleMarker([loc.lat, loc.lng], {
-            radius: 4,
-            color: '#4488ff',
-            fillColor: '#4488ff',
-            fillOpacity: 0.3,
-            weight: 1
-        }).bindTooltip(`<b>P3</b> ${loc.name}<br>${loc.nameEn}`, {
-            className: 'dark-tooltip'
+            radius: 4, color: '#4488ff', fillColor: '#4488ff', fillOpacity: 0.3, weight: 1
+        }).bindTooltip(`<b>P3</b> ${loc.he}`, { className: 'dark-tooltip' }).addTo(map);
+    });
+
+    // KEY VILLAGES - larger highlighted markers with pulse
+    KEY_VILLAGES.forEach(loc => {
+        L.circleMarker([loc.lat, loc.lng], {
+            radius: 8,
+            color: '#ff0040',
+            fillColor: '#ff0040',
+            fillOpacity: 0.5,
+            weight: 2
+        }).bindTooltip(`<b style="color:#ff0040;">KEY</b> ${loc.he}`, { className: 'dark-tooltip', permanent: false }).addTo(map);
+        // Outer pulse ring
+        L.circleMarker([loc.lat, loc.lng], {
+            radius: 14,
+            color: '#ff0040',
+            fillColor: 'transparent',
+            fillOpacity: 0,
+            weight: 1,
+            opacity: 0.3,
+            dashArray: '4,4'
         }).addTo(map);
     });
 
-    // Route 443 approximate polyline
     const route443 = [
         [31.840, 35.040], [31.845, 35.055], [31.850, 35.070],
         [31.855, 35.085], [31.860, 35.095], [31.865, 35.108],
@@ -1177,64 +1736,48 @@ function initMap() {
         [31.880, 35.160], [31.882, 35.175]
     ];
     L.polyline(route443, {
-        color: '#00d4ff',
-        weight: 2,
-        opacity: 0.5,
-        dashArray: '10, 6'
+        color: '#00d4ff', weight: 2, opacity: 0.5, dashArray: '10, 6'
     }).addTo(map);
-
-    // Tooltip style
-    const style = document.createElement('style');
-    style.textContent = `
-        .dark-tooltip {
-            background: rgba(8, 16, 35, 0.95) !important;
-            color: #e0e8f0 !important;
-            border: 1px solid #0f3460 !important;
-            border-radius: 4px !important;
-            font-family: 'Share Tech Mono', monospace !important;
-            font-size: 11px !important;
-            padding: 6px 10px !important;
-            box-shadow: 0 0 15px rgba(0, 212, 255, 0.2) !important;
-        }
-        .dark-tooltip::before {
-            border-top-color: #0f3460 !important;
-        }
-    `;
-    document.head.appendChild(style);
 }
 
-// ═══════ ADD ALERT MARKERS TO MAP ═══════
+function toggleMapFullscreen() {
+    const panel = document.getElementById('mapPanel');
+    const btn = document.getElementById('mapBtn');
+    mapIsFullscreen = !mapIsFullscreen;
+
+    if (mapIsFullscreen) {
+        panel.classList.add('fullscreen');
+        btn.innerHTML = '&#x26F6; MINIMIZE';
+    } else {
+        panel.classList.remove('fullscreen');
+        btn.innerHTML = '&#x26F6; EXPAND';
+    }
+    setTimeout(() => map.invalidateSize(), 400);
+}
+
 function updateMapMarkers(news) {
-    // Remove old alert markers
-    markers.forEach(m => map.removeLayer(m));
-    markers = [];
+    alertMarkers.forEach(m => map.removeLayer(m));
+    alertMarkers = [];
 
     Object.values(news).forEach(item => {
         if (!item.coordinates) return;
-
-        const colors = {
-            5: '#ff0040', 4: '#ff8800', 3: '#ffd000', 2: '#4488ff', 1: '#666'
-        };
+        const colors = { 5: '#ff0040', 4: '#ff8800', 3: '#ffd000', 2: '#4488ff', 1: '#666' };
         const color = colors[item.urgency] || '#666';
         const size = item.urgency >= 4 ? 12 : item.urgency >= 3 ? 9 : 7;
 
-        const marker = L.circleMarker([item.coordinates.lat, item.coordinates.lon || item.coordinates.lng], {
-            radius: size,
-            color: color,
-            fillColor: color,
-            fillOpacity: 0.6,
-            weight: 2,
-            className: 'alert-marker'
-        }).bindPopup(`
+        const marker = L.circleMarker(
+            [item.coordinates.lat, item.coordinates.lon || item.coordinates.lng],
+            { radius: size, color, fillColor: color, fillOpacity: 0.6, weight: 2 }
+        ).bindPopup(`
             <div style="direction:rtl; font-family: 'Rajdhani', sans-serif; max-width: 250px;">
                 <b style="color:${color};">[${item.urgencyLabel || 'ALERT'}]</b><br>
-                <b>${item.title || ''}</b><br>
-                <small>${item.snippet || ''}</small><br>
-                <small style="color:#888;">${item.source} | ${formatTime(item.timestamp)}</small>
+                <b>${escapeHtml(item.title || '')}</b><br>
+                <small>${escapeHtml(item.snippet || '')}</small><br>
+                <small style="color:#888;">${escapeHtml(item.source)} | ${formatTime(item.timestamp)}</small>
             </div>
         `, { className: 'dark-tooltip', maxWidth: 280 }).addTo(map);
 
-        markers.push(marker);
+        alertMarkers.push(marker);
     });
 }
 
@@ -1242,7 +1785,7 @@ function updateMapMarkers(news) {
 async function fetchData() {
     try {
         const [newsRes, summaryRes, metaRes] = await Promise.all([
-            fetch(`${FIREBASE_URL}/news.json?orderBy="savedAt"&limitToLast=50`),
+            fetch(`${FIREBASE_URL}/news.json?orderBy="savedAt"&limitToLast=100`),
             fetch(`${FIREBASE_URL}/world-news-summary/current.json`),
             fetch(`${FIREBASE_URL}/metadata.json`)
         ]);
@@ -1251,19 +1794,56 @@ async function fetchData() {
         const summary = await summaryRes.json();
         const meta = await metaRes.json();
 
-        if (news) newsData = news;
+        // Detect new alerts for flash
+        if (news && !isFirstLoad) {
+            const newIds = Object.keys(news);
+            let hasNewRed = false;
+            newIds.forEach(id => {
+                if (!knownIds.has(id) && news[id].urgency >= 5) hasNewRed = true;
+            });
+            if (hasNewRed) triggerRedAlert();
+        }
+
+        if (news) {
+            newsData = news;
+            allNewsData = { ...allNewsData, ...news };
+            Object.keys(news).forEach(id => knownIds.add(id));
+        }
         if (summary) summaryData = summary;
         if (meta) metaData = meta;
 
+        isFirstLoad = false;
         document.getElementById('statusDot').className = 'status-dot';
         document.getElementById('statusText').textContent = 'ONLINE';
-
         renderAll();
     } catch (error) {
         console.error('Fetch error:', error);
         document.getElementById('statusDot').className = 'status-dot offline';
         document.getElementById('statusText').textContent = 'ERROR';
     }
+}
+
+// ═══════ RED ALERT ═══════
+function triggerRedAlert() {
+    const flash = document.getElementById('redAlertFlash');
+    flash.classList.remove('active');
+    void flash.offsetWidth; // reflow
+    flash.classList.add('active');
+
+    // Audio beep
+    try {
+        const ctx = new (window.AudioContext || window.webkitAudioContext)();
+        const osc = ctx.createOscillator();
+        const gain = ctx.createGain();
+        osc.connect(gain);
+        gain.connect(ctx.destination);
+        osc.frequency.value = 880;
+        osc.type = 'square';
+        gain.gain.value = 0.15;
+        osc.start();
+        gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.5);
+        osc.stop(ctx.currentTime + 0.5);
+    } catch (e) {}
 }
 
 // ═══════ RENDER ALL ═══════
@@ -1274,49 +1854,176 @@ function renderAll() {
     renderSources();
     renderThreatLevel();
     renderMeta();
+    renderTimeline();
     updateMapMarkers(newsData);
+}
+
+// ═══════ FILTERS ═══════
+function setFilter(level, btn) {
+    activeFilter = level;
+    document.querySelectorAll('.alert-toolbar .filter-chip').forEach(c => c.classList.remove('active'));
+    btn.classList.add('active');
+    renderAlerts();
+}
+
+function applyFilters() {
+    renderAlerts();
+}
+
+function toggleAnarchist() {
+    showAnarchists = !showAnarchists;
+    const toggle = document.getElementById('anarchistToggle');
+    toggle.classList.toggle('active', showAnarchists);
+    renderAlerts();
+}
+
+function isAnarchistEvent(item) {
+    const text = ((item.title || '') + ' ' + (item.snippet || '') + ' ' + (item.fullText || '')).toLowerCase();
+    return ANARCHIST_KEYWORDS.some(kw => text.includes(kw.toLowerCase()));
+}
+
+function setHistoryFilter(level, btn) {
+    historyFilter = level;
+    document.querySelectorAll('.history-filters .filter-chip').forEach(c => c.classList.remove('active'));
+    btn.classList.add('active');
+    renderHistory();
 }
 
 // ═══════ RENDER ALERTS ═══════
 function renderAlerts() {
     const feed = document.getElementById('alertFeed');
-    const items = Object.values(newsData);
+    let items = Object.values(newsData);
+    const searchText = (document.getElementById('searchInput').value || '').toLowerCase();
+
+    // Tag anarchist events
+    items.forEach(i => { i._isAnarchist = isAnarchistEvent(i); });
+
+    // Filter by anarchist toggle
+    if (!showAnarchists) {
+        items = items.filter(i => !i._isAnarchist);
+    }
+
+    if (activeFilter === 'anarchist') {
+        items = items.filter(i => i._isAnarchist);
+    } else if (activeFilter !== 'all') {
+        items = items.filter(i => i.urgency === activeFilter);
+    }
+    if (searchText) {
+        items = items.filter(i =>
+            (i.title || '').toLowerCase().includes(searchText) ||
+            (i.snippet || '').toLowerCase().includes(searchText) ||
+            (i.fullText || '').toLowerCase().includes(searchText) ||
+            (i.source || '').toLowerCase().includes(searchText)
+        );
+    }
 
     if (items.length === 0) {
-        feed.innerHTML = '<div class="empty-state">NO ACTIVE THREATS DETECTED<br><small style="color: var(--green);">SECTOR CLEAR</small></div>';
+        feed.innerHTML = `<div class="empty-state">
+            ${searchText || activeFilter !== 'all' ? 'NO MATCHING ALERTS' : 'NO ACTIVE THREATS'}<br>
+            <small style="color: var(--green);">${searchText ? 'TRY DIFFERENT SEARCH' : 'SECTOR CLEAR'}</small>
+        </div>`;
         return;
     }
 
-    // Sort by timestamp descending
     items.sort((a, b) => (b.timestamp || 0) - (a.timestamp || 0));
 
     feed.innerHTML = items.map(item => `
-        <div class="alert-item">
-            <span class="alert-time">${formatTime(item.timestamp)}</span>
-            <div class="alert-urgency urgency-${item.urgency || 1}"></div>
-            <div class="alert-content">
-                <div class="alert-title">${escapeHtml(item.title || 'Unknown')}</div>
-                <div class="alert-snippet">${escapeHtml((item.snippet || item.fullText || '').substring(0, 120))}</div>
+        <div class="alert-item" onclick="toggleAlertExpand(this)">
+            <div class="alert-row">
+                <span class="alert-time">${formatTime(item.timestamp)}</span>
+                <div class="alert-urgency ${item._isAnarchist ? 'urgency-anarchist' : 'urgency-' + (item.urgency || 1)}"></div>
+                <div class="alert-content">
+                    <div class="alert-title">${escapeHtml(item.title || 'N/A')}</div>
+                    <div class="alert-snippet">${escapeHtml((item.snippet || item.fullText || '').substring(0, 120))}</div>
+                </div>
+                <span class="alert-source">${escapeHtml(item.source || 'N/A')}</span>
             </div>
-            <span class="alert-source">${escapeHtml(item.source || 'N/A')}</span>
+            <div class="alert-full-text" style="display:none;">${escapeHtml(item.fullText || item.snippet || '')}</div>
+            <div class="alert-meta-row" style="display:none;">
+                <span>${formatDateTime(item.timestamp)}</span>
+                ${item.matchedLocations ? '<span>LOC: ' + escapeHtml(item.matchedLocations.join(', ')) + '</span>' : ''}
+                ${item.matchedKeywords ? '<span>KW: ' + escapeHtml(item.matchedKeywords.join(', ')) + '</span>' : ''}
+                ${item.distance ? '<span>' + item.distance.toFixed(1) + ' km</span>' : ''}
+            </div>
         </div>
     `).join('');
+}
+
+function toggleAlertExpand(el) {
+    const fullText = el.querySelector('.alert-full-text');
+    const metaRow = el.querySelector('.alert-meta-row');
+    const isExpanded = el.classList.contains('expanded');
+
+    // Close all others
+    document.querySelectorAll('.alert-item.expanded').forEach(item => {
+        if (item !== el) {
+            item.classList.remove('expanded');
+            item.querySelector('.alert-full-text').style.display = 'none';
+            item.querySelector('.alert-meta-row').style.display = 'none';
+        }
+    });
+
+    if (isExpanded) {
+        el.classList.remove('expanded');
+        fullText.style.display = 'none';
+        metaRow.style.display = 'none';
+    } else {
+        el.classList.add('expanded');
+        fullText.style.display = 'block';
+        metaRow.style.display = 'flex';
+    }
+}
+
+// ═══════ RENDER TIMELINE ═══════
+function renderTimeline() {
+    const container = document.getElementById('timelineBars');
+    const hoursContainer = document.getElementById('timelineHours');
+    const items = Object.values(newsData);
+    const now = Date.now();
+    const hours = 24;
+    const buckets = Array.from({ length: hours }, () => ({ count: 0, maxUrg: 0 }));
+
+    items.forEach(item => {
+        const age = (now - (item.timestamp || 0)) / (1000 * 60 * 60);
+        const bucket = Math.min(hours - 1, Math.max(0, Math.floor(age)));
+        buckets[bucket].count++;
+        buckets[bucket].maxUrg = Math.max(buckets[bucket].maxUrg, item.urgency || 1);
+    });
+
+    const maxCount = Math.max(1, ...buckets.map(b => b.count));
+
+    // Reverse so newest is on the right
+    const reversed = [...buckets].reverse();
+
+    container.innerHTML = reversed.map((b, i) => {
+        const h = Math.max(2, (b.count / maxCount) * 35);
+        const urgClass = b.maxUrg >= 5 ? 'has-red' : b.maxUrg >= 4 ? 'has-orange' : b.maxUrg >= 3 ? 'has-yellow' : b.count > 0 ? 'has-blue' : '';
+        return `<div class="timeline-bar ${urgClass}" style="height:${h}px;" title="${b.count} alerts"></div>`;
+    }).join('');
+
+    // Hour labels
+    const nowHour = new Date().getHours();
+    hoursContainer.innerHTML = '';
+    for (let i = 0; i < hours; i += 6) {
+        const label = String((nowHour - hours + 1 + i + 24) % 24).padStart(2, '0') + ':00';
+        const span = document.createElement('span');
+        span.textContent = label;
+        hoursContainer.appendChild(span);
+    }
 }
 
 // ═══════ RENDER SUMMARY ═══════
 function renderSummary() {
     const body = document.getElementById('summaryBody');
-
     if (!summaryData || !summaryData.summary) {
-        body.innerHTML = '<div class="empty-state">AWAITING AI ANALYSIS<br><small>Summary updates every hour</small></div>';
+        body.innerHTML = '<div class="empty-state">AWAITING AI ANALYSIS<br><small>UPDATES EVERY HOUR</small></div>';
         return;
     }
-
     body.innerHTML = `
         <div class="summary-text">${escapeHtml(summaryData.summary)}</div>
         <div class="summary-meta">
             <span>${summaryData.aiProvider || 'Gemini'} AI</span>
-            <span>${formatTime(summaryData.generatedAt)}</span>
+            <span>${formatDateTime(summaryData.generatedAt)}</span>
         </div>
     `;
 }
@@ -1345,7 +2052,7 @@ function renderStats() {
 function renderThreatLevel() {
     const items = Object.values(newsData);
     let maxUrgency = 0;
-    const recentCutoff = Date.now() - (6 * 60 * 60 * 1000); // Last 6 hours
+    const recentCutoff = Date.now() - (6 * 60 * 60 * 1000);
 
     items.forEach(item => {
         if (item.timestamp > recentCutoff && item.urgency > maxUrgency) {
@@ -1373,7 +2080,6 @@ function renderThreatLevel() {
     label.textContent = level.label;
     label.style.color = level.color;
 
-    // Update threat bars
     const bars = document.querySelectorAll('.threat-bar');
     bars.forEach((bar, i) => {
         if (i < maxUrgency) {
@@ -1391,39 +2097,126 @@ function renderSources() {
     const items = Object.values(newsData);
     const sourceCounts = {};
     items.forEach(item => {
-        if (item.source) {
-            sourceCounts[item.source] = (sourceCounts[item.source] || 0) + 1;
-        }
+        if (item.source) sourceCounts[item.source] = (sourceCounts[item.source] || 0) + 1;
     });
 
     const list = document.getElementById('sourcesList');
     list.innerHTML = SOURCES.map(src => {
         const count = sourceCounts[src.id] || sourceCounts[src.name] || 0;
         const isActive = count > 0;
+        const typeLabels = { local: 'LOCAL', regional: 'AREA', national: 'NATL', news: 'NEWS' };
         return `
             <div class="source-item">
                 <div class="source-dot ${isActive ? 'active' : 'inactive'}"></div>
                 <span class="source-name">${src.name}</span>
-                <span class="source-count">${count > 0 ? count : '—'}</span>
+                <span class="source-type ${src.type}">${typeLabels[src.type]}</span>
+                <span class="source-count">${count > 0 ? count : ''}</span>
             </div>
         `;
     }).join('');
 }
 
-// ═══════ RENDER META ═══════
 function renderMeta() {
     if (metaData && metaData.lastRun) {
         document.getElementById('lastScan').textContent = formatTime(metaData.lastRun);
     }
 }
 
+// ═══════ HISTORY ═══════
+function toggleHistory() {
+    const overlay = document.getElementById('historyOverlay');
+    overlay.classList.toggle('visible');
+    if (overlay.classList.contains('visible')) {
+        fetchHistory();
+    }
+}
+
+async function fetchHistory() {
+    try {
+        const res = await fetch(`${FIREBASE_URL}/news.json`);
+        const data = await res.json();
+        if (data) allNewsData = data;
+        renderHistory();
+    } catch (e) {
+        document.getElementById('historyBody').innerHTML = '<div class="empty-state">ERROR LOADING HISTORY</div>';
+    }
+}
+
+function renderHistory() {
+    const body = document.getElementById('historyBody');
+    const searchText = (document.getElementById('historySearch').value || '').toLowerCase();
+    let items = Object.values(allNewsData);
+
+    if (historyFilter !== 'all') {
+        items = items.filter(i => i.urgency === historyFilter);
+    }
+    if (searchText) {
+        items = items.filter(i =>
+            (i.title || '').toLowerCase().includes(searchText) ||
+            (i.snippet || '').toLowerCase().includes(searchText) ||
+            (i.fullText || '').toLowerCase().includes(searchText) ||
+            (i.source || '').toLowerCase().includes(searchText)
+        );
+    }
+
+    items.sort((a, b) => (b.timestamp || 0) - (a.timestamp || 0));
+
+    // Stats
+    const counts = { 5: 0, 4: 0, 3: 0, 2: 0, 1: 0 };
+    items.forEach(i => counts[i.urgency || 1]++);
+    document.getElementById('historyStats').innerHTML = `
+        <div class="history-stat"><strong>${items.length}</strong> TOTAL</div>
+        <div class="history-stat"><strong style="color:var(--red)">${counts[5]}</strong> RED</div>
+        <div class="history-stat"><strong style="color:var(--orange)">${counts[4]}</strong> ORANGE</div>
+        <div class="history-stat"><strong style="color:var(--yellow)">${counts[3]}</strong> YELLOW</div>
+        <div class="history-stat"><strong style="color:var(--blue)">${counts[2] + counts[1]}</strong> BLUE</div>
+    `;
+
+    // Group by date
+    const groups = {};
+    items.forEach(item => {
+        const d = new Date(item.timestamp || 0);
+        const key = d.toLocaleDateString('he-IL', { year: 'numeric', month: 'long', day: 'numeric', weekday: 'long' });
+        if (!groups[key]) groups[key] = [];
+        groups[key].push(item);
+    });
+
+    if (Object.keys(groups).length === 0) {
+        body.innerHTML = '<div class="empty-state">NO MATCHING RECORDS</div>';
+        return;
+    }
+
+    const colors = { 5: 'var(--red)', 4: 'var(--orange)', 3: 'var(--yellow)', 2: 'var(--blue)', 1: '#666' };
+
+    body.innerHTML = Object.entries(groups).map(([date, dateItems]) => `
+        <div class="history-date-group">
+            <div class="history-date-header">${date} (${dateItems.length})</div>
+            ${dateItems.map(item => `
+                <div class="history-item">
+                    <span class="history-item-time">${formatTime(item.timestamp)}</span>
+                    <div class="history-item-urgency" style="background:${colors[item.urgency] || '#666'}; box-shadow: 0 0 6px ${colors[item.urgency] || '#666'};"></div>
+                    <div class="history-item-content">
+                        <div class="history-item-title">${escapeHtml(item.title || 'N/A')}</div>
+                        <div class="history-item-text">${escapeHtml((item.snippet || item.fullText || '').substring(0, 200))}</div>
+                        <div class="history-item-source">${escapeHtml(item.source || 'N/A')}${item.matchedLocations ? ' | ' + escapeHtml(item.matchedLocations.join(', ')) : ''}</div>
+                    </div>
+                </div>
+            `).join('')}
+        </div>
+    `).join('');
+}
+
 // ═══════ UTILITIES ═══════
 function formatTime(ts) {
     if (!ts) return '--:--';
     const d = new Date(ts);
-    const h = String(d.getHours()).padStart(2, '0');
-    const m = String(d.getMinutes()).padStart(2, '0');
-    return `${h}:${m}`;
+    return String(d.getHours()).padStart(2, '0') + ':' + String(d.getMinutes()).padStart(2, '0');
+}
+
+function formatDateTime(ts) {
+    if (!ts) return '--';
+    const d = new Date(ts);
+    return d.toLocaleDateString('he-IL') + ' ' + formatTime(ts);
 }
 
 function escapeHtml(text) {
@@ -1432,6 +2225,21 @@ function escapeHtml(text) {
     div.textContent = text;
     return div.innerHTML;
 }
+
+// ═══════ KEYBOARD SHORTCUTS ═══════
+document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape') {
+        if (mapIsFullscreen) toggleMapFullscreen();
+        const history = document.getElementById('historyOverlay');
+        if (history.classList.contains('visible')) toggleHistory();
+    }
+    if (e.key === 'f' || e.key === 'F') {
+        if (document.activeElement.tagName !== 'INPUT') toggleMapFullscreen();
+    }
+    if (e.key === 'h' || e.key === 'H') {
+        if (document.activeElement.tagName !== 'INPUT') toggleHistory();
+    }
+});
 
 // ═══════ REFRESH CYCLE ═══════
 function startRefreshCycle() {
