@@ -1867,6 +1867,20 @@ document.getElementById('loginInput').addEventListener('keydown', function(e) {
 </div>
 
 <!-- SCRIPTS -->
+<script>
+// ═══════ ERROR HANDLER - shows JS errors on screen ═══════
+window.onerror = function(msg, url, line, col, error) {
+    var d = document.getElementById('debugBox');
+    if (!d) {
+        d = document.createElement('div');
+        d.id = 'debugBox';
+        d.style.cssText = 'position:fixed;bottom:60px;left:10px;right:10px;background:rgba(255,0,0,0.9);color:white;padding:10px;font-size:11px;font-family:monospace;z-index:999999;max-height:200px;overflow:auto;border-radius:4px;';
+        document.body.appendChild(d);
+    }
+    d.innerHTML += '<div>ERROR: ' + msg + ' (line ' + line + ')</div>';
+    return false;
+};
+</script>
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 <script>
 // ═══════════════════════════════════════
@@ -2806,11 +2820,24 @@ function loadDemoData() {
 
 // ═══════ INIT ═══════
 document.addEventListener('DOMContentLoaded', () => {
-    updateClock();
-    setInterval(updateClock, 1000);
-    initMap();
-    fetchData();
-    startRefreshCycle();
+    try { updateClock(); } catch(e) { console.error('Clock init error:', e); }
+    setInterval(() => { try { updateClock(); } catch(e) {} }, 1000);
+
+    try {
+        if (typeof L !== 'undefined') {
+            initMap();
+        } else {
+            console.error('Leaflet not loaded');
+            document.getElementById('map').innerHTML = '<div style="color:#ff0040;padding:20px;text-align:center;">MAP: Leaflet loading...</div>';
+            // Retry after 2 seconds
+            setTimeout(() => {
+                try { if (typeof L !== 'undefined') initMap(); } catch(e) { console.error('Map retry error:', e); }
+            }, 2000);
+        }
+    } catch(e) { console.error('Map init error:', e); }
+
+    try { fetchData(); } catch(e) { console.error('Fetch init error:', e); }
+    try { startRefreshCycle(); } catch(e) { console.error('Refresh init error:', e); }
 });
 </script>
 </body>
