@@ -1561,7 +1561,16 @@ body {
 </head>
 <body>
 
-<!-- LOGIN SCREEN REMOVED - will re-add later -->
+<!-- LOGIN GATE -->
+<script>
+(function() {
+    var code = prompt('מבט 443 - הזן קוד גישה:');
+    if (code !== '1875') {
+        document.body.innerHTML = '<div style="display:flex;align-items:center;justify-content:center;height:100vh;background:#040810;color:#ff0040;font-family:monospace;font-size:18px;text-align:center;direction:rtl;">ACCESS DENIED<br><br>קוד גישה שגוי</div>';
+        throw new Error('Access denied');
+    }
+})();
+</script>
 
 <!-- Background Effects -->
 <div class="bg-grid"></div>
