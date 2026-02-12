@@ -1582,7 +1582,7 @@ body {
         <div class="login-subtitle">פלטפורמת מודיעין גזרתית</div>
         <div class="login-field">
             <label>קוד גישה</label>
-            <input type="password" class="login-input" id="loginInput" placeholder="••••" maxlength="10" autofocus>
+            <input type="text" class="login-input" id="loginInput" placeholder="••••" maxlength="10" autofocus autocomplete="off" inputmode="numeric" style="-webkit-text-security:disc; text-security:disc;">
         </div>
         <button class="login-btn" onclick="attemptLogin()">כניסה למערכת</button>
         <div class="login-error" id="loginError"></div>
