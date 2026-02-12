@@ -1335,9 +1335,260 @@ body {
     box-shadow: 0 0 20px rgba(0, 212, 255, 0.2) !important;
 }
 .leaflet-popup-tip { background: rgba(8, 16, 35, 0.95) !important; }
+
+/* ═══════ LOGIN SCREEN ═══════ */
+.login-overlay {
+    position: fixed;
+    top: 0; left: 0; right: 0; bottom: 0;
+    z-index: 99999;
+    background: var(--bg-primary);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-direction: column;
+}
+
+.login-overlay .bg-grid-login {
+    position: absolute;
+    top: 0; left: 0; right: 0; bottom: 0;
+    background-image:
+        linear-gradient(rgba(0, 212, 255, 0.04) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(0, 212, 255, 0.04) 1px, transparent 1px);
+    background-size: 40px 40px;
+    animation: gridPulse 4s ease-in-out infinite;
+}
+
+.login-overlay .scan-line-login {
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 2px;
+    background: linear-gradient(90deg, transparent, var(--cyan), transparent);
+    animation: scanDown 5s linear infinite;
+    opacity: 0.3;
+}
+
+.login-box {
+    position: relative;
+    z-index: 2;
+    text-align: center;
+    padding: 50px 60px;
+    border: 1px solid var(--border-primary);
+    border-radius: 8px;
+    background: rgba(8, 16, 35, 0.9);
+    box-shadow: 0 0 60px rgba(0, 212, 255, 0.08), inset 0 0 40px rgba(0, 0, 0, 0.3);
+    min-width: 380px;
+    max-width: 450px;
+}
+
+.login-box::before {
+    content: '';
+    position: absolute;
+    top: -1px; left: -1px; right: -1px;
+    height: 2px;
+    background: linear-gradient(90deg, transparent, var(--cyan), transparent);
+}
+
+.login-box::after {
+    content: '';
+    position: absolute;
+    bottom: -1px; left: -1px; right: -1px;
+    height: 1px;
+    background: linear-gradient(90deg, transparent, var(--cyan-dim), transparent);
+}
+
+.login-hex {
+    width: 80px;
+    height: 80px;
+    margin: 0 auto 25px;
+    background: linear-gradient(135deg, var(--cyan), var(--blue));
+    clip-path: polygon(50% 0%, 100% 25%, 100% 75%, 50% 100%, 0% 75%, 0% 25%);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    animation: hexPulse 3s ease-in-out infinite;
+}
+
+.login-hex::before {
+    content: '\2B21';
+    font-size: 36px;
+    color: var(--bg-primary);
+    font-weight: bold;
+}
+
+.login-title {
+    font-family: var(--font-display);
+    font-size: 28px;
+    font-weight: 900;
+    letter-spacing: 6px;
+    background: linear-gradient(90deg, var(--cyan), #fff, var(--cyan));
+    background-size: 200% auto;
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    animation: shimmer 3s linear infinite;
+    margin-bottom: 8px;
+}
+
+.login-subtitle {
+    font-family: var(--font-mono);
+    font-size: 12px;
+    color: var(--text-secondary);
+    letter-spacing: 3px;
+    margin-bottom: 35px;
+}
+
+.login-field {
+    position: relative;
+    margin-bottom: 20px;
+}
+
+.login-field label {
+    display: block;
+    font-family: var(--font-mono);
+    font-size: 10px;
+    color: var(--text-dim);
+    letter-spacing: 2px;
+    text-align: right;
+    margin-bottom: 6px;
+}
+
+.login-input {
+    width: 100%;
+    padding: 12px 16px;
+    background: rgba(0, 0, 0, 0.4);
+    border: 1px solid var(--border-primary);
+    border-radius: 4px;
+    color: var(--cyan);
+    font-family: var(--font-mono);
+    font-size: 18px;
+    letter-spacing: 8px;
+    text-align: center;
+    outline: none;
+    transition: all 0.3s ease;
+    direction: ltr;
+}
+
+.login-input:focus {
+    border-color: var(--cyan);
+    box-shadow: 0 0 20px var(--cyan-dim);
+}
+
+.login-input.error {
+    border-color: var(--red);
+    box-shadow: 0 0 20px var(--red-dim);
+    animation: shake 0.5s ease;
+}
+
+@keyframes shake {
+    0%, 100% { transform: translateX(0); }
+    20% { transform: translateX(-8px); }
+    40% { transform: translateX(8px); }
+    60% { transform: translateX(-5px); }
+    80% { transform: translateX(5px); }
+}
+
+.login-btn {
+    width: 100%;
+    padding: 12px;
+    background: linear-gradient(135deg, rgba(0, 212, 255, 0.15), rgba(68, 136, 255, 0.15));
+    border: 1px solid var(--cyan-dim);
+    border-radius: 4px;
+    color: var(--cyan);
+    font-family: var(--font-display);
+    font-size: 14px;
+    letter-spacing: 4px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.login-btn:hover {
+    background: linear-gradient(135deg, rgba(0, 212, 255, 0.25), rgba(68, 136, 255, 0.25));
+    border-color: var(--cyan);
+    box-shadow: 0 0 25px var(--cyan-dim);
+}
+
+.login-error {
+    font-family: var(--font-mono);
+    font-size: 11px;
+    color: var(--red);
+    height: 16px;
+    margin-top: 10px;
+    letter-spacing: 1px;
+}
+
+.login-classification {
+    position: absolute;
+    top: 15px;
+    left: 50%;
+    transform: translateX(-50%);
+    font-family: var(--font-display);
+    font-size: 10px;
+    letter-spacing: 3px;
+    color: var(--red);
+    z-index: 2;
+    text-shadow: 0 0 10px var(--red-dim);
+}
+
+.login-footer {
+    position: absolute;
+    bottom: 15px;
+    left: 50%;
+    transform: translateX(-50%);
+    font-family: var(--font-mono);
+    font-size: 9px;
+    color: var(--text-dim);
+    z-index: 2;
+    white-space: nowrap;
+}
+
+/* ═══════ CREDIT FOOTER ═══════ */
+.credit-footer {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    z-index: 100;
+    text-align: center;
+    padding: 4px 10px;
+    font-family: var(--font-mono);
+    font-size: 10px;
+    color: var(--text-dim);
+    background: linear-gradient(0deg, rgba(4, 8, 16, 0.9), transparent);
+    letter-spacing: 1px;
+    pointer-events: auto;
+}
+
+.credit-footer a {
+    color: var(--green);
+    text-decoration: none;
+    transition: color 0.3s ease;
+}
+
+.credit-footer a:hover {
+    color: var(--cyan);
+    text-shadow: 0 0 8px var(--cyan-dim);
+}
 </style>
 </head>
 <body>
+
+<!-- LOGIN SCREEN -->
+<div class="login-overlay" id="loginOverlay">
+    <div class="bg-grid-login"></div>
+    <div class="scan-line-login"></div>
+    <div class="login-classification">CLASSIFIED // RESTRICTED ACCESS</div>
+    <div class="login-box">
+        <div class="login-hex"></div>
+        <div class="login-title">MABAT 443</div>
+        <div class="login-subtitle">פלטפורמת מודיעין גזרתית</div>
+        <div class="login-field">
+            <label>קוד גישה</label>
+            <input type="password" class="login-input" id="loginInput" placeholder="••••" maxlength="10" autofocus>
+        </div>
+        <button class="login-btn" onclick="attemptLogin()">כניסה למערכת</button>
+        <div class="login-error" id="loginError"></div>
+    </div>
+    <div class="login-footer">SECTOR DEFENSE INTELLIGENCE PLATFORM v2.0</div>
+</div>
 
 <!-- Background Effects -->
 <div class="bg-grid"></div>
@@ -1359,7 +1610,7 @@ body {
             <div class="logo-hex"></div>
             <div>
                 <div class="system-title">MABAT 443</div>
-                <div class="system-subtitle">SECTOR INTELLIGENCE PLATFORM</div>
+                <div class="system-subtitle">פלטפורמת מודיעין גזרתית</div>
             </div>
         </div>
 
@@ -1369,16 +1620,20 @@ body {
                 <span id="statusText">ONLINE</span>
             </div>
             <div class="status-badge">
-                <span>SCAN</span>
+                <span>סריקה</span>
                 <span id="lastScan" style="color: var(--cyan);">--:--</span>
             </div>
             <div class="status-badge">
-                <span>ALERTS</span>
+                <span>התראות</span>
                 <span id="alertCount" style="color: var(--orange);">0</span>
             </div>
             <button class="header-btn" onclick="toggleHistory()">
                 <span class="btn-icon">&#9776;</span>
-                <span>HISTORY</span>
+                <span>היסטוריה</span>
+            </button>
+            <button class="header-btn" onclick="loadDemoData()" style="color:var(--yellow);border-color:var(--yellow-dim);">
+                <span class="btn-icon">&#9881;</span>
+                <span>הדגמה</span>
             </button>
         </div>
 
@@ -1394,7 +1649,7 @@ body {
     <div class="left-panel">
         <div class="panel threat-container">
             <div class="panel-header">
-                <span class="panel-title">THREAT LEVEL</span>
+                <span class="panel-title">רמת איום</span>
                 <div class="panel-indicator"></div>
             </div>
             <div class="threat-gauge">
@@ -1414,32 +1669,32 @@ body {
 
         <div class="panel stats-container">
             <div class="panel-header">
-                <span class="panel-title">ANALYTICS</span>
+                <span class="panel-title">נתונים</span>
                 <div class="panel-indicator"></div>
             </div>
             <div class="panel-body">
                 <div class="stat-row">
-                    <span class="stat-label">TOTAL</span>
+                    <span class="stat-label">סה"כ</span>
                     <span class="stat-value" id="statTotal">0</span>
                 </div>
                 <div class="stat-row">
-                    <span class="stat-label">RED</span>
+                    <span class="stat-label">ודאי</span>
                     <span class="stat-value red" id="statRed">0</span>
                 </div>
                 <div class="stat-row">
-                    <span class="stat-label">ORANGE</span>
+                    <span class="stat-label">חזק</span>
                     <span class="stat-value orange" id="statOrange">0</span>
                 </div>
                 <div class="stat-row">
-                    <span class="stat-label">YELLOW</span>
+                    <span class="stat-label">בינוני</span>
                     <span class="stat-value yellow" id="statYellow">0</span>
                 </div>
                 <div class="stat-row">
-                    <span class="stat-label">BLUE</span>
+                    <span class="stat-label">חלש</span>
                     <span class="stat-value" id="statBlue">0</span>
                 </div>
                 <div class="stat-row">
-                    <span class="stat-label">SOURCES</span>
+                    <span class="stat-label">מקורות</span>
                     <span class="stat-value green" id="statSources">0</span>
                 </div>
             </div>
@@ -1447,7 +1702,7 @@ body {
 
         <div class="panel sources-container">
             <div class="panel-header">
-                <span class="panel-title">SOURCES</span>
+                <span class="panel-title">מקורות</span>
                 <div class="panel-indicator"></div>
             </div>
             <div class="panel-body" id="sourcesList">
@@ -1461,20 +1716,20 @@ body {
         <div id="map"></div>
         <div class="map-overlay"></div>
         <div class="map-coords">31.870N  35.120E</div>
-        <div class="map-label">SECTOR 443</div>
-        <button class="map-btn" onclick="toggleMapFullscreen()" id="mapBtn" title="F = Fullscreen">&#x26F6; EXPAND</button>
+        <div class="map-label">גזרה 443</div>
+        <button class="map-btn" onclick="toggleMapFullscreen()" id="mapBtn" title="F = Fullscreen">&#x26F6; הרחב</button>
     </div>
 
     <!-- RIGHT PANEL - AI SUMMARY -->
     <div class="panel right-panel">
         <div class="panel-header">
-            <span class="panel-title">AI BRIEFING</span>
+            <span class="panel-title">תדריך AI</span>
             <span class="ai-badge">GEMINI AI</span>
         </div>
         <div class="panel-body" id="summaryBody">
             <div class="loading-state">
                 <div class="loading-spinner"></div>
-                <span>AWAITING AI ANALYSIS...</span>
+                <span>ממתין לניתוח AI...</span>
             </div>
         </div>
     </div>
@@ -1482,36 +1737,36 @@ body {
     <!-- BOTTOM - ALERT FEED -->
     <div class="panel alert-feed" id="alertFeedPanel">
         <div class="panel-header">
-            <span class="panel-title">LIVE FEED</span>
+            <span class="panel-title">פיד חי</span>
             <div style="display:flex; gap:8px; align-items:center;">
-                <span class="urgency-tag red">RED</span>
-                <span class="urgency-tag orange">HIGH</span>
-                <span class="urgency-tag yellow">MED</span>
-                <span class="urgency-tag blue">LOW</span>
+                <span class="urgency-tag red">ודאי</span>
+                <span class="urgency-tag orange">חזק</span>
+                <span class="urgency-tag yellow">בינוני</span>
+                <span class="urgency-tag blue">חלש</span>
             </div>
         </div>
         <div class="alert-toolbar">
-            <button class="filter-chip active" data-filter="all" onclick="setFilter('all', this)">ALL</button>
-            <button class="filter-chip red" data-filter="5" onclick="setFilter(5, this)">RED</button>
-            <button class="filter-chip orange" data-filter="4" onclick="setFilter(4, this)">ORANGE</button>
-            <button class="filter-chip yellow" data-filter="3" onclick="setFilter(3, this)">YELLOW</button>
-            <button class="filter-chip blue" data-filter="2" onclick="setFilter(2, this)">BLUE</button>
-            <button class="filter-chip purple" data-filter="anarchist" onclick="setFilter('anarchist', this)">ANARCH</button>
+            <button class="filter-chip active" data-filter="all" onclick="setFilter('all', this)">הכל</button>
+            <button class="filter-chip red" data-filter="5" onclick="setFilter(5, this)">ודאי</button>
+            <button class="filter-chip orange" data-filter="4" onclick="setFilter(4, this)">חזק</button>
+            <button class="filter-chip yellow" data-filter="3" onclick="setFilter(3, this)">בינוני</button>
+            <button class="filter-chip blue" data-filter="2" onclick="setFilter(2, this)">חלש</button>
+            <button class="filter-chip purple" data-filter="anarchist" onclick="setFilter('anarchist', this)">אנרכיסטים</button>
             <div class="toggle-container">
                 <div class="toggle-switch active" id="anarchistToggle" onclick="toggleAnarchist()"></div>
-                <span>ACTIVISTS</span>
+                <span>אנרכיסטים</span>
             </div>
-            <input type="text" class="search-input" id="searchInput" placeholder="SEARCH..." oninput="applyFilters()">
+            <input type="text" class="search-input" id="searchInput" placeholder="חיפוש..." oninput="applyFilters()">
         </div>
         <div class="timeline-graph">
-            <div class="timeline-label">24H ACTIVITY</div>
+            <div class="timeline-label">פעילות 24 שעות</div>
             <div class="timeline-bars" id="timelineBars"></div>
             <div class="timeline-hours" id="timelineHours"></div>
         </div>
         <div class="panel-body" id="alertFeed">
             <div class="loading-state">
                 <div class="loading-spinner"></div>
-                <span>SCANNING...</span>
+                <span>סורק ערוצים...</span>
             </div>
         </div>
     </div>
@@ -1519,17 +1774,17 @@ body {
     <!-- CONFIG PANEL -->
     <div class="panel config-panel">
         <div class="panel-header">
-            <span class="panel-title">SYSTEM</span>
+            <span class="panel-title">מערכת</span>
             <div class="panel-indicator"></div>
         </div>
         <div class="panel-body">
-            <div class="config-item"><span class="config-key">SECTOR</span><span class="config-val">ROUTE 443</span></div>
-            <div class="config-item"><span class="config-key">RADIUS</span><span class="config-val">15 KM</span></div>
-            <div class="config-item"><span class="config-key">CENTER</span><span class="config-val">31.87N 35.12E</span></div>
-            <div class="config-item"><span class="config-key">SCAN</span><span class="config-val">10 MIN</span></div>
+            <div class="config-item"><span class="config-key">גזרה</span><span class="config-val">כביש 443</span></div>
+            <div class="config-item"><span class="config-key">רדיוס</span><span class="config-val">15 ק"מ</span></div>
+            <div class="config-item"><span class="config-key">מרכז</span><span class="config-val">31.87N 35.12E</span></div>
+            <div class="config-item"><span class="config-key">סריקה</span><span class="config-val">10 דק'</span></div>
             <div class="config-item"><span class="config-key">AI</span><span class="config-val">GEMINI 2.0</span></div>
-            <div class="config-item"><span class="config-key">RETAIN</span><span class="config-val">72 HRS</span></div>
-            <div class="config-item"><span class="config-key">REFRESH</span><span class="config-val" id="nextRefresh">30s</span></div>
+            <div class="config-item"><span class="config-key">שמירה</span><span class="config-val">72 שעות</span></div>
+            <div class="config-item"><span class="config-key">רענון</span><span class="config-val" id="nextRefresh">30s</span></div>
         </div>
     </div>
 
@@ -1538,25 +1793,30 @@ body {
 <!-- HISTORY OVERLAY -->
 <div class="history-overlay" id="historyOverlay">
     <div class="history-header">
-        <div class="history-title">HISTORY LOG</div>
-        <button class="history-close" onclick="toggleHistory()">ESC CLOSE</button>
+        <div class="history-title">יומן היסטורי</div>
+        <button class="history-close" onclick="toggleHistory()">ESC סגור</button>
     </div>
     <div class="history-stat-bar" id="historyStats"></div>
     <div class="history-filters">
-        <input type="text" class="history-search" id="historySearch" placeholder="SEARCH HISTORY..." oninput="renderHistory()">
-        <button class="filter-chip active" data-hfilter="all" onclick="setHistoryFilter('all', this)">ALL</button>
-        <button class="filter-chip red" data-hfilter="5" onclick="setHistoryFilter(5, this)">RED</button>
-        <button class="filter-chip orange" data-hfilter="4" onclick="setHistoryFilter(4, this)">ORANGE</button>
-        <button class="filter-chip yellow" data-hfilter="3" onclick="setHistoryFilter(3, this)">YELLOW</button>
-        <button class="filter-chip blue" data-hfilter="2" onclick="setHistoryFilter(2, this)">BLUE</button>
+        <input type="text" class="history-search" id="historySearch" placeholder="חיפוש בהיסטוריה..." oninput="renderHistory()">
+        <button class="filter-chip active" data-hfilter="all" onclick="setHistoryFilter('all', this)">הכל</button>
+        <button class="filter-chip red" data-hfilter="5" onclick="setHistoryFilter(5, this)">ודאי</button>
+        <button class="filter-chip orange" data-hfilter="4" onclick="setHistoryFilter(4, this)">חזק</button>
+        <button class="filter-chip yellow" data-hfilter="3" onclick="setHistoryFilter(3, this)">בינוני</button>
+        <button class="filter-chip blue" data-hfilter="2" onclick="setHistoryFilter(2, this)">חלש</button>
     </div>
     <div class="history-body" id="historyBody">
-        <div class="loading-state"><div class="loading-spinner"></div><span>LOADING HISTORY...</span></div>
+        <div class="loading-state"><div class="loading-spinner"></div><span>טוען היסטוריה...</span></div>
     </div>
 </div>
 
 <!-- Refresh Bar -->
 <div class="refresh-bar" id="refreshBar"></div>
+
+<!-- Credit Footer -->
+<div class="credit-footer" id="creditFooter" style="display:none;">
+    נבנה ע"י אלחי פיין | <a href="https://wa.me/972542012000" target="_blank">📱 054-201-2000</a>
+</div>
 
 <!-- SCRIPTS -->
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
@@ -1613,7 +1873,7 @@ const P3_LOCATIONS = [
     { name: "Givat Zeev", he: "גבעת זאב", lat: 31.860, lng: 35.170 },
 ];
 
-const SOURCES = [
+const מקורות = [
     { id: 'deiribzi', name: 'דיר איביע', type: 'local' },
     { id: 'beit_liqya', name: 'בית ליקיא', type: 'local' },
     { id: 'beit_sira', name: 'בית סירא', type: 'local' },
@@ -1708,15 +1968,27 @@ function initMap() {
         }).bindTooltip(`<b>P3</b> ${loc.he}`, { className: 'dark-tooltip' }).addTo(map);
     });
 
-    // KEY VILLAGES - larger highlighted markers with pulse
+    // KEY VILLAGES - larger highlighted markers with dynamic tooltips
     KEY_VILLAGES.forEach(loc => {
-        L.circleMarker([loc.lat, loc.lng], {
+        const marker = L.circleMarker([loc.lat, loc.lng], {
             radius: 8,
             color: '#ff0040',
             fillColor: '#ff0040',
             fillOpacity: 0.5,
             weight: 2
-        }).bindTooltip(`<b style="color:#ff0040;">KEY</b> ${loc.he}`, { className: 'dark-tooltip', permanent: false }).addTo(map);
+        }).addTo(map);
+
+        // Dynamic tooltip with 24h report count
+        marker.on('mouseover', function() {
+            const count24h = getVillageReportCount(loc, 24);
+            const tooltipHtml = `<div style="direction:rtl;text-align:center;">` +
+                `<b style="color:#ff0040;font-size:13px;">${loc.he}</b><br>` +
+                `<span style="color:#7088a0;font-size:10px;">דיווחים 24 שע': </span>` +
+                `<b style="color:${count24h > 0 ? '#ff8800' : '#00ff88'};font-size:12px;">${count24h}</b>` +
+                `</div>`;
+            this.bindTooltip(tooltipHtml, { className: 'dark-tooltip', permanent: false, direction: 'top' }).openTooltip();
+        });
+
         // Outer pulse ring
         L.circleMarker([loc.lat, loc.lng], {
             radius: 14,
@@ -1747,10 +2019,10 @@ function toggleMapFullscreen() {
 
     if (mapIsFullscreen) {
         panel.classList.add('fullscreen');
-        btn.innerHTML = '&#x26F6; MINIMIZE';
+        btn.innerHTML = '&#x26F6; מזער';
     } else {
         panel.classList.remove('fullscreen');
-        btn.innerHTML = '&#x26F6; EXPAND';
+        btn.innerHTML = '&#x26F6; הרחב';
     }
     setTimeout(() => map.invalidateSize(), 400);
 }
@@ -1785,7 +2057,7 @@ function updateMapMarkers(news) {
 async function fetchData() {
     try {
         const [newsRes, summaryRes, metaRes] = await Promise.all([
-            fetch(`${FIREBASE_URL}/news.json?orderBy="savedAt"&limitToLast=100`),
+            fetch(`${FIREBASE_URL}/auto-news.json?orderBy="savedAt"&limitToLast=100`),
             fetch(`${FIREBASE_URL}/world-news-summary/current.json`),
             fetch(`${FIREBASE_URL}/metadata.json`)
         ]);
@@ -1819,7 +2091,7 @@ async function fetchData() {
     } catch (error) {
         console.error('Fetch error:', error);
         document.getElementById('statusDot').className = 'status-dot offline';
-        document.getElementById('statusText').textContent = 'ERROR';
+        document.getElementById('statusText').textContent = 'שגיאה';
     }
 }
 
@@ -1919,8 +2191,8 @@ function renderAlerts() {
 
     if (items.length === 0) {
         feed.innerHTML = `<div class="empty-state">
-            ${searchText || activeFilter !== 'all' ? 'NO MATCHING ALERTS' : 'NO ACTIVE THREATS'}<br>
-            <small style="color: var(--green);">${searchText ? 'TRY DIFFERENT SEARCH' : 'SECTOR CLEAR'}</small>
+            ${searchText || activeFilter !== 'all' ? 'אין התראות תואמות' : 'לא זוהו איומים אנרכיסטים'}<br>
+            <small style="color: var(--green);">${searchText ? 'נסה חיפוש אחר' : 'הגזרה שקטה'}</small>
         </div>`;
         return;
     }
@@ -2016,7 +2288,7 @@ function renderTimeline() {
 function renderSummary() {
     const body = document.getElementById('summaryBody');
     if (!summaryData || !summaryData.summary) {
-        body.innerHTML = '<div class="empty-state">AWAITING AI ANALYSIS<br><small>UPDATES EVERY HOUR</small></div>';
+        body.innerHTML = '<div class="empty-state">ממתין לניתוח AI<br><small>מתעדכן כל שעה</small></div>';
         return;
     }
     body.innerHTML = `
@@ -2048,7 +2320,7 @@ function renderStats() {
     document.getElementById('alertCount').textContent = items.length;
 }
 
-// ═══════ RENDER THREAT LEVEL ═══════
+// ═══════ RENDER רמת איום ═══════
 function renderThreatLevel() {
     const items = Object.values(newsData);
     let maxUrgency = 0;
@@ -2065,12 +2337,12 @@ function renderThreatLevel() {
     const label = document.getElementById('threatLabel');
 
     const levels = {
-        0: { class: 'level-gray', label: 'CLEAR', color: '#666' },
-        1: { class: 'level-gray', label: 'MINIMAL', color: '#666' },
-        2: { class: 'level-blue', label: 'LOW', color: '#4488ff' },
-        3: { class: 'level-yellow', label: 'ELEVATED', color: '#ffd000' },
-        4: { class: 'level-orange', label: 'HIGH', color: '#ff8800' },
-        5: { class: 'level-red', label: 'CRITICAL', color: '#ff0040' }
+        0: { class: 'level-gray', label: 'שקט', color: '#666' },
+        1: { class: 'level-gray', label: 'מינימלי', color: '#666' },
+        2: { class: 'level-blue', label: 'חלש', color: '#4488ff' },
+        3: { class: 'level-yellow', label: 'בינוני', color: '#ffd000' },
+        4: { class: 'level-orange', label: 'חזק', color: '#ff8800' },
+        5: { class: 'level-red', label: 'ודאי', color: '#ff0040' }
     };
 
     const level = levels[maxUrgency] || levels[0];
@@ -2092,7 +2364,7 @@ function renderThreatLevel() {
     });
 }
 
-// ═══════ RENDER SOURCES ═══════
+// ═══════ RENDER מקורות ═══════
 function renderSources() {
     const items = Object.values(newsData);
     const sourceCounts = {};
@@ -2101,7 +2373,7 @@ function renderSources() {
     });
 
     const list = document.getElementById('sourcesList');
-    list.innerHTML = SOURCES.map(src => {
+    list.innerHTML = מקורות.map(src => {
         const count = sourceCounts[src.id] || sourceCounts[src.name] || 0;
         const isActive = count > 0;
         const typeLabels = { local: 'LOCAL', regional: 'AREA', national: 'NATL', news: 'NEWS' };
@@ -2133,12 +2405,12 @@ function toggleHistory() {
 
 async function fetchHistory() {
     try {
-        const res = await fetch(`${FIREBASE_URL}/news.json`);
+        const res = await fetch(`${FIREBASE_URL}/auto-news.json`);
         const data = await res.json();
         if (data) allNewsData = data;
         renderHistory();
     } catch (e) {
-        document.getElementById('historyBody').innerHTML = '<div class="empty-state">ERROR LOADING HISTORY</div>';
+        document.getElementById('historyBody').innerHTML = '<div class="empty-state">שגיאה LOADING HISTORY</div>';
     }
 }
 
@@ -2165,11 +2437,11 @@ function renderHistory() {
     const counts = { 5: 0, 4: 0, 3: 0, 2: 0, 1: 0 };
     items.forEach(i => counts[i.urgency || 1]++);
     document.getElementById('historyStats').innerHTML = `
-        <div class="history-stat"><strong>${items.length}</strong> TOTAL</div>
-        <div class="history-stat"><strong style="color:var(--red)">${counts[5]}</strong> RED</div>
-        <div class="history-stat"><strong style="color:var(--orange)">${counts[4]}</strong> ORANGE</div>
-        <div class="history-stat"><strong style="color:var(--yellow)">${counts[3]}</strong> YELLOW</div>
-        <div class="history-stat"><strong style="color:var(--blue)">${counts[2] + counts[1]}</strong> BLUE</div>
+        <div class="history-stat"><strong>${items.length}</strong> סה"כ</div>
+        <div class="history-stat"><strong style="color:var(--red)">${counts[5]}</strong> ודאי</div>
+        <div class="history-stat"><strong style="color:var(--orange)">${counts[4]}</strong> חזק</div>
+        <div class="history-stat"><strong style="color:var(--yellow)">${counts[3]}</strong> בינוני</div>
+        <div class="history-stat"><strong style="color:var(--blue)">${counts[2] + counts[1]}</strong> חלש</div>
     `;
 
     // Group by date
@@ -2182,7 +2454,7 @@ function renderHistory() {
     });
 
     if (Object.keys(groups).length === 0) {
-        body.innerHTML = '<div class="empty-state">NO MATCHING RECORDS</div>';
+        body.innerHTML = '<div class="empty-state">אין רשומות תואמות</div>';
         return;
     }
 
@@ -2204,6 +2476,29 @@ function renderHistory() {
             `).join('')}
         </div>
     `).join('');
+}
+
+// ═══════ VILLAGE REPORT COUNT ═══════
+function getVillageReportCount(village, hours) {
+    const cutoff = Date.now() - (hours * 60 * 60 * 1000);
+    const items = Object.values(newsData);
+    let count = 0;
+    items.forEach(item => {
+        if ((item.timestamp || 0) < cutoff) return;
+        // Check by coordinates proximity (within ~2km)
+        if (item.coordinates) {
+            const dlat = Math.abs((item.coordinates.lat || 0) - village.lat);
+            const dlng = Math.abs((item.coordinates.lon || item.coordinates.lng || 0) - village.lng);
+            if (dlat < 0.02 && dlng < 0.02) { count++; return; }
+        }
+        // Check by matched location name
+        if (item.matchedLocations) {
+            const names = item.matchedLocations.join(' ').toLowerCase();
+            const heName = village.he.toLowerCase();
+            if (names.includes(heName)) { count++; }
+        }
+    });
+    return count;
 }
 
 // ═══════ UTILITIES ═══════
@@ -2259,6 +2554,200 @@ function startRefreshCycle() {
             fetchData();
         }
     }, 1000);
+}
+
+// ═══════ LOGIN ═══════
+const ACCESS_CODE = '1875';
+let isLoggedIn = false;
+
+function attemptLogin() {
+    const input = document.getElementById('loginInput');
+    const error = document.getElementById('loginError');
+
+    if (input.value === ACCESS_CODE) {
+        isLoggedIn = true;
+        const overlay = document.getElementById('loginOverlay');
+        overlay.style.transition = 'opacity 0.8s ease';
+        overlay.style.opacity = '0';
+        setTimeout(() => {
+            overlay.style.display = 'none';
+            document.getElementById('creditFooter').style.display = 'block';
+        }, 800);
+    } else {
+        input.classList.add('error');
+        error.textContent = 'קוד גישה שגוי // ACCESS DENIED';
+        setTimeout(() => {
+            input.classList.remove('error');
+            error.textContent = '';
+        }, 2000);
+        input.value = '';
+        input.focus();
+    }
+}
+
+// Enter key to login
+document.addEventListener('keydown', (e) => {
+    if (!isLoggedIn && e.key === 'Enter') {
+        attemptLogin();
+    }
+});
+
+// ═══════ DEMO DATA ═══════
+function loadDemoData() {
+    const now = Date.now();
+    const hour = 3600000;
+
+    const demoItems = [
+        {
+            title: 'ירי לעבר כוח צה"ל בסמוך לבית עור א-תחתא',
+            snippet: 'דווח על ירי מנשק קל לעבר כוח צבאי שפעל ליד הכפר. אין נפגעים. כוחות הגיעו למקום.',
+            fullText: 'דווח על ירי מנשק קל לעבר כוח צבאי שפעל ליד הכפר בית עור א-תחתא בשעות הלילה. הכוח החזיר אש. אין נפגעים מצד כוחותינו. כוחות נוספים הגיעו לסריקה.',
+            source: 'ramallahnew',
+            urgency: 5,
+            urgencyLabel: 'ודאי',
+            timestamp: now - (0.5 * hour),
+            coordinates: { lat: 31.870, lon: 35.120 },
+            matchedLocations: ['Beit Ur al-Tahta'],
+            matchedKeywords: ['ירי', 'כוח צבאי']
+        },
+        {
+            title: 'חסימת כביש 443 - צמיגים בוערים',
+            snippet: 'מספר צעירים חסמו את הכביש באזור ספא בצמיגים בוערים ואבנים',
+            fullText: 'מספר צעירים פלסטינים חסמו את כביש 443 באזור הכפר ספא בצמיגים בוערים ואבנים. כוחות צה"ל הגיעו לפזר את החסימה. נוצרה פקק תנועה של כ-20 דקות.',
+            source: 'QudsN',
+            urgency: 4,
+            urgencyLabel: 'חזק',
+            timestamp: now - (1.2 * hour),
+            coordinates: { lat: 31.878, lon: 35.087 },
+            matchedLocations: ['Safa', 'Route 443'],
+            matchedKeywords: ['חסימה', 'צמיגים']
+        },
+        {
+            title: 'פעילות מחאה של אנרכיסטים בבילעין',
+            snippet: 'קבוצת פעילי שמאל ובינלאומיים הגיעו לבילעין להפגנה שבועית נגד גדר ההפרדה',
+            fullText: 'כ-30 פעילי שמאל ישראלים ובינלאומיים מ-ISM הגיעו לכפר בילעין להפגנה שבועית. צה"ל פיזר את ההפגנה באמצעות גז מדמיע. מספר פעילים נעצרו.',
+            source: 'google-news',
+            urgency: 3,
+            urgencyLabel: 'בינוני',
+            timestamp: now - (2.5 * hour),
+            coordinates: { lat: 31.900, lon: 35.080 },
+            matchedLocations: ['Bilin'],
+            matchedKeywords: ['פעילי שמאל', 'ISM', 'הפגנה']
+        },
+        {
+            title: 'השלכת אבנים לעבר רכבים בצומת בית חורון',
+            snippet: 'דווח על השלכת אבנים לעבר רכבים ישראליים באזור צומת בית חורון',
+            fullText: 'מספר צעירים מכפר בית עור הפוקא השליכו אבנים לעבר רכבים ישראליים בצומת בית חורון. נגרם נזק לשני רכבים. אין נפגעים בנפש.',
+            source: 'palinfo',
+            urgency: 4,
+            urgencyLabel: 'חזק',
+            timestamp: now - (3.8 * hour),
+            coordinates: { lat: 31.860, lon: 35.148 },
+            matchedLocations: ['Beit Horon'],
+            matchedKeywords: ['אבנים', 'רכבים']
+        },
+        {
+            title: 'תנועה חשודה במידיה - סריקה צבאית',
+            snippet: 'כוח צבאי ביצע סריקה בכפר מידיה בעקבות דיווח על תנועה חשודה',
+            fullText: 'כוח צבאי נכנס לכפר מידיה לביצוע סריקה בעקבות מידע מודיעיני על תנועה חשודה. הסריקה הסתיימה ללא ממצאים חריגים.',
+            source: 'ramallahmix1',
+            urgency: 3,
+            urgencyLabel: 'בינוני',
+            timestamp: now - (5 * hour),
+            coordinates: { lat: 31.838, lon: 35.110 },
+            matchedLocations: ['Midya'],
+            matchedKeywords: ['סריקה', 'תנועה חשודה']
+        },
+        {
+            title: 'עימות מקומי בבית סירא',
+            snippet: 'עימות בין תושבים מקומיים לכוחות ביטחון באזור הכניסה לכפר',
+            fullText: 'עימות מקומי פרץ בכניסה לכפר בית סירא בין צעירים מקומיים לכוחות ביטחון. הושלכו אבנים ובקבוקי תבערה. הכוחות השתמשו באמצעי פיזור.',
+            source: 'beit_sira',
+            urgency: 4,
+            urgencyLabel: 'חזק',
+            timestamp: now - (6.5 * hour),
+            coordinates: { lat: 31.848, lon: 35.075 },
+            matchedLocations: ['Beit Sira'],
+            matchedKeywords: ['עימות', 'בקבוקי תבערה']
+        },
+        {
+            title: 'דיווח על רחפן מעל בית ליקיא',
+            snippet: 'תושבים דיווחו על רחפן לא מזוהה שנצפה מעל הכפר',
+            fullText: 'תושבי בית ליקיא דיווחו על רחפן לא מזוהה שנצפה מעל הכפר בשעות הבוקר המוקדמות. ככל הנראה מדובר ברחפן צבאי.',
+            source: 'beit_liqya',
+            urgency: 2,
+            urgencyLabel: 'חלש',
+            timestamp: now - (8 * hour),
+            coordinates: { lat: 31.833, lon: 35.080 },
+            matchedLocations: ['Beit Liqya'],
+            matchedKeywords: ['רחפן']
+        },
+        {
+            title: 'פעילות שגרתית - מחסום מכבים',
+            snippet: 'עיכובים במעבר מחסום מכבים בעקבות בדיקות מוגברות',
+            fullText: 'בדיקות מוגברות במחסום מכבים הובילו לעיכובים של עד 30 דקות. הפעילות בוצעה בעקבות הנחיה מודיעינית כללית.',
+            source: 'google-news',
+            urgency: 2,
+            urgencyLabel: 'חלש',
+            timestamp: now - (10 * hour),
+            coordinates: { lat: 31.850, lon: 35.050 },
+            matchedLocations: ['Maccabim CP'],
+            matchedKeywords: ['מחסום', 'בדיקות']
+        },
+        {
+            title: 'בצלם: תיעוד פעילות צבאית ברנתיס',
+            snippet: 'פעילי ארגון בצלם תיעדו פעילות צבאית בכפר רנתיס',
+            fullText: 'פעילי ארגון בצלם ופעילי שמאל בינלאומיים תיעדו בוידאו פעילות צבאית שגרתית בכפר רנתיס. התיעוד הופץ ברשתות החברתיות.',
+            source: 'google-news',
+            urgency: 3,
+            urgencyLabel: 'בינוני',
+            timestamp: now - (14 * hour),
+            coordinates: { lat: 31.815, lon: 35.060 },
+            matchedLocations: ['Rantis'],
+            matchedKeywords: ['בצלם', 'פעילי שמאל']
+        },
+        {
+            title: 'ניסיון חדירת גדר באזור קיבא',
+            snippet: 'חיישני הגדר איתרו ניסיון חדירה בגזרת קיבא. כוחות הוזנקו.',
+            fullText: 'חיישני גדר ההפרדה איתרו ניסיון חדירה בגזרת הכפר קיבא. כוחות צה"ל הוזנקו למקום. לא אותרו חשודים. ככל הנראה מדובר בבעל חיים.',
+            source: 'deiribzi',
+            urgency: 3,
+            urgencyLabel: 'בינוני',
+            timestamp: now - (18 * hour),
+            coordinates: { lat: 31.810, lon: 35.090 },
+            matchedLocations: ['Qibya'],
+            matchedKeywords: ['חדירה', 'גדר']
+        },
+    ];
+
+    // Load demo data
+    const demoNews = {};
+    demoItems.forEach((item, i) => {
+        demoNews['demo-' + i] = item;
+    });
+
+    newsData = demoNews;
+    allNewsData = { ...allNewsData, ...demoNews };
+
+    // Demo summary
+    summaryData = {
+        summary: '📊 סיכום מצב גזרה 443:\n\nבשעות האחרונות נרשמה עלייה בפעילות בגזרה. אירוע הירי בבית עור א-תחתא הוא האירוע החמור ביותר. נרשמו מספר מוקדי חיכוך נוספים: חסימת כביש 443 באזור ספא, השלכת אבנים בצומת בית חורון, ועימות בבית סירא.\n\nפעילות אנרכיסטים: הפגנה שבועית בבילעין עם פעילי ISM. תיעוד בצלם ברנתיס.\n\n⚠️ המלצות:\n• הגברת כוננות באזור בית עור - כביש 443\n• סיור מוגבר ספא-בית סירא\n• מעקב אחר פעילות אנרכיסטים בבילעין',
+        aiProvider: 'Gemini',
+        generatedAt: now - (15 * 60000)
+    };
+
+    // Demo metadata
+    metaData = { lastRun: now - (3 * 60000) };
+
+    renderAll();
+
+    // Flash effect
+    const btn = document.querySelector('[onclick="loadDemoData()"]');
+    if (btn) {
+        btn.style.color = 'var(--green)';
+        btn.style.borderColor = 'var(--green)';
+        btn.innerHTML = '<span class="btn-icon">&#10003;</span><span>הדגמה פעילה</span>';
+    }
 }
 
 // ═══════ INIT ═══════
