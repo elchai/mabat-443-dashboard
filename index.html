@@ -597,7 +597,8 @@ body {
 
 /* ═══════ RIGHT PANEL - AI SUMMARY ═══════ */
 .right-panel {
-    grid-row: 2 / 3;
+    grid-row: 3 / 4;
+    grid-column: 3 / 4;
     display: flex;
     flex-direction: column;
 }
@@ -643,7 +644,7 @@ body {
 
 /* Config Panel */
 .config-panel {
-    grid-row: 3 / 4;
+    grid-row: 2 / 3;
     grid-column: 3 / 4;
 }
 
@@ -1318,10 +1319,11 @@ body {
     color: #e0e8f0 !important;
     border: 1px solid #0f3460 !important;
     border-radius: 4px !important;
-    font-family: 'Share Tech Mono', monospace !important;
+    font-family: 'Rajdhani', 'Share Tech Mono', monospace !important;
     font-size: 11px !important;
-    padding: 6px 10px !important;
-    box-shadow: 0 0 15px rgba(0, 212, 255, 0.2) !important;
+    padding: 8px 12px !important;
+    box-shadow: 0 0 20px rgba(0, 212, 255, 0.25) !important;
+    max-width: 280px !important;
 }
 .dark-tooltip::before { border-top-color: #0f3460 !important; }
 
@@ -1879,17 +1881,47 @@ const FIREBASE_URL = 'https://project-8874611670473210078-default-rtdb.europe-we
 const SECTOR_CENTER = { lat: 31.870, lng: 35.120 };
 const REFRESH_INTERVAL = 30000;
 
-// KEY VILLAGES - highlighted on map with larger markers
+// KEY VILLAGES - highlighted on map with larger markers + sector history
 const KEY_VILLAGES = [
-    { he: "בית סירא", lat: 31.848, lng: 35.075 },
-    { he: "בית ליקיא", lat: 31.833, lng: 35.080 },
-    { he: "ח'רבת אל-מיסבאח", lat: 31.852, lng: 35.098 },
-    { he: "בית עור א-תחתא", lat: 31.870, lng: 35.120 },
-    { he: "ספא", lat: 31.878, lng: 35.087 },
-    { he: "מידיה", lat: 31.838, lng: 35.110 },
-    { he: "בית דורס (בן דרוס)", lat: 31.825, lng: 35.095 },
-    { he: "קיבא", lat: 31.810, lng: 35.090 },
-    { he: "רנתיס", lat: 31.815, lng: 35.060 },
+    { he: "בית עור א-תחתא", lat: 31.870, lng: 35.120, priority: 'P1', pop: '~5,000',
+      history: 'צמוד לציר 443. מוקד עימותים קבוע, ירי ואבנים לעבר כלי רכב. נקודת חנק מרכזית.',
+      threats: ['ירי', 'אבנים', 'חסימות'] },
+    { he: "בית עור אל-פוקא", lat: 31.878, lng: 35.130, priority: 'P1', pop: '~3,500',
+      history: 'כפר מעל ציר 443. היסטוריה של השלכת אבנים לעבר מתנחלים ורכבים צבאיים.',
+      threats: ['אבנים', 'בקת"ב'] },
+    { he: "ח'רבת אל-מיסבאח", lat: 31.852, lng: 35.098, priority: 'P1', pop: '~1,200',
+      history: 'יישוב קטן על הציר. חיכוכי קרקעות עם מתנחלים. מבנים לא חוקיים.',
+      threats: ['קרקעות', 'מבנים'] },
+    { he: "ספא", lat: 31.878, lng: 35.087, priority: 'P2', pop: '~3,000',
+      history: 'כפר צפונית לציר. חסימות כביש חוזרות בצמיגים בוערים. מוקד הפגנות.',
+      threats: ['חסימות', 'הפגנות', 'צמיגים'] },
+    { he: "מידיה", lat: 31.838, lng: 35.110, priority: 'P1', pop: '~3,200',
+      history: 'צמוד לציר 443 דרומית. פעילות חשודה ליד הגדר. סריקות תכופות.',
+      threats: ['פעילות חשודה', 'גדר'] },
+    { he: "בית סירא", lat: 31.848, lng: 35.075, priority: 'P2', pop: '~4,500',
+      history: 'מערבית לציר. עימותים עם כוחות ביטחון בכניסה לכפר. בקת"ב ואבנים.',
+      threats: ['עימותים', 'בקת"ב', 'אבנים'] },
+    { he: "בית ליקיא", lat: 31.833, lng: 35.080, priority: 'P2', pop: '~7,000',
+      history: 'כפר גדול מערבית-דרומית. פשיטות ומעצרים תכופים. ערוץ טלגרם מקומי פעיל.',
+      threats: ['מעצרים', 'פשיטות'] },
+    { he: "בית דורס (בן דרוס)", lat: 31.825, lng: 35.095, priority: 'P1', pop: '~2,000',
+      history: 'על הציר. נקודת חיכוך עם מתנחלים. הפגנות שבועיות נגד ההתנחלויות.',
+      threats: ['מתנחלים', 'הפגנות'] },
+    { he: "קיבא", lat: 31.810, lng: 35.090, priority: 'P1', pop: '~4,000',
+      history: 'ליד גדר ההפרדה. ניסיונות חדירה. היסטוריה ביטחונית עמוסה.',
+      threats: ['חדירות', 'גדר'] },
+    { he: "רנתיס", lat: 31.815, lng: 35.060, priority: 'P1', pop: '~2,500',
+      history: 'כפר דרום-מערבי. פעילות אנרכיסטים ובצלם. תיעוד נגד צה"ל.',
+      threats: ['אנרכיסטים', 'תיעוד'] },
+    { he: "דיר איביע", lat: 31.893, lng: 35.155, priority: 'P2', pop: '~4,000',
+      history: 'צפונית לציר. ערוץ טלגרם מקומי. פשיטות צבאיות תכופות.',
+      threats: ['פשיטות', 'מעצרים'] },
+    { he: "כפר ניעמה", lat: 31.905, lng: 35.120, priority: 'P2', pop: '~2,800',
+      history: 'צפונית. מוקד השלכת אבנים ועימותים עם כוחות.',
+      threats: ['אבנים', 'עימותים'] },
+    { he: "בילעין", lat: 31.900, lng: 35.080, priority: 'P2', pop: '~2,000',
+      history: 'מוכר בינלאומית מהפגנות שבועיות נגד הגדר. מוקד ISM ואנרכיסטים.',
+      threats: ['הפגנות', 'אנרכיסטים', 'ISM'] },
 ];
 
 const P1_LOCATIONS = [
@@ -2018,31 +2050,57 @@ function initMap() {
         }).bindTooltip(`<b>P3</b> ${loc.he}`, { className: 'dark-tooltip' }).addTo(map);
     });
 
-    // KEY VILLAGES - larger highlighted markers with dynamic tooltips
+    // KEY VILLAGES - larger highlighted markers with sector history tooltips
     KEY_VILLAGES.forEach(loc => {
+        const pColor = loc.priority === 'P1' ? '#ff0040' : loc.priority === 'P2' ? '#ff8800' : '#4488ff';
         const marker = L.circleMarker([loc.lat, loc.lng], {
             radius: 8,
-            color: '#ff0040',
-            fillColor: '#ff0040',
+            color: pColor,
+            fillColor: pColor,
             fillOpacity: 0.5,
             weight: 2
         }).addTo(map);
 
-        // Dynamic tooltip with 24h report count
+        // Rich tooltip with sector history + live data
         marker.on('mouseover', function() {
             const count24h = getVillageReportCount(loc, 24);
-            const tooltipHtml = `<div style="direction:rtl;text-align:center;">` +
-                `<b style="color:#ff0040;font-size:13px;">${loc.he}</b><br>` +
-                `<span style="color:#7088a0;font-size:10px;">דיווחים 24 שע': </span>` +
-                `<b style="color:${count24h > 0 ? '#ff8800' : '#00ff88'};font-size:12px;">${count24h}</b>` +
-                `</div>`;
-            this.bindTooltip(tooltipHtml, { className: 'dark-tooltip', permanent: false, direction: 'top' }).openTooltip();
+            const count72h = getVillageReportCount(loc, 72);
+            const lastEvent = getVillageLastEvent(loc);
+            const threatTags = (loc.threats || []).map(t =>
+                `<span style="display:inline-block;padding:1px 5px;margin:1px;border-radius:3px;background:rgba(255,0,64,0.15);border:1px solid rgba(255,0,64,0.3);font-size:9px;color:#ff8800;">${t}</span>`
+            ).join('');
+
+            const tooltipHtml = `<div style="direction:rtl;text-align:right;min-width:200px;max-width:260px;">` +
+                `<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:4px;">` +
+                    `<b style="color:${pColor};font-size:14px;">${loc.he}</b>` +
+                    `<span style="font-size:9px;padding:1px 6px;border:1px solid ${pColor};border-radius:3px;color:${pColor};letter-spacing:1px;">${loc.priority}</span>` +
+                `</div>` +
+                (loc.pop ? `<div style="color:#7088a0;font-size:10px;margin-bottom:4px;">אוכלוסייה: ${loc.pop}</div>` : '') +
+                `<div style="color:#e0e8f0;font-size:11px;line-height:1.4;margin-bottom:6px;border-right:2px solid ${pColor};padding-right:6px;">${loc.history || ''}</div>` +
+                `<div style="margin-bottom:5px;">${threatTags}</div>` +
+                `<div style="border-top:1px solid #0f3460;padding-top:4px;display:flex;gap:12px;">` +
+                    `<div style="text-align:center;">` +
+                        `<div style="font-size:9px;color:#7088a0;">24 שע'</div>` +
+                        `<b style="color:${count24h > 0 ? '#ff8800' : '#00ff88'};font-size:14px;">${count24h}</b>` +
+                    `</div>` +
+                    `<div style="text-align:center;">` +
+                        `<div style="font-size:9px;color:#7088a0;">72 שע'</div>` +
+                        `<b style="color:${count72h > 0 ? '#ffd000' : '#00ff88'};font-size:14px;">${count72h}</b>` +
+                    `</div>` +
+                    `<div style="flex:1;text-align:center;">` +
+                        `<div style="font-size:9px;color:#7088a0;">אחרון</div>` +
+                        `<span style="color:#e0e8f0;font-size:10px;">${lastEvent}</span>` +
+                    `</div>` +
+                `</div>` +
+            `</div>`;
+            this.unbindTooltip();
+            this.bindTooltip(tooltipHtml, { className: 'dark-tooltip', permanent: false, direction: 'top', maxWidth: 280 }).openTooltip();
         });
 
         // Outer pulse ring
         L.circleMarker([loc.lat, loc.lng], {
             radius: 14,
-            color: '#ff0040',
+            color: pColor,
             fillColor: 'transparent',
             fillOpacity: 0,
             weight: 1,
@@ -2558,6 +2616,29 @@ function getVillageReportCount(village, hours) {
         }
     });
     return count;
+}
+
+// ═══════ VILLAGE LAST EVENT ═══════
+function getVillageLastEvent(village) {
+    const items = Object.values(newsData);
+    let latest = null;
+    items.forEach(item => {
+        let match = false;
+        if (item.coordinates) {
+            const dlat = Math.abs((item.coordinates.lat || 0) - village.lat);
+            const dlng = Math.abs((item.coordinates.lon || item.coordinates.lng || 0) - village.lng);
+            if (dlat < 0.02 && dlng < 0.02) match = true;
+        }
+        if (!match && item.matchedLocations) {
+            const names = item.matchedLocations.join(' ').toLowerCase();
+            if (names.includes(village.he.toLowerCase())) match = true;
+        }
+        if (match && (!latest || (item.timestamp || 0) > (latest.timestamp || 0))) {
+            latest = item;
+        }
+    });
+    if (!latest) return 'אין';
+    return formatTime(latest.timestamp);
 }
 
 // ═══════ UTILITIES ═══════
