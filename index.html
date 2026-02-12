@@ -1815,7 +1815,7 @@ body {
 
 <!-- Credit Footer -->
 <div class="credit-footer" id="creditFooter" style="display:none;">
-    נבנה ע"י אלחי פיין | <a href="https://wa.me/972542012000" target="_blank">📱 054-201-2000</a>
+    <a href="https://wa.me/972542012000" target="_blank">נבנה ע"י אלחי פיין | 054-201-2000</a>
 </div>
 
 <!-- SCRIPTS -->
@@ -1874,15 +1874,15 @@ const P3_LOCATIONS = [
 ];
 
 const מקורות = [
-    { id: 'deiribzi', name: 'דיר איביע', type: 'local' },
-    { id: 'beit_liqya', name: 'בית ליקיא', type: 'local' },
-    { id: 'beit_sira', name: 'בית סירא', type: 'local' },
-    { id: 'ramallahnew', name: 'רמאללה חדשות', type: 'regional' },
-    { id: 'ramallahmix1', name: 'רמאללה מיקס', type: 'regional' },
-    { id: 'QudsN', name: 'רשת קודס', type: 'national' },
-    { id: 'palinfo', name: 'מרכז תקשורת', type: 'national' },
-    { id: 'PalestineResist', name: 'Resistance News', type: 'national' },
-    { id: 'google-news', name: 'Google News', type: 'news' },
+    { id: 'deiribzi', name: 'דיר איביע', type: 'local', tg: 'deiribzi' },
+    { id: 'beit_liqya', name: 'בית ליקיא', type: 'local', tg: 'beit_liqya' },
+    { id: 'beit_sira', name: 'בית סירא', type: 'local', tg: 'beit_sira' },
+    { id: 'ramallahnew', name: 'רמאללה חדשות', type: 'regional', tg: 'ramallahnew' },
+    { id: 'ramallahmix1', name: 'רמאללה מיקס', type: 'regional', tg: 'ramallahmix1' },
+    { id: 'QudsN', name: 'רשת קודס', type: 'national', tg: 'QudsN' },
+    { id: 'palinfo', name: 'מרכז תקשורת', type: 'national', tg: 'palaborz' },
+    { id: 'PalestineResist', name: 'Resistance News', type: 'national', tg: 'PalestineResist' },
+    { id: 'google-news', name: 'Google News', type: 'news', url: 'https://news.google.com' },
 ];
 
 // ═══════ STATE ═══════
@@ -2377,13 +2377,14 @@ function renderSources() {
         const count = sourceCounts[src.id] || sourceCounts[src.name] || 0;
         const isActive = count > 0;
         const typeLabels = { local: 'LOCAL', regional: 'AREA', national: 'NATL', news: 'NEWS' };
+        const link = src.tg ? `https://t.me/${src.tg}` : (src.url || '#');
         return `
-            <div class="source-item">
+            <a class="source-item" href="${link}" target="_blank" style="text-decoration:none;cursor:pointer;">
                 <div class="source-dot ${isActive ? 'active' : 'inactive'}"></div>
                 <span class="source-name">${src.name}</span>
                 <span class="source-type ${src.type}">${typeLabels[src.type]}</span>
                 <span class="source-count">${count > 0 ? count : ''}</span>
-            </div>
+            </a>
         `;
     }).join('');
 }
