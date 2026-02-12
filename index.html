@@ -2103,7 +2103,7 @@ function updateMapMarkers(news) {
 async function fetchData() {
     try {
         const [newsRes, summaryRes, metaRes] = await Promise.all([
-            fetch(`${FIREBASE_URL}/auto-news.json?limitToLast=200`),
+            fetch(`${FIREBASE_URL}/auto-news.json`),
             fetch(`${FIREBASE_URL}/world-news-summary/current.json`),
             fetch(`${FIREBASE_URL}/metadata.json`)
         ]);
@@ -2112,23 +2112,27 @@ async function fetchData() {
         const summary = await summaryRes.json();
         const meta = await metaRes.json();
 
-        // Detect new alerts for flash
-        if (news && !isFirstLoad) {
-            const newIds = Object.keys(news);
-            let hasNewRed = false;
-            newIds.forEach(id => {
-                if (!knownIds.has(id) && news[id].urgency >= 5) hasNewRed = true;
+        // Skip Firebase error responses
+        if (news && !news.error) {
+            // Normalize urgencyScore → urgency
+            Object.values(news).forEach(item => {
+                if (!item.urgency && item.urgencyScore) item.urgency = item.urgencyScore;
             });
-            if (hasNewRed) triggerRedAlert();
-        }
-
-        if (news) {
+            // Detect new alerts for flash
+            if (!isFirstLoad) {
+                const newIds = Object.keys(news);
+                let hasNewRed = false;
+                newIds.forEach(id => {
+                    if (!knownIds.has(id) && news[id].urgency >= 5) hasNewRed = true;
+                });
+                if (hasNewRed) triggerRedAlert();
+            }
             newsData = news;
             allNewsData = { ...allNewsData, ...news };
             Object.keys(news).forEach(id => knownIds.add(id));
         }
-        if (summary) summaryData = summary;
-        if (meta) metaData = meta;
+        if (summary && !summary.error) summaryData = summary;
+        if (meta && !meta.error) metaData = meta;
 
         isFirstLoad = false;
         document.getElementById('statusDot').className = 'status-dot';
