@@ -1561,15 +1561,59 @@ body {
 </head>
 <body>
 
-<!-- LOGIN GATE -->
+<!-- LOGIN SCREEN -->
+<div id="loginOverlay" style="position:fixed;top:0;left:0;right:0;bottom:0;z-index:99999;background:#040810;display:flex;align-items:center;justify-content:center;flex-direction:column;">
+    <div style="position:absolute;top:0;left:0;right:0;bottom:0;background-image:linear-gradient(rgba(0,212,255,0.04) 1px,transparent 1px),linear-gradient(90deg,rgba(0,212,255,0.04) 1px,transparent 1px);background-size:40px 40px;pointer-events:none;"></div>
+    <div style="position:absolute;top:15px;left:50%;transform:translateX(-50%);font-family:'Orbitron',monospace;font-size:10px;letter-spacing:3px;color:#ff0040;pointer-events:none;">CLASSIFIED // RESTRICTED ACCESS</div>
+    <div style="position:relative;z-index:10;text-align:center;padding:50px 60px;border:1px solid #0f3460;border-radius:8px;background:rgba(8,16,35,0.9);box-shadow:0 0 60px rgba(0,212,255,0.08);min-width:340px;">
+        <div style="width:80px;height:80px;margin:0 auto 25px;display:flex;align-items:center;justify-content:center;">
+            <svg viewBox="0 0 100 120" width="80" height="96" xmlns="http://www.w3.org/2000/svg">
+                <path d="M50 5 L90 25 L90 75 L50 115 L10 75 L10 25 Z" fill="none" stroke="#00d4ff" stroke-width="1.5" opacity="0.4"/>
+                <path d="M50 25 Q62 25 70 35 Q75 42 74 52 Q72 62 65 68 L50 80 L35 68 Q28 62 26 52 Q25 42 30 35 Q38 25 50 25Z" fill="rgba(0,212,255,0.08)" stroke="#00d4ff" stroke-width="1.2"/>
+                <path d="M35 28 L30 15 L40 25" fill="#00d4ff" opacity="0.5"/><path d="M65 28 L70 15 L60 25" fill="#00d4ff" opacity="0.5"/>
+                <circle cx="39" cy="42" r="9" fill="none" stroke="#00d4ff" stroke-width="1.2"/>
+                <circle cx="61" cy="42" r="9" fill="none" stroke="#00d4ff" stroke-width="1.2"/>
+                <circle cx="39" cy="42" r="4" fill="#ffd000"/><circle cx="61" cy="42" r="4" fill="#ffd000"/>
+                <circle cx="39" cy="42" r="1.5" fill="#040810"/><circle cx="61" cy="42" r="1.5" fill="#040810"/>
+                <path d="M47 48 L50 54 L53 48" fill="#ff8800" opacity="0.6"/>
+                <line x1="50" y1="70" x2="50" y2="105" stroke="#00d4ff" stroke-width="1.8" opacity="0.7"/>
+                <path d="M45 72 L50 70 L55 72 L50 74 Z" fill="#00d4ff" opacity="0.5"/>
+            </svg>
+        </div>
+        <div style="font-family:'Orbitron',monospace;font-size:28px;font-weight:900;letter-spacing:6px;color:#00d4ff;margin-bottom:8px;">MABAT 443</div>
+        <div style="font-family:'Share Tech Mono',monospace;font-size:12px;color:#7088a0;letter-spacing:3px;margin-bottom:35px;">פלטפורמת מודיעין גזרתית</div>
+        <div style="margin-bottom:20px;text-align:right;">
+            <label style="display:block;font-family:'Share Tech Mono',monospace;font-size:10px;color:#3a4a5c;letter-spacing:2px;margin-bottom:6px;">קוד גישה</label>
+            <input id="loginInput" type="password" autocomplete="new-password" maxlength="10" placeholder="••••"
+                style="width:100%;padding:12px 16px;background:rgba(0,0,0,0.4);border:1px solid #0f3460;border-radius:4px;color:#00d4ff;font-family:'Share Tech Mono',monospace;font-size:18px;letter-spacing:8px;text-align:center;outline:none;box-sizing:border-box;"
+                onfocus="this.style.borderColor='#00d4ff';this.style.boxShadow='0 0 20px rgba(0,212,255,0.15)'"
+                onblur="this.style.borderColor='#0f3460';this.style.boxShadow='none'">
+        </div>
+        <button onclick="doLogin()" style="width:100%;padding:12px;background:linear-gradient(135deg,rgba(0,212,255,0.15),rgba(68,136,255,0.15));border:1px solid rgba(0,212,255,0.3);border-radius:4px;color:#00d4ff;font-family:'Orbitron',monospace;font-size:14px;letter-spacing:4px;cursor:pointer;">כניסה למערכת</button>
+        <div id="loginError" style="font-family:'Share Tech Mono',monospace;font-size:11px;color:#ff0040;height:16px;margin-top:10px;letter-spacing:1px;"></div>
+    </div>
+    <div style="position:absolute;bottom:15px;font-family:'Share Tech Mono',monospace;font-size:9px;color:#3a4a5c;pointer-events:none;">SECTOR DEFENSE INTELLIGENCE PLATFORM v2.0</div>
+</div>
 <script>
-(function() {
-    var code = prompt('מבט 443 - הזן קוד גישה:');
-    if (code !== '1875') {
-        document.body.innerHTML = '<div style="display:flex;align-items:center;justify-content:center;height:100vh;background:#040810;color:#ff0040;font-family:monospace;font-size:18px;text-align:center;direction:rtl;">ACCESS DENIED<br><br>קוד גישה שגוי</div>';
-        throw new Error('Access denied');
+function doLogin() {
+    var input = document.getElementById('loginInput');
+    var err = document.getElementById('loginError');
+    if (input.value === '1875') {
+        var ov = document.getElementById('loginOverlay');
+        ov.style.transition = 'opacity 0.8s ease';
+        ov.style.opacity = '0';
+        setTimeout(function() { ov.style.display = 'none'; }, 800);
+    } else {
+        err.textContent = 'קוד גישה שגוי // ACCESS DENIED';
+        input.style.borderColor = '#ff0040';
+        input.style.boxShadow = '0 0 20px rgba(255,0,64,0.15)';
+        input.value = '';
+        setTimeout(function() { err.textContent = ''; input.style.borderColor = '#0f3460'; input.style.boxShadow = 'none'; }, 2000);
     }
-})();
+}
+document.getElementById('loginInput').addEventListener('keydown', function(e) {
+    if (e.key === 'Enter') doLogin();
+});
 </script>
 
 <!-- Background Effects -->
@@ -2563,41 +2607,7 @@ function startRefreshCycle() {
     }, 1000);
 }
 
-// ═══════ LOGIN ═══════
-const ACCESS_CODE = '1875';
-let isLoggedIn = false;
-
-function attemptLogin() {
-    const input = document.getElementById('loginInput');
-    const error = document.getElementById('loginError');
-
-    if (input.value === ACCESS_CODE) {
-        isLoggedIn = true;
-        const overlay = document.getElementById('loginOverlay');
-        overlay.style.transition = 'opacity 0.8s ease';
-        overlay.style.opacity = '0';
-        setTimeout(() => {
-            overlay.style.display = 'none';
-            document.getElementById('creditFooter').style.display = 'block';
-        }, 800);
-    } else {
-        input.classList.add('error');
-        error.textContent = 'קוד גישה שגוי // ACCESS DENIED';
-        setTimeout(() => {
-            input.classList.remove('error');
-            error.textContent = '';
-        }, 2000);
-        input.value = '';
-        input.focus();
-    }
-}
-
-// Enter key to login
-document.addEventListener('keydown', (e) => {
-    if (!isLoggedIn && e.key === 'Enter') {
-        attemptLogin();
-    }
-});
+// ═══════ LOGIN (handled by inline script above) ═══════
 
 // ═══════ DEMO DATA ═══════
 let isDemoMode = false;
