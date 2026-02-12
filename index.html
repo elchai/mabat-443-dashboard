@@ -156,20 +156,12 @@ body {
 .logo-hex {
     width: 45px;
     height: 45px;
-    background: linear-gradient(135deg, var(--cyan), var(--blue));
-    clip-path: polygon(50% 0%, 100% 25%, 100% 75%, 50% 100%, 0% 75%, 0% 25%);
     display: flex;
     align-items: center;
     justify-content: center;
     animation: hexPulse 3s ease-in-out infinite;
     position: relative;
-}
-
-.logo-hex::before {
-    content: '\2B21';
-    font-size: 20px;
-    color: var(--bg-primary);
-    font-weight: bold;
+    filter: drop-shadow(0 0 8px var(--cyan-dim));
 }
 
 @keyframes hexPulse {
@@ -1397,22 +1389,14 @@ body {
 }
 
 .login-hex {
-    width: 80px;
-    height: 80px;
+    width: 100px;
+    height: 100px;
     margin: 0 auto 25px;
-    background: linear-gradient(135deg, var(--cyan), var(--blue));
-    clip-path: polygon(50% 0%, 100% 25%, 100% 75%, 50% 100%, 0% 75%, 0% 25%);
     display: flex;
     align-items: center;
     justify-content: center;
     animation: hexPulse 3s ease-in-out infinite;
-}
-
-.login-hex::before {
-    content: '\2B21';
-    font-size: 36px;
-    color: var(--bg-primary);
-    font-weight: bold;
+    filter: drop-shadow(0 0 15px var(--cyan-dim));
 }
 
 .login-title {
@@ -1577,7 +1561,45 @@ body {
     <div class="scan-line-login"></div>
     <div class="login-classification">CLASSIFIED // RESTRICTED ACCESS</div>
     <div class="login-box">
-        <div class="login-hex"></div>
+        <div class="login-hex"><svg viewBox="0 0 100 120" width="90" height="108" xmlns="http://www.w3.org/2000/svg">
+<!-- Shield -->
+<path d="M50 5 L90 25 L90 75 L50 115 L10 75 L10 25 Z" fill="none" stroke="#00d4ff" stroke-width="1.5" opacity="0.4"/>
+<path d="M50 10 L85 28 L85 72 L50 108 L15 72 L15 28 Z" fill="rgba(0,212,255,0.04)" stroke="#0f3460" stroke-width="0.8"/>
+<!-- Wings -->
+<path d="M12 52 Q5 42 8 30 Q12 38 22 42 L30 50 Z" fill="#00d4ff" opacity="0.25" stroke="#00d4ff" stroke-width="0.5"/>
+<path d="M88 52 Q95 42 92 30 Q88 38 78 42 L70 50 Z" fill="#00d4ff" opacity="0.25" stroke="#00d4ff" stroke-width="0.5"/>
+<path d="M15 58 Q8 50 10 38 Q15 46 25 48 L32 54 Z" fill="#00d4ff" opacity="0.15"/>
+<path d="M85 58 Q92 50 90 38 Q85 46 75 48 L68 54 Z" fill="#00d4ff" opacity="0.15"/>
+<!-- Owl body -->
+<path d="M50 25 Q62 25 70 35 Q75 42 74 52 Q72 62 65 68 L50 80 L35 68 Q28 62 26 52 Q25 42 30 35 Q38 25 50 25Z" fill="rgba(0,212,255,0.08)" stroke="#00d4ff" stroke-width="1.2"/>
+<!-- Ear tufts -->
+<path d="M35 28 L30 15 L40 25" fill="#00d4ff" opacity="0.5" stroke="#00d4ff" stroke-width="0.8"/>
+<path d="M65 28 L70 15 L60 25" fill="#00d4ff" opacity="0.5" stroke="#00d4ff" stroke-width="0.8"/>
+<!-- Eyes -->
+<circle cx="39" cy="42" r="9" fill="none" stroke="#00d4ff" stroke-width="1.2"/>
+<circle cx="61" cy="42" r="9" fill="none" stroke="#00d4ff" stroke-width="1.2"/>
+<circle cx="39" cy="42" r="4" fill="#ffd000" opacity="0.9">
+  <animate attributeName="opacity" values="0.9;0.4;0.9" dur="3s" repeatCount="indefinite"/>
+</circle>
+<circle cx="61" cy="42" r="4" fill="#ffd000" opacity="0.9">
+  <animate attributeName="opacity" values="0.9;0.4;0.9" dur="3s" repeatCount="indefinite"/>
+</circle>
+<circle cx="39" cy="42" r="1.5" fill="#040810"/>
+<circle cx="61" cy="42" r="1.5" fill="#040810"/>
+<!-- Brow ridge -->
+<path d="M28 36 Q39 30 50 36 Q61 30 72 36" fill="none" stroke="#00d4ff" stroke-width="1" opacity="0.6"/>
+<!-- Beak -->
+<path d="M47 48 L50 54 L53 48" fill="#ff8800" opacity="0.6" stroke="#ff8800" stroke-width="0.5"/>
+<!-- Chest feather lines -->
+<path d="M42 58 Q50 62 58 58" fill="none" stroke="#00d4ff" stroke-width="0.5" opacity="0.3"/>
+<path d="M40 63 Q50 67 60 63" fill="none" stroke="#00d4ff" stroke-width="0.5" opacity="0.25"/>
+<path d="M38 68 Q50 72 62 68" fill="none" stroke="#00d4ff" stroke-width="0.5" opacity="0.2"/>
+<!-- Sword -->
+<line x1="50" y1="70" x2="50" y2="105" stroke="#00d4ff" stroke-width="1.8" opacity="0.7"/>
+<path d="M45 72 L50 70 L55 72 L50 74 Z" fill="#00d4ff" opacity="0.5"/>
+<line x1="44" y1="73" x2="56" y2="73" stroke="#00d4ff" stroke-width="1.2" opacity="0.5"/>
+<path d="M48 103 L50 110 L52 103" fill="#00d4ff" opacity="0.4"/>
+</svg></div>
         <div class="login-title">MABAT 443</div>
         <div class="login-subtitle">פלטפורמת מודיעין גזרתית</div>
         <div class="login-field">
@@ -1607,7 +1629,27 @@ body {
     <!-- HEADER -->
     <header class="header">
         <div class="logo-section">
-            <div class="logo-hex"></div>
+            <div class="logo-hex"><svg viewBox="0 0 100 120" width="40" height="48" xmlns="http://www.w3.org/2000/svg">
+<path d="M50 5 L90 25 L90 75 L50 115 L10 75 L10 25 Z" fill="none" stroke="#00d4ff" stroke-width="2" opacity="0.4"/>
+<path d="M50 10 L85 28 L85 72 L50 108 L15 72 L15 28 Z" fill="rgba(0,212,255,0.05)" stroke="#0f3460" stroke-width="1"/>
+<path d="M12 52 Q5 42 8 30 Q12 38 22 42 L30 50 Z" fill="#00d4ff" opacity="0.3" stroke="#00d4ff" stroke-width="0.7"/>
+<path d="M88 52 Q95 42 92 30 Q88 38 78 42 L70 50 Z" fill="#00d4ff" opacity="0.3" stroke="#00d4ff" stroke-width="0.7"/>
+<path d="M50 25 Q62 25 70 35 Q75 42 74 52 Q72 62 65 68 L50 80 L35 68 Q28 62 26 52 Q25 42 30 35 Q38 25 50 25Z" fill="rgba(0,212,255,0.1)" stroke="#00d4ff" stroke-width="1.5"/>
+<path d="M35 28 L30 15 L40 25" fill="#00d4ff" opacity="0.6" stroke="#00d4ff" stroke-width="1"/>
+<path d="M65 28 L70 15 L60 25" fill="#00d4ff" opacity="0.6" stroke="#00d4ff" stroke-width="1"/>
+<circle cx="39" cy="42" r="9" fill="none" stroke="#00d4ff" stroke-width="1.5"/>
+<circle cx="61" cy="42" r="9" fill="none" stroke="#00d4ff" stroke-width="1.5"/>
+<circle cx="39" cy="42" r="4" fill="#ffd000" opacity="0.9"><animate attributeName="opacity" values="0.9;0.4;0.9" dur="3s" repeatCount="indefinite"/></circle>
+<circle cx="61" cy="42" r="4" fill="#ffd000" opacity="0.9"><animate attributeName="opacity" values="0.9;0.4;0.9" dur="3s" repeatCount="indefinite"/></circle>
+<circle cx="39" cy="42" r="1.5" fill="#040810"/>
+<circle cx="61" cy="42" r="1.5" fill="#040810"/>
+<path d="M28 36 Q39 30 50 36 Q61 30 72 36" fill="none" stroke="#00d4ff" stroke-width="1.2" opacity="0.6"/>
+<path d="M47 48 L50 54 L53 48" fill="#ff8800" opacity="0.7" stroke="#ff8800" stroke-width="0.7"/>
+<line x1="50" y1="70" x2="50" y2="105" stroke="#00d4ff" stroke-width="2" opacity="0.6"/>
+<path d="M45 72 L50 70 L55 72 L50 74 Z" fill="#00d4ff" opacity="0.5"/>
+<line x1="44" y1="73" x2="56" y2="73" stroke="#00d4ff" stroke-width="1.5" opacity="0.5"/>
+<path d="M48 103 L50 110 L52 103" fill="#00d4ff" opacity="0.4"/>
+</svg></div>
             <div>
                 <div class="system-title">MABAT 443</div>
                 <div class="system-subtitle">פלטפורמת מודיעין גזרתית</div>
