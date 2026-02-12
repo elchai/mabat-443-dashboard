@@ -1869,20 +1869,6 @@ document.getElementById('loginInput').addEventListener('keydown', function(e) {
 </div>
 
 <!-- SCRIPTS -->
-<script>
-// ═══════ ERROR HANDLER - shows JS errors on screen ═══════
-window.onerror = function(msg, url, line, col, error) {
-    var d = document.getElementById('debugBox');
-    if (!d) {
-        d = document.createElement('div');
-        d.id = 'debugBox';
-        d.style.cssText = 'position:fixed;bottom:60px;left:10px;right:10px;background:rgba(255,0,0,0.9);color:white;padding:10px;font-size:11px;font-family:monospace;z-index:999999;max-height:200px;overflow:auto;border-radius:4px;';
-        document.body.appendChild(d);
-    }
-    d.innerHTML += '<div>ERROR: ' + msg + ' (line ' + line + ')</div>';
-    return false;
-};
-</script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
 <script>
 // ═══════════════════════════════════════
@@ -2812,7 +2798,6 @@ function loadDemoData() {
     renderAll();
 
     // Flash effect
-    const btn = document.querySelector('[onclick="loadDemoData()"]');
     if (btn) {
         btn.style.color = 'var(--green)';
         btn.style.borderColor = 'var(--green)';
