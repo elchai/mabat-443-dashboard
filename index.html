@@ -64,6 +64,7 @@ body {
     background-size: 50px 50px;
     z-index: 0;
     animation: gridPulse 4s ease-in-out infinite;
+    pointer-events: none;
 }
 
 @keyframes gridPulse {
@@ -80,6 +81,7 @@ body {
     animation: scanDown 4s linear infinite;
     opacity: 0.4;
     box-shadow: 0 0 20px var(--cyan), 0 0 60px var(--cyan-dim);
+    pointer-events: none;
 }
 
 @keyframes scanDown {
@@ -1564,7 +1566,7 @@ body {
 <!-- LOGIN SCREEN -->
 <div id="loginOverlay" style="position:fixed;top:0;left:0;right:0;bottom:0;z-index:99999;background:#040810;display:flex;align-items:center;justify-content:center;flex-direction:column;">
     <div style="position:absolute;top:0;left:0;right:0;bottom:0;background-image:linear-gradient(rgba(0,212,255,0.04) 1px,transparent 1px),linear-gradient(90deg,rgba(0,212,255,0.04) 1px,transparent 1px);background-size:40px 40px;pointer-events:none;"></div>
-    <div style="position:absolute;top:15px;left:50%;transform:translateX(-50%);font-family:'Orbitron',monospace;font-size:10px;letter-spacing:3px;color:#ff0040;pointer-events:none;">CLASSIFIED // RESTRICTED ACCESS</div>
+    <div style="position:absolute;top:15px;left:50%;transform:translateX(-50%);font-family:'Orbitron',monospace;font-size:8px;letter-spacing:2px;color:#ff0040;pointer-events:none;white-space:nowrap;">CLASSIFIED // RESTRICTED ACCESS</div>
     <div style="position:relative;z-index:10;text-align:center;padding:50px 60px;border:1px solid #0f3460;border-radius:8px;background:rgba(8,16,35,0.9);box-shadow:0 0 60px rgba(0,212,255,0.08);min-width:340px;">
         <div style="width:80px;height:80px;margin:0 auto 25px;display:flex;align-items:center;justify-content:center;">
             <svg viewBox="0 0 100 120" width="80" height="96" xmlns="http://www.w3.org/2000/svg">
@@ -1584,8 +1586,8 @@ body {
         <div style="font-family:'Share Tech Mono',monospace;font-size:12px;color:#7088a0;letter-spacing:3px;margin-bottom:35px;">פלטפורמת מודיעין גזרתית</div>
         <div style="margin-bottom:20px;text-align:right;">
             <label style="display:block;font-family:'Share Tech Mono',monospace;font-size:10px;color:#3a4a5c;letter-spacing:2px;margin-bottom:6px;">קוד גישה</label>
-            <input id="loginInput" type="password" autocomplete="new-password" maxlength="10" placeholder="••••"
-                style="width:100%;padding:12px 16px;background:rgba(0,0,0,0.4);border:1px solid #0f3460;border-radius:4px;color:#00d4ff;font-family:'Share Tech Mono',monospace;font-size:18px;letter-spacing:8px;text-align:center;outline:none;box-sizing:border-box;"
+            <input id="loginInput" type="text" autocomplete="off" data-lpignore="true" data-1p-ignore maxlength="10" placeholder="••••"
+                style="width:100%;padding:12px 16px;background:rgba(0,0,0,0.4);border:1px solid #0f3460;border-radius:4px;color:#00d4ff;font-family:'Share Tech Mono',monospace;font-size:18px;letter-spacing:8px;text-align:center;outline:none;box-sizing:border-box;-webkit-text-security:disc;-moz-text-security:disc;text-security:disc;"
                 onfocus="this.style.borderColor='#00d4ff';this.style.boxShadow='0 0 20px rgba(0,212,255,0.15)'"
                 onblur="this.style.borderColor='#0f3460';this.style.boxShadow='none'">
         </div>
