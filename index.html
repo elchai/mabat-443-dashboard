@@ -1818,7 +1818,7 @@ body {
         <button onclick="doLogin()" style="width:100%;padding:12px;background:linear-gradient(135deg,rgba(0,212,255,0.15),rgba(68,136,255,0.15));border:1px solid rgba(0,212,255,0.3);border-radius:4px;color:#00d4ff;font-family:'Orbitron',monospace;font-size:14px;letter-spacing:4px;cursor:pointer;">כניסה למערכת</button>
         <div id="loginError" style="font-family:'Share Tech Mono',monospace;font-size:11px;color:#ff0040;height:16px;margin-top:10px;letter-spacing:1px;"></div>
     </div>
-    <div style="position:absolute;bottom:15px;font-family:'Share Tech Mono',monospace;font-size:9px;color:#3a4a5c;pointer-events:none;">SECTOR DEFENSE INTELLIGENCE PLATFORM v2.0</div>
+    <div style="position:absolute;bottom:15px;font-family:'Heebo',sans-serif;font-size:11px;color:#6880a0;pointer-events:auto;"><a href="https://wa.me/972542012000" target="_blank" style="color:#00ff88;text-decoration:none;">נבנה ע"י אלחי פיין | 054-201-2000</a></div>
 </div>
 <script>
 function doLogin() {
@@ -2202,23 +2202,42 @@ let isFirstLoad = true;
 let mapIsFullscreen = false;
 let showAnarchists = true;
 let checkedAlerts = new Set(JSON.parse(localStorage.getItem('mabat443-checked') || '[]'));
-let journalNotes = JSON.parse(localStorage.getItem('mabat443-notes') || '{}');
+let journalNotes = {};
 
-function saveJournalNote(itemId) {
+// Load journal notes from Firebase
+async function loadJournalNotes() {
+    try {
+        const res = await fetch(`${FIREBASE_URL}/journal-notes.json`);
+        const data = await res.json();
+        if (data && !data.error) journalNotes = data;
+    } catch (e) {
+        console.error('Error loading journal notes:', e);
+    }
+}
+
+async function saveJournalNote(itemId) {
     const form = document.getElementById('note-form-' + itemId);
     if (!form) return;
     const reporter = form.querySelector('[name="reporter"]').value.trim();
     const details = form.querySelector('[name="details"]').value.trim();
     const handling = form.querySelector('[name="handling"]').value.trim();
     if (!reporter && !details && !handling) return;
-    journalNotes[itemId] = { reporter, details, handling, savedAt: Date.now() };
-    localStorage.setItem('mabat443-notes', JSON.stringify(journalNotes));
+    const note = { reporter, details, handling, savedAt: Date.now() };
+    journalNotes[itemId] = note;
+    try {
+        await fetch(`${FIREBASE_URL}/journal-notes/${itemId}.json`, {
+            method: 'PUT',
+            body: JSON.stringify(note)
+        });
+    } catch (e) { console.error('Error saving note:', e); }
     renderHistory();
 }
 
-function deleteJournalNote(itemId) {
+async function deleteJournalNote(itemId) {
     delete journalNotes[itemId];
-    localStorage.setItem('mabat443-notes', JSON.stringify(journalNotes));
+    try {
+        await fetch(`${FIREBASE_URL}/journal-notes/${itemId}.json`, { method: 'DELETE' });
+    } catch (e) { console.error('Error deleting note:', e); }
     renderHistory();
 }
 
@@ -2911,7 +2930,7 @@ function toggleHistory() {
     const overlay = document.getElementById('historyOverlay');
     overlay.classList.toggle('visible');
     if (overlay.classList.contains('visible')) {
-        fetchHistory();
+        loadJournalNotes().then(() => fetchHistory());
     }
 }
 
@@ -3387,6 +3406,7 @@ document.addEventListener('DOMContentLoaded', () => {
     } catch(e) { console.error('Map init error:', e); }
 
     try { fetchData(); } catch(e) { console.error('Fetch init error:', e); }
+    try { loadJournalNotes(); } catch(e) { console.error('Notes init error:', e); }
     try { startRefreshCycle(); } catch(e) { console.error('Refresh init error:', e); }
 });
 </script>
