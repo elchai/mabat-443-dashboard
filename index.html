@@ -2220,9 +2220,8 @@ async function saveJournalNote(itemId) {
     if (!form) return;
     const reporter = form.querySelector('[name="reporter"]').value.trim();
     const details = form.querySelector('[name="details"]').value.trim();
-    const handling = form.querySelector('[name="handling"]').value.trim();
-    if (!reporter && !details && !handling) return;
-    const note = { reporter, details, handling, savedAt: Date.now() };
+    if (!reporter && !details) return;
+    const note = { reporter, details, savedAt: Date.now() };
     journalNotes[itemId] = note;
     try {
         await fetch(`${FIREBASE_URL}/journal-notes/${itemId}.json`, {
@@ -3030,7 +3029,6 @@ function renderHistory() {
                     ? `<div class="journal-saved-note">
                         <div><strong>מדווח:</strong> ${escapeHtml(note.reporter || '-')}</div>
                         ${note.details ? '<div><strong>פרטים:</strong> ' + escapeHtml(note.details) + '</div>' : ''}
-                        ${note.handling ? '<div><strong>טיפול:</strong> ' + escapeHtml(note.handling) + '</div>' : ''}
                         <div style="display:flex;gap:6px;margin-top:4px;">
                             <button class="journal-note-btn" onclick="toggleNoteForm('${noteId}')">ערוך</button>
                             <button class="journal-note-btn" style="color:var(--red);border-color:var(--red-dim);" onclick="deleteJournalNote('${noteId}')">מחק</button>
@@ -3052,8 +3050,7 @@ function renderHistory() {
                         ${noteHtml}
                         <div class="journal-note-form" id="note-form-${noteId}" style="display:none;">
                             <input name="reporter" placeholder="שם המדווח" value="${note ? escapeHtml(note.reporter || '') : ''}">
-                            <textarea name="details" placeholder="פרטים">${note ? escapeHtml(note.details || '') : ''}</textarea>
-                            <input name="handling" placeholder="אופן הטיפול" value="${note ? escapeHtml(note.handling || '') : ''}">
+                            <textarea name="details" placeholder="פרטים ואופן טיפול">${note ? escapeHtml(note.details || '') : ''}</textarea>
                             <div class="journal-note-actions">
                                 <button class="journal-note-cancel" onclick="event.stopPropagation();toggleNoteForm('${noteId}')">ביטול</button>
                                 <button class="journal-note-save" onclick="event.stopPropagation();saveJournalNote('${noteId}')">שמור</button>
