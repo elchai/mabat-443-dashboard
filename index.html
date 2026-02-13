@@ -709,6 +709,7 @@ body {
 .filter-chip.active.yellow { border-color: var(--yellow); color: var(--yellow); background: var(--yellow-dim); }
 .filter-chip.active.blue { border-color: var(--blue); color: var(--blue); background: rgba(68,136,255,0.12); }
 .filter-chip.active.purple { border-color: var(--purple); color: var(--purple); background: var(--purple-dim); }
+.filter-chip.active.green { border-color: var(--green); color: var(--green); background: var(--green-dim); }
 
 /* Anarchist toggle */
 .toggle-container {
@@ -839,6 +840,7 @@ body {
 .alert-urgency.urgency-2 { background: var(--blue); box-shadow: 0 0 6px var(--blue); }
 .alert-urgency.urgency-1 { background: #666; }
 .alert-urgency.urgency-anarchist { background: var(--purple); box-shadow: 0 0 8px var(--purple); }
+.alert-urgency.urgency-field { background: var(--green); box-shadow: 0 0 8px var(--green); }
 
 .alert-content { flex: 1; min-width: 0; }
 
@@ -1239,6 +1241,121 @@ body {
 .journal-saved-note strong {
     color: var(--cyan);
     font-weight: 500;
+}
+
+/* ═══════ FIELD REPORT FORM ═══════ */
+.report-overlay {
+    position: fixed;
+    top: 0; left: 0; right: 0; bottom: 0;
+    z-index: 8000;
+    background: rgba(0, 0, 0, 0.7);
+    display: none;
+    align-items: center;
+    justify-content: center;
+    backdrop-filter: blur(4px);
+}
+.report-overlay.visible { display: flex; }
+.report-form {
+    background: var(--bg-card);
+    border: 1px solid var(--border-glow);
+    border-radius: 8px;
+    padding: 25px;
+    width: 90%;
+    max-width: 420px;
+    direction: rtl;
+    box-shadow: 0 0 40px rgba(0, 212, 255, 0.15);
+}
+.report-form-title {
+    font-family: var(--font-he);
+    font-size: 16px;
+    font-weight: 700;
+    color: var(--green);
+    margin-bottom: 15px;
+    text-align: center;
+}
+.report-field {
+    margin-bottom: 10px;
+}
+.report-field label {
+    display: block;
+    font-family: var(--font-he);
+    font-size: 11px;
+    font-weight: 500;
+    color: var(--text-secondary);
+    margin-bottom: 4px;
+}
+.report-field input,
+.report-field textarea,
+.report-field select {
+    width: 100%;
+    padding: 8px 10px;
+    background: rgba(0, 0, 0, 0.4);
+    border: 1px solid var(--border-primary);
+    border-radius: 4px;
+    color: var(--text-primary);
+    font-family: var(--font-he);
+    font-size: 12px;
+    outline: none;
+    direction: rtl;
+    box-sizing: border-box;
+}
+.report-field input:focus,
+.report-field textarea:focus,
+.report-field select:focus {
+    border-color: var(--green);
+    box-shadow: 0 0 8px var(--green-dim);
+}
+.report-field textarea { resize: vertical; min-height: 60px; }
+.report-field select { cursor: pointer; }
+.report-field select option { background: #0a1020; color: var(--text-primary); }
+.report-urgency-row {
+    display: flex;
+    gap: 8px;
+}
+.report-urgency-btn {
+    flex: 1;
+    padding: 6px;
+    border-radius: 4px;
+    border: 1px solid var(--border-primary);
+    background: none;
+    color: var(--text-dim);
+    font-family: var(--font-he);
+    font-size: 11px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+.report-urgency-btn.selected { font-weight: 700; }
+.report-urgency-btn[data-urg="5"].selected { border-color: var(--red); color: var(--red); background: var(--red-dim); }
+.report-urgency-btn[data-urg="4"].selected { border-color: var(--orange); color: var(--orange); background: var(--orange-dim); }
+.report-urgency-btn[data-urg="3"].selected { border-color: var(--yellow); color: var(--yellow); background: var(--yellow-dim); }
+.report-urgency-btn[data-urg="2"].selected { border-color: var(--blue); color: var(--blue); background: rgba(68,136,255,0.15); }
+.report-actions {
+    display: flex;
+    gap: 10px;
+    margin-top: 15px;
+}
+.report-submit {
+    flex: 1;
+    padding: 10px;
+    background: rgba(0, 255, 136, 0.12);
+    border: 1px solid var(--green);
+    border-radius: 4px;
+    color: var(--green);
+    font-family: var(--font-he);
+    font-size: 13px;
+    font-weight: 700;
+    cursor: pointer;
+}
+.report-cancel {
+    padding: 10px 20px;
+    background: none;
+    border: 1px solid var(--border-primary);
+    border-radius: 4px;
+    color: var(--text-dim);
+    font-family: var(--font-he);
+    font-size: 13px;
+    cursor: pointer;
 }
 
 .history-stat-bar {
@@ -1900,6 +2017,10 @@ document.getElementById('loginInput').addEventListener('keydown', function(e) {
                 <span class="btn-icon" id="alertCount" style="background:var(--orange);color:#000;border-radius:50%;width:20px;height:20px;display:inline-flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;">0</span>
                 <span>יומן מבצעים</span>
             </button>
+            <button class="header-btn" onclick="toggleReportForm()" style="color:var(--green);border-color:var(--green-dim);">
+                <span class="btn-icon">&#x2795;</span>
+                <span>דיווח שטח</span>
+            </button>
             <button class="header-btn" onclick="loadDemoData()" style="color:var(--yellow);border-color:var(--yellow-dim);">
                 <span class="btn-icon">&#9881;</span>
                 <span>הדגמה</span>
@@ -2027,6 +2148,7 @@ document.getElementById('loginInput').addEventListener('keydown', function(e) {
             <button class="filter-chip yellow" data-filter="3" onclick="setFilter(3, this)">בינוני</button>
             <button class="filter-chip blue" data-filter="2" onclick="setFilter(2, this)">חלש</button>
             <button class="filter-chip purple" data-filter="anarchist" onclick="setFilter('anarchist', this)">אנרכיסטים</button>
+            <button class="filter-chip green" data-filter="field" onclick="setFilter('field', this)">שטח</button>
             <input type="text" class="search-input" id="searchInput" placeholder="חיפוש..." oninput="applyFilters()">
         </div>
         <div class="timeline-graph">
@@ -2059,6 +2181,44 @@ document.getElementById('loginInput').addEventListener('keydown', function(e) {
         </div>
     </div>
 
+</div>
+
+<!-- FIELD REPORT OVERLAY -->
+<div class="report-overlay" id="reportOverlay" onclick="if(event.target===this)toggleReportForm()">
+    <div class="report-form">
+        <div class="report-form-title">➕ דיווח שטח חדש</div>
+        <div class="report-field">
+            <label>כותרת</label>
+            <input type="text" id="reportTitle" placeholder="תיאור קצר של האירוע">
+        </div>
+        <div class="report-field">
+            <label>פרטים</label>
+            <textarea id="reportDetails" placeholder="פרטים נוספים ואופן טיפול..."></textarea>
+        </div>
+        <div class="report-field">
+            <label>רמת דחיפות</label>
+            <div class="report-urgency-row">
+                <button class="report-urgency-btn" data-urg="5" onclick="selectReportUrgency(this)">ודאי</button>
+                <button class="report-urgency-btn" data-urg="4" onclick="selectReportUrgency(this)">חזק</button>
+                <button class="report-urgency-btn selected" data-urg="3" onclick="selectReportUrgency(this)">בינוני</button>
+                <button class="report-urgency-btn" data-urg="2" onclick="selectReportUrgency(this)">חלש</button>
+            </div>
+        </div>
+        <div class="report-field">
+            <label>מיקום</label>
+            <select id="reportLocation">
+                <option value="">-- בחר מיקום --</option>
+            </select>
+        </div>
+        <div class="report-field">
+            <label>שם מדווח</label>
+            <input type="text" id="reportReporter" placeholder="שם המדווח">
+        </div>
+        <div class="report-actions">
+            <button class="report-submit" onclick="submitFieldReport()">שלח דיווח</button>
+            <button class="report-cancel" onclick="toggleReportForm()">ביטול</button>
+        </div>
+    </div>
 </div>
 
 <!-- HISTORY OVERLAY -->
@@ -2244,6 +2404,100 @@ async function deleteJournalNote(itemId) {
 function toggleNoteForm(itemId) {
     const form = document.getElementById('note-form-' + itemId);
     if (form) { form.style.display = form.style.display === 'none' ? 'flex' : 'none'; }
+}
+
+// ═══════ FIELD REPORT ═══════
+let reportUrgency = 3;
+
+function toggleReportForm() {
+    const overlay = document.getElementById('reportOverlay');
+    overlay.classList.toggle('visible');
+    if (overlay.classList.contains('visible')) {
+        populateLocationDropdown();
+    }
+}
+
+function populateLocationDropdown() {
+    const sel = document.getElementById('reportLocation');
+    if (sel.options.length > 1) return; // already populated
+    const allLocs = [...KEY_VILLAGES, ...P1_LOCATIONS, ...P2_LOCATIONS, ...P3_LOCATIONS, ...ISRAELI_LOCATIONS];
+    const seen = new Set();
+    allLocs.forEach(loc => {
+        if (seen.has(loc.he)) return;
+        seen.add(loc.he);
+        const opt = document.createElement('option');
+        opt.value = JSON.stringify({ he: loc.he, lat: loc.lat, lng: loc.lng });
+        opt.textContent = loc.he;
+        sel.appendChild(opt);
+    });
+}
+
+function selectReportUrgency(btn) {
+    document.querySelectorAll('.report-urgency-btn').forEach(b => b.classList.remove('selected'));
+    btn.classList.add('selected');
+    reportUrgency = parseInt(btn.dataset.urg);
+}
+
+async function submitFieldReport() {
+    const title = document.getElementById('reportTitle').value.trim();
+    const details = document.getElementById('reportDetails').value.trim();
+    const locVal = document.getElementById('reportLocation').value;
+    const reporter = document.getElementById('reportReporter').value.trim();
+
+    if (!title) { alert('נא להזין כותרת'); return; }
+
+    let locationHe = '';
+    let coordinates = null;
+    if (locVal) {
+        const loc = JSON.parse(locVal);
+        locationHe = loc.he;
+        coordinates = { lat: loc.lat, lng: loc.lng };
+    }
+
+    const report = {
+        title: title,
+        fullText: details,
+        snippet: details,
+        source: 'דיווח שטח',
+        sourceUrl: '',
+        urgencyScore: reportUrgency,
+        urgency: reportUrgency,
+        locationHe: locationHe,
+        coordinates: coordinates,
+        publishedAt: Date.now(),
+        fetchedAt: Date.now(),
+        timestamp: Date.now(),
+        isFieldReport: true,
+        reporter: reporter || 'לא צוין'
+    };
+
+    const reportId = 'field_' + Date.now();
+
+    try {
+        await fetch(`${FIREBASE_URL}/auto-news/${reportId}.json`, {
+            method: 'PUT',
+            body: JSON.stringify(report)
+        });
+
+        // Add to local data immediately
+        newsData[reportId] = report;
+        allNewsData[reportId] = report;
+        renderAll();
+
+        // Reset form
+        document.getElementById('reportTitle').value = '';
+        document.getElementById('reportDetails').value = '';
+        document.getElementById('reportLocation').value = '';
+        document.getElementById('reportReporter').value = '';
+        reportUrgency = 3;
+        document.querySelectorAll('.report-urgency-btn').forEach(b => b.classList.remove('selected'));
+        document.querySelector('.report-urgency-btn[data-urg="3"]').classList.add('selected');
+
+        toggleReportForm();
+    } catch (e) {
+        console.error('Error submitting field report:', e);
+        alert('שגיאה בשליחת הדיווח');
+    }
 }
 
 // Anarchist/activist keywords
@@ -2650,6 +2904,8 @@ function renderAlerts() {
 
     if (activeFilter === 'anarchist') {
         items = items.filter(i => i._isAnarchist);
+    } else if (activeFilter === 'field') {
+        items = items.filter(i => i.isFieldReport);
     } else if (activeFilter !== 'all') {
         items = items.filter(i => i.urgency === activeFilter);
     }
@@ -2701,7 +2957,7 @@ function renderAlerts() {
                     ${isChecked ? '✓' : ''}
                 </div>
                 <span class="alert-time">${formatTimeWithDate(item.timestamp)}</span>
-                <div class="alert-urgency ${item._isAnarchist ? 'urgency-anarchist' : 'urgency-' + (item.urgency || 1)}"></div>
+                <div class="alert-urgency ${item.isFieldReport ? 'urgency-field' : item._isAnarchist ? 'urgency-anarchist' : 'urgency-' + (item.urgency || 1)}"></div>
                 <div class="alert-content">
                     <div class="alert-title">${escapeHtml(item.title || 'N/A')}</div>
                     ${locationTag}
