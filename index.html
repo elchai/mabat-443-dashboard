@@ -1333,6 +1333,70 @@ body {
 }
 .dark-tooltip::before { border-top-color: #0f3460 !important; }
 
+/* ═══════ MAP LEGEND ═══════ */
+.map-legend {
+    position: absolute;
+    bottom: 10px;
+    right: 10px;
+    z-index: 1001;
+    background: rgba(4, 8, 16, 0.9);
+    border: 1px solid var(--border-primary);
+    border-radius: 4px;
+    padding: 8px 12px;
+    font-family: var(--font-mono);
+    font-size: 10px;
+    direction: rtl;
+    pointer-events: auto;
+    max-width: 140px;
+}
+.legend-title {
+    font-family: var(--font-display);
+    font-size: 9px;
+    color: var(--cyan);
+    letter-spacing: 2px;
+    margin-bottom: 6px;
+    text-align: center;
+}
+.legend-subtitle {
+    font-size: 9px;
+    color: var(--text-secondary);
+    margin-bottom: 3px;
+}
+.legend-item {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding: 2px 0;
+    color: var(--text-primary);
+}
+.legend-circle {
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    flex-shrink: 0;
+}
+.legend-ring {
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    border: 2px solid;
+    background: transparent;
+    flex-shrink: 0;
+}
+.legend-divider {
+    height: 1px;
+    background: var(--border-primary);
+    margin: 5px 0;
+}
+
+.threat-ring-pulse {
+    animation: ringPulse 2s ease-in-out infinite;
+}
+@keyframes ringPulse {
+    0%, 100% { opacity: 0.7; }
+    50% { opacity: 0.3; }
+}
+
 .leaflet-popup-content-wrapper {
     background: rgba(8, 16, 35, 0.95) !important;
     color: #e0e8f0 !important;
@@ -1776,6 +1840,18 @@ document.getElementById('loginInput').addEventListener('keydown', function(e) {
         <div class="map-coords">31.870N  35.120E</div>
         <div class="map-label">גזרה 443</div>
         <button class="map-btn" onclick="toggleMapFullscreen()" id="mapBtn" title="F = Fullscreen">&#x26F6; הרחב</button>
+        <div class="map-legend" id="mapLegend">
+            <div class="legend-title">מקרא</div>
+            <div class="legend-item"><span class="legend-circle" style="background:#ff8800;"></span> כפר ערבי</div>
+            <div class="legend-item"><span class="legend-circle" style="background:#4488ff;"></span> ישוב ישראלי</div>
+            <div class="legend-item"><span class="legend-circle" style="background:#00d4ff;"></span> ציר / מחסום</div>
+            <div class="legend-divider"></div>
+            <div class="legend-subtitle">טבעת איום:</div>
+            <div class="legend-item"><span class="legend-ring" style="border-color:#ff0040;"></span> ודאי</div>
+            <div class="legend-item"><span class="legend-ring" style="border-color:#ff8800;"></span> חזק</div>
+            <div class="legend-item"><span class="legend-ring" style="border-color:#ffd000;"></span> בינוני</div>
+            <div class="legend-item"><span class="legend-ring" style="border-color:#4488ff;"></span> חלש</div>
+        </div>
     </div>
 
     <!-- RIGHT PANEL - AI SUMMARY -->
@@ -1934,7 +2010,6 @@ const P1_LOCATIONS = [
     { name: "Beit Ur al-Tahta", he: "בית עור א-תחתא", lat: 31.870, lng: 35.120 },
     { name: "Beit Ur al-Fauqa", he: "בית עור אל-פוקא", lat: 31.878, lng: 35.130 },
     { name: "Khirbet al-Misbah", he: "ח'רבת אל-מיסבאח", lat: 31.852, lng: 35.098 },
-    { name: "Beit Horon", he: "בית חורון", lat: 31.860, lng: 35.148 },
     { name: "Midya", he: "מידיה", lat: 31.838, lng: 35.110 },
     { name: "Budrus", he: "בית דורס (בן דרוס)", lat: 31.825, lng: 35.095 },
     { name: "Qibya", he: "קיבא", lat: 31.810, lng: 35.090 },
@@ -1954,11 +2029,15 @@ const P2_LOCATIONS = [
 ];
 
 const P3_LOCATIONS = [
-    { name: "Route 443", he: "כביש 443", lat: 31.870, lng: 35.120 },
-    { name: "Route 446", he: "כביש 446", lat: 31.920, lng: 35.070 },
-    { name: "Maccabim CP", he: "מחסום מכבים", lat: 31.850, lng: 35.050 },
+    { name: "Route 443", he: "כביש 443", lat: 31.870, lng: 35.120, type: 'route' },
+    { name: "Route 446", he: "כביש 446", lat: 31.920, lng: 35.070, type: 'route' },
+    { name: "Maccabim CP", he: "מחסום מכבים", lat: 31.850, lng: 35.050, type: 'checkpoint' },
+];
+
+const ISRAELI_LOCATIONS = [
     { name: "Modi'in Illit", he: "מודיעין עילית", lat: 31.930, lng: 35.050 },
     { name: "Givat Zeev", he: "גבעת זאב", lat: 31.860, lng: 35.170 },
+    { name: "Beit Horon", he: "בית חורון", lat: 31.860, lng: 35.148 },
 ];
 
 const מקורות = [
@@ -2064,33 +2143,44 @@ function initMap() {
         fillOpacity: 0.3, weight: 2
     }).addTo(map);
 
+    // Arab villages - orange
     P1_LOCATIONS.forEach(loc => {
         L.circleMarker([loc.lat, loc.lng], {
-            radius: 6, color: '#ff0040', fillColor: '#ff0040', fillOpacity: 0.4, weight: 1.5
-        }).bindTooltip(`<b>P1</b> ${loc.he}`, { className: 'dark-tooltip' })
-          .bindPopup(buildLocationPopup(loc, 'P1', '#ff0040'), { className: 'dark-tooltip', maxWidth: 280 })
+            radius: 6, color: '#ff8800', fillColor: '#ff8800', fillOpacity: 0.4, weight: 1.5
+        }).bindTooltip(loc.he, { className: 'dark-tooltip' })
+          .bindPopup(buildLocationPopup(loc, 'P1', '#ff8800'), { className: 'dark-tooltip', maxWidth: 280 })
           .addTo(map);
     });
 
     P2_LOCATIONS.forEach(loc => {
         L.circleMarker([loc.lat, loc.lng], {
             radius: 5, color: '#ff8800', fillColor: '#ff8800', fillOpacity: 0.3, weight: 1
-        }).bindTooltip(`<b>P2</b> ${loc.he}`, { className: 'dark-tooltip' })
+        }).bindTooltip(loc.he, { className: 'dark-tooltip' })
           .bindPopup(buildLocationPopup(loc, 'P2', '#ff8800'), { className: 'dark-tooltip', maxWidth: 280 })
           .addTo(map);
     });
 
+    // Routes & checkpoints - cyan dashed
     P3_LOCATIONS.forEach(loc => {
         L.circleMarker([loc.lat, loc.lng], {
-            radius: 4, color: '#4488ff', fillColor: '#4488ff', fillOpacity: 0.3, weight: 1
-        }).bindTooltip(`<b>P3</b> ${loc.he}`, { className: 'dark-tooltip' })
-          .bindPopup(buildLocationPopup(loc, 'P3', '#4488ff'), { className: 'dark-tooltip', maxWidth: 280 })
+            radius: 4, color: '#00d4ff', fillColor: '#00d4ff', fillOpacity: 0.3, weight: 1
+        }).bindTooltip(loc.he, { className: 'dark-tooltip' })
+          .bindPopup(buildLocationPopup(loc, 'P3', '#00d4ff'), { className: 'dark-tooltip', maxWidth: 280 })
           .addTo(map);
     });
 
-    // KEY VILLAGES - larger highlighted markers with sector history popups
+    // Israeli settlements - blue
+    ISRAELI_LOCATIONS.forEach(loc => {
+        L.circleMarker([loc.lat, loc.lng], {
+            radius: 6, color: '#4488ff', fillColor: '#4488ff', fillOpacity: 0.4, weight: 1.5
+        }).bindTooltip(loc.he, { className: 'dark-tooltip' })
+          .bindPopup(buildLocationPopup(loc, 'ישוב', '#4488ff'), { className: 'dark-tooltip', maxWidth: 280 })
+          .addTo(map);
+    });
+
+    // KEY VILLAGES - larger highlighted markers with sector history popups (all orange = Arab villages)
     KEY_VILLAGES.forEach(loc => {
-        const pColor = loc.priority === 'P1' ? '#ff0040' : loc.priority === 'P2' ? '#ff8800' : '#4488ff';
+        const pColor = '#ff8800';
         const marker = L.circleMarker([loc.lat, loc.lng], {
             radius: 8,
             color: pColor,
@@ -2099,7 +2189,7 @@ function initMap() {
             weight: 2
         }).addTo(map);
 
-        marker.bindTooltip(`<b>${loc.priority}</b> ${loc.he}`, { className: 'dark-tooltip' });
+        marker.bindTooltip(loc.he, { className: 'dark-tooltip' });
 
         // Rich popup on click with sector history + live data
         marker.on('click', function() {
@@ -2182,6 +2272,37 @@ function toggleMapFullscreen() {
 function updateMapMarkers(news) {
     alertMarkers.forEach(m => map.removeLayer(m));
     alertMarkers = [];
+
+    // Build threat level per village (highest urgency near each village)
+    const allVillages = [...KEY_VILLAGES, ...P1_LOCATIONS.map(l => ({...l, he: l.he})), ...P2_LOCATIONS.map(l => ({...l, he: l.he}))];
+    const villageThreat = {};
+    Object.values(news).forEach(item => {
+        if (!item.coordinates) return;
+        allVillages.forEach(v => {
+            const dlat = Math.abs((item.coordinates.lat || 0) - v.lat);
+            const dlng = Math.abs((item.coordinates.lon || item.coordinates.lng || 0) - v.lng);
+            if (dlat < 0.015 && dlng < 0.015) {
+                const key = `${v.lat},${v.lng}`;
+                if (!villageThreat[key] || item.urgency > villageThreat[key]) {
+                    villageThreat[key] = item.urgency;
+                }
+            }
+        });
+    });
+
+    // Add threat rings around villages
+    Object.entries(villageThreat).forEach(([key, urgency]) => {
+        const [lat, lng] = key.split(',').map(Number);
+        const threatColors = { 5: '#ff0040', 4: '#ff8800', 3: '#ffd000', 2: '#4488ff', 1: '#666' };
+        const ringColor = threatColors[urgency] || '#666';
+        const ring = L.circleMarker([lat, lng], {
+            radius: 16, color: ringColor, fillColor: 'transparent',
+            fillOpacity: 0, weight: 2.5, opacity: 0.7,
+            dashArray: urgency >= 4 ? '' : '6,4',
+            className: urgency >= 4 ? 'threat-ring-pulse' : ''
+        }).addTo(map);
+        alertMarkers.push(ring);
+    });
 
     Object.values(news).forEach(item => {
         if (!item.coordinates) return;
@@ -2804,6 +2925,8 @@ function startRefreshCycle() {
 
 // ═══════ DEMO DATA ═══════
 let isDemoMode = false;
+let demoTimer = null;
+let demoCountdown = 0;
 let realNewsData = {};
 let realAllNewsData = {};
 let realSummaryData = null;
@@ -2814,17 +2937,7 @@ function loadDemoData() {
 
     // Toggle off
     if (isDemoMode) {
-        isDemoMode = false;
-        newsData = realNewsData;
-        allNewsData = realAllNewsData;
-        summaryData = realSummaryData;
-        metaData = realMetaData;
-        renderAll();
-        if (btn) {
-            btn.style.color = 'var(--yellow)';
-            btn.style.borderColor = 'var(--yellow-dim)';
-            btn.innerHTML = '<span class="btn-icon">&#9881;</span><span>הדגמה</span>';
-        }
+        exitDemoMode();
         return;
     }
 
@@ -2982,11 +3095,39 @@ function loadDemoData() {
 
     renderAll();
 
-    // Flash effect
+    // Start 60s countdown
+    demoCountdown = 60;
+    updateDemoButton();
+    demoTimer = setInterval(() => {
+        demoCountdown--;
+        updateDemoButton();
+        if (demoCountdown <= 0) {
+            exitDemoMode();
+        }
+    }, 1000);
+}
+
+function updateDemoButton() {
+    const btn = document.querySelector('[onclick="loadDemoData()"]');
+    if (!btn) return;
+    btn.style.color = 'var(--green)';
+    btn.style.borderColor = 'var(--green)';
+    btn.innerHTML = `<span class="btn-icon">&#10003;</span><span>הדגמה פעילה ${demoCountdown}s</span>`;
+}
+
+function exitDemoMode() {
+    const btn = document.querySelector('[onclick="loadDemoData()"]');
+    isDemoMode = false;
+    if (demoTimer) { clearInterval(demoTimer); demoTimer = null; }
+    newsData = realNewsData;
+    allNewsData = realAllNewsData;
+    summaryData = realSummaryData;
+    metaData = realMetaData;
+    renderAll();
     if (btn) {
-        btn.style.color = 'var(--green)';
-        btn.style.borderColor = 'var(--green)';
-        btn.innerHTML = '<span class="btn-icon">&#10003;</span><span>הדגמה פעילה</span>';
+        btn.style.color = 'var(--yellow)';
+        btn.style.borderColor = 'var(--yellow-dim)';
+        btn.innerHTML = '<span class="btn-icon">&#9881;</span><span>הדגמה</span>';
     }
 }
 
