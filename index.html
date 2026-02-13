@@ -2688,9 +2688,8 @@ function renderAlerts() {
                     ${locationTag}
                 </div>
             </div>
-            <div class="alert-full-text" style="display:none;">${escapeHtml(item.fullText || item.snippet || '')}</div>
+            ${(item.fullText || item.snippet) ? '<div class="alert-full-text" style="display:none;">' + escapeHtml(item.fullText || item.snippet) + '</div>' : ''}
             <div class="alert-meta-row" style="display:none;">
-                <span>${formatDateTime(item.timestamp)}</span>
                 ${sourceUrl ? '<a href="' + escapeHtml(sourceUrl) + '" target="_blank" onclick="event.stopPropagation();" style="color:#00d4ff;text-decoration:none;cursor:pointer;">📡 הצג מקור: ' + escapeHtml(item.source || 'טלגרם') + '</a>' : '<span style="color:var(--text-dim);">📡 ' + escapeHtml(item.source || 'N/A') + '</span>'}
                 ${item.matchedKeywords ? '<span>KW: ' + escapeHtml(item.matchedKeywords.join(', ')) + '</span>' : ''}
             </div>
@@ -2707,18 +2706,20 @@ function toggleAlertExpand(el) {
     document.querySelectorAll('.alert-item.expanded').forEach(item => {
         if (item !== el) {
             item.classList.remove('expanded');
-            item.querySelector('.alert-full-text').style.display = 'none';
-            item.querySelector('.alert-meta-row').style.display = 'none';
+            const ft = item.querySelector('.alert-full-text');
+            if (ft) ft.style.display = 'none';
+            const mr = item.querySelector('.alert-meta-row');
+            if (mr) mr.style.display = 'none';
         }
     });
 
     if (isExpanded) {
         el.classList.remove('expanded');
-        fullText.style.display = 'none';
+        if (fullText) fullText.style.display = 'none';
         metaRow.style.display = 'none';
     } else {
         el.classList.add('expanded');
-        fullText.style.display = 'block';
+        if (fullText) fullText.style.display = 'block';
         metaRow.style.display = 'flex';
     }
 }
