@@ -829,18 +829,45 @@ body {
     font-weight: 600;
     color: var(--text-primary);
     margin-bottom: 3px;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
     overflow: hidden;
-    text-overflow: ellipsis;
-    white-space: nowrap;
+    line-height: 1.4;
 }
 
-.alert-snippet {
-    font-family: var(--font-mono);
-    font-size: 10px;
-    color: var(--text-secondary);
-    overflow: hidden;
-    text-overflow: ellipsis;
-    white-space: nowrap;
+/* ═══════ ALERT CHECKMARK ═══════ */
+.alert-check {
+    width: 22px;
+    height: 22px;
+    min-width: 22px;
+    border: 1.5px solid var(--border-primary);
+    border-radius: 4px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    font-size: 14px;
+    color: transparent;
+    transition: all 0.2s ease;
+    margin-top: 2px;
+    flex-shrink: 0;
+}
+.alert-check:hover {
+    border-color: var(--cyan);
+    background: rgba(0, 212, 255, 0.05);
+}
+.alert-check.checked {
+    border-color: var(--green);
+    color: var(--green);
+    background: rgba(0, 255, 136, 0.1);
+}
+.alert-item.alert-checked {
+    opacity: 0.5;
+}
+.alert-item.alert-checked .alert-title {
+    text-decoration: line-through;
+    text-decoration-color: var(--text-dim);
 }
 
 .alert-full-text {
@@ -1255,8 +1282,7 @@ body {
     .timeline-bars { height: 25px; }
 
     .alert-item { padding: 8px 10px; gap: 8px; }
-    .alert-title { font-size: 12px; white-space: normal; overflow: visible; text-overflow: unset; }
-    .alert-snippet { font-size: 10px; white-space: normal; overflow: visible; text-overflow: unset; line-height: 1.5; }
+    .alert-title { font-size: 12px; -webkit-line-clamp: 2; }
     .alert-source { font-size: 8px; padding: 1px 4px; }
 
     .left-panel {
@@ -2065,6 +2091,7 @@ let knownIds = new Set();
 let isFirstLoad = true;
 let mapIsFullscreen = false;
 let showAnarchists = true;
+let checkedAlerts = new Set(JSON.parse(localStorage.getItem('mabat443-checked') || '[]'));
 
 // Anarchist/activist keywords
 const ANARCHIST_KEYWORDS = [
@@ -2485,38 +2512,44 @@ function renderAlerts() {
 
     items.sort((a, b) => (b.timestamp || 0) - (a.timestamp || 0));
 
-    feed.innerHTML = items.map(item => {
+    feed.innerHTML = items.map((item, idx) => {
         // Location: prefer locationHe from backend, fallback to matchedLocations
         const locationName = item.locationHe || (item.matchedLocations ? item.matchedLocations.join(', ') : '') || '';
         const hasCoords = item.coordinates && (item.coordinates.lat || item.coordinates.lon || item.coordinates.lng);
         const coordLat = hasCoords ? item.coordinates.lat : '';
         const coordLng = hasCoords ? (item.coordinates.lon || item.coordinates.lng) : '';
-        const locationTag = hasCoords
-            ? `<a href="javascript:void(0)" onclick="flyToAlertLocation(${coordLat},${coordLng},event)" style="color:#00d4ff;font-size:10px;text-decoration:none;display:inline-flex;align-items:center;gap:3px;margin-top:3px;cursor:pointer;">📍 ${escapeHtml(locationName || 'הצג במפה')}</a>`
-            : (locationName
-                ? `<span style="color:#9ab0c8;font-size:10px;display:inline-flex;align-items:center;gap:3px;margin-top:3px;">📍 ${escapeHtml(locationName)}</span>`
+        const locationTag = locationName
+            ? (hasCoords
+                ? `<a href="javascript:void(0)" onclick="flyToAlertLocation(${coordLat},${coordLng},event)" style="color:#00d4ff;font-size:10px;text-decoration:none;display:inline-flex;align-items:center;gap:3px;margin-top:2px;cursor:pointer;">📍 ${escapeHtml(locationName)}</a>`
+                : `<span style="color:#00d4ff;font-size:10px;display:inline-flex;align-items:center;gap:3px;margin-top:2px;">📍 ${escapeHtml(locationName)}</span>`)
+            : (hasCoords
+                ? `<a href="javascript:void(0)" onclick="flyToAlertLocation(${coordLat},${coordLng},event)" style="color:#00d4ff;font-size:10px;text-decoration:none;display:inline-flex;align-items:center;gap:3px;margin-top:2px;cursor:pointer;">📍 הצג במפה</a>`
                 : '');
-        // Source link
+        // Source link - only shown in expanded view
         const sourceUrl = item.sourceUrl || getSourceUrl(item.source);
-        const sourceTag = sourceUrl
-            ? `<a href="${escapeHtml(sourceUrl)}" target="_blank" onclick="event.stopPropagation();" class="alert-source" style="text-decoration:none;color:var(--text-dim);">${escapeHtml(item.source || 'N/A')}</a>`
-            : `<span class="alert-source">${escapeHtml(item.source || 'N/A')}</span>`;
+        const sourceLink = sourceUrl
+            ? `<a href="${escapeHtml(sourceUrl)}" target="_blank" onclick="event.stopPropagation();" style="text-decoration:none;color:#00d4ff;font-size:10px;">📡 ${escapeHtml(item.source || 'N/A')}</a>`
+            : `<span style="color:var(--text-dim);font-size:10px;">📡 ${escapeHtml(item.source || 'N/A')}</span>`;
+        // Alert ID for checkmark persistence
+        const alertId = item.id || item.timestamp || idx;
+        const isChecked = checkedAlerts.has(String(alertId));
         return `
-        <div class="alert-item" onclick="toggleAlertExpand(this)">
+        <div class="alert-item${isChecked ? ' alert-checked' : ''}" onclick="toggleAlertExpand(this)">
             <div class="alert-row">
                 <span class="alert-time">${formatTime(item.timestamp)}</span>
                 <div class="alert-urgency ${item._isAnarchist ? 'urgency-anarchist' : 'urgency-' + (item.urgency || 1)}"></div>
                 <div class="alert-content">
-                    <div class="alert-title">${escapeHtml(item.title || 'N/A')}${locationName ? ' <span style="color:#00d4ff;font-weight:normal;font-size:11px;">(' + escapeHtml(locationName) + ')</span>' : ''}</div>
-                    <div class="alert-snippet">${escapeHtml((item.snippet || item.fullText || '').substring(0, 120))}</div>
+                    <div class="alert-title">${escapeHtml(item.title || 'N/A')}</div>
                     ${locationTag}
                 </div>
-                ${sourceTag}
+                <div class="alert-check${isChecked ? ' checked' : ''}" onclick="toggleAlertCheck(this,'${alertId}',event)" title="סמן כנקרא">
+                    ${isChecked ? '✓' : ''}
+                </div>
             </div>
             <div class="alert-full-text" style="display:none;">${escapeHtml(item.fullText || item.snippet || '')}</div>
             <div class="alert-meta-row" style="display:none;">
                 <span>${formatDateTime(item.timestamp)}</span>
-                ${locationName ? '<span>📍 ' + escapeHtml(locationName) + '</span>' : ''}
+                ${sourceLink}
                 ${item.matchedKeywords ? '<span>KW: ' + escapeHtml(item.matchedKeywords.join(', ')) + '</span>' : ''}
                 ${item.distance ? '<span>' + item.distance.toFixed(1) + ' km</span>' : ''}
                 ${hasCoords ? '<a href="javascript:void(0)" onclick="flyToAlertLocation(' + coordLat + ',' + coordLng + ',event)" style="color:#00d4ff;text-decoration:none;cursor:pointer;">🗺️ הצג במפה</a>' : ''}
@@ -2548,6 +2581,23 @@ function toggleAlertExpand(el) {
         fullText.style.display = 'block';
         metaRow.style.display = 'flex';
     }
+}
+
+function toggleAlertCheck(el, alertId, event) {
+    event.stopPropagation();
+    const item = el.closest('.alert-item');
+    if (checkedAlerts.has(String(alertId))) {
+        checkedAlerts.delete(String(alertId));
+        el.classList.remove('checked');
+        el.textContent = '';
+        item.classList.remove('alert-checked');
+    } else {
+        checkedAlerts.add(String(alertId));
+        el.classList.add('checked');
+        el.textContent = '✓';
+        item.classList.add('alert-checked');
+    }
+    localStorage.setItem('mabat443-checked', JSON.stringify([...checkedAlerts]));
 }
 
 function scrollToAlerts() {
