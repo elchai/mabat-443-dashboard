@@ -40,9 +40,10 @@
     --text-primary: #e0e8f0;
     --text-secondary: #9ab0c8;
     --text-dim: #6880a0;
-    --font-display: 'Orbitron', monospace;
+    --font-display: 'Orbitron', 'Heebo', sans-serif;
     --font-body: 'Heebo', 'Rajdhani', sans-serif;
     --font-mono: 'Share Tech Mono', 'Heebo', monospace;
+    --font-he: 'Heebo', sans-serif;
 }
 
 * { margin: 0; padding: 0; box-sizing: border-box; }
@@ -122,7 +123,7 @@ body {
 /* ═══════ MAIN LAYOUT ═══════ */
 .dashboard {
     display: grid;
-    grid-template-rows: 70px 1fr 280px;
+    grid-template-rows: 70px 1fr 340px;
     grid-template-columns: 280px 1fr 320px;
     height: 100vh;
     gap: 2px;
@@ -213,8 +214,9 @@ body {
     padding: 5px 14px;
     border: 1px solid var(--border-primary);
     border-radius: 4px;
-    font-family: var(--font-mono);
+    font-family: var(--font-he);
     font-size: 12px;
+    font-weight: 500;
 }
 
 .header-btn {
@@ -224,8 +226,9 @@ body {
     padding: 6px 14px;
     border: 1px solid var(--border-primary);
     border-radius: 4px;
-    font-family: var(--font-mono);
+    font-family: var(--font-he);
     font-size: 12px;
+    font-weight: 500;
     color: var(--cyan);
     background: transparent;
     cursor: pointer;
@@ -312,9 +315,10 @@ body {
 }
 
 .panel-title {
-    font-family: var(--font-display);
+    font-family: var(--font-he);
     font-size: 11px;
-    letter-spacing: 3px;
+    font-weight: 700;
+    letter-spacing: 2px;
     color: var(--cyan);
 }
 
@@ -415,9 +419,10 @@ body {
 }
 
 .threat-level-label {
-    font-family: var(--font-mono);
+    font-family: var(--font-he);
     font-size: 11px;
-    letter-spacing: 2px;
+    letter-spacing: 1px;
+    font-weight: 500;
 }
 
 .threat-bars {
@@ -446,8 +451,9 @@ body {
 }
 
 .stat-label {
-    font-family: var(--font-mono);
+    font-family: var(--font-he);
     font-size: 11px;
+    font-weight: 400;
     color: var(--text-secondary);
 }
 
@@ -471,7 +477,7 @@ body {
     align-items: center;
     gap: 8px;
     padding: 5px 0;
-    font-family: var(--font-mono);
+    font-family: var(--font-he);
     font-size: 11px;
     border-bottom: 1px solid rgba(15, 52, 96, 0.3);
 }
@@ -492,6 +498,8 @@ body {
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
+    font-family: var(--font-he);
+    font-weight: 400;
 }
 
 .source-type {
@@ -566,9 +574,9 @@ body {
     position: absolute;
     top: 10px;
     right: 10px;
-    font-family: var(--font-display);
-    font-size: 10px;
-    letter-spacing: 2px;
+    font-family: var(--font-he);
+    font-size: 11px;
+    font-weight: 700;
     color: var(--cyan);
     z-index: 1001;
     pointer-events: none;
@@ -586,7 +594,7 @@ body {
     padding: 6px 10px;
     border-radius: 4px;
     cursor: pointer;
-    font-family: var(--font-mono);
+    font-family: var(--font-he);
     font-size: 12px;
     transition: all 0.3s ease;
 }
@@ -619,7 +627,7 @@ body {
     margin-top: 12px;
     padding-top: 10px;
     border-top: 1px solid var(--border-primary);
-    font-family: var(--font-mono);
+    font-family: var(--font-he);
     font-size: 10px;
     color: var(--text-dim);
     display: flex;
@@ -657,8 +665,9 @@ body {
     align-items: center;
     padding: 6px 0;
     border-bottom: 1px solid rgba(15, 52, 96, 0.3);
-    font-family: var(--font-mono);
+    font-family: var(--font-he);
     font-size: 11px;
+    font-weight: 400;
 }
 
 .config-key { color: var(--text-secondary); }
@@ -681,8 +690,9 @@ body {
     padding: 3px 10px;
     border: 1px solid var(--border-primary);
     border-radius: 3px;
-    font-family: var(--font-mono);
+    font-family: var(--font-he);
     font-size: 10px;
+    font-weight: 500;
     cursor: pointer;
     transition: all 0.2s ease;
     background: transparent;
@@ -703,8 +713,9 @@ body {
     display: flex;
     align-items: center;
     gap: 6px;
-    font-family: var(--font-mono);
+    font-family: var(--font-he);
     font-size: 10px;
+    font-weight: 500;
     color: var(--purple);
     padding: 0 8px;
 }
@@ -751,8 +762,9 @@ body {
     border-radius: 3px;
     background: rgba(0, 0, 0, 0.3);
     color: var(--text-primary);
-    font-family: var(--font-mono);
+    font-family: var(--font-he);
     font-size: 11px;
+    font-weight: 400;
     outline: none;
     direction: rtl;
     transition: border-color 0.3s ease;
@@ -765,6 +777,8 @@ body {
     padding: 0;
     flex: 1;
     overflow-y: auto;
+    scroll-behavior: smooth;
+    -webkit-overflow-scrolling: touch;
 }
 
 .alert-item {
@@ -801,8 +815,9 @@ body {
 }
 
 .alert-time {
-    font-family: var(--font-mono);
+    font-family: var(--font-he);
     font-size: 10px;
+    font-weight: 400;
     color: var(--text-dim);
     white-space: nowrap;
     min-width: 45px;
@@ -873,8 +888,9 @@ body {
 }
 
 .alert-full-text {
-    font-family: var(--font-body);
+    font-family: var(--font-he);
     font-size: 13px;
+    font-weight: 300;
     line-height: 1.6;
     color: var(--text-secondary);
     padding: 8px 12px;
@@ -889,14 +905,16 @@ body {
     display: flex;
     gap: 10px;
     align-items: center;
-    font-family: var(--font-mono);
+    font-family: var(--font-he);
     font-size: 9px;
+    font-weight: 400;
     color: var(--text-dim);
 }
 
 .alert-source {
-    font-family: var(--font-mono);
+    font-family: var(--font-he);
     font-size: 9px;
+    font-weight: 400;
     color: var(--text-dim);
     white-space: nowrap;
     padding: 2px 6px;
@@ -914,11 +932,11 @@ body {
 }
 
 .timeline-label {
-    font-family: var(--font-mono);
+    font-family: var(--font-he);
     font-size: 9px;
     color: var(--text-dim);
     margin-bottom: 4px;
-    letter-spacing: 1px;
+    font-weight: 400;
 }
 
 .timeline-bars {
@@ -985,9 +1003,10 @@ body {
 }
 
 .history-title {
-    font-family: var(--font-display);
+    font-family: var(--font-he);
     font-size: 18px;
-    letter-spacing: 4px;
+    font-weight: 700;
+    letter-spacing: 2px;
     color: var(--cyan);
 }
 
@@ -998,8 +1017,9 @@ body {
     padding: 6px 14px;
     border-radius: 4px;
     cursor: pointer;
-    font-family: var(--font-mono);
+    font-family: var(--font-he);
     font-size: 12px;
+    font-weight: 500;
     transition: all 0.3s ease;
 }
 
@@ -1025,8 +1045,9 @@ body {
     border-radius: 4px;
     background: rgba(0, 0, 0, 0.3);
     color: var(--text-primary);
-    font-family: var(--font-mono);
+    font-family: var(--font-he);
     font-size: 12px;
+    font-weight: 400;
     outline: none;
     direction: rtl;
 }
@@ -1039,7 +1060,7 @@ body {
     border-radius: 4px;
     background: rgba(0, 0, 0, 0.3);
     color: var(--text-primary);
-    font-family: var(--font-mono);
+    font-family: var(--font-he);
     font-size: 11px;
 }
 
@@ -1058,9 +1079,10 @@ body {
 }
 
 .history-date-header {
-    font-family: var(--font-display);
-    font-size: 12px;
-    letter-spacing: 2px;
+    font-family: var(--font-he);
+    font-size: 13px;
+    font-weight: 700;
+    letter-spacing: 1px;
     color: var(--cyan);
     padding: 8px 0;
     border-bottom: 1px solid var(--border-primary);
@@ -1087,8 +1109,9 @@ body {
 }
 
 .history-item-time {
-    font-family: var(--font-mono);
+    font-family: var(--font-he);
     font-size: 11px;
+    font-weight: 400;
     color: var(--text-dim);
     min-width: 50px;
     padding-top: 2px;
@@ -1106,22 +1129,24 @@ body {
 }
 
 .history-item-title {
-    font-family: var(--font-body);
+    font-family: var(--font-he);
     font-size: 14px;
-    font-weight: 600;
+    font-weight: 500;
     margin-bottom: 4px;
 }
 
 .history-item-text {
-    font-family: var(--font-mono);
+    font-family: var(--font-he);
     font-size: 11px;
+    font-weight: 300;
     color: var(--text-secondary);
     line-height: 1.5;
 }
 
 .history-item-source {
-    font-family: var(--font-mono);
+    font-family: var(--font-he);
     font-size: 10px;
+    font-weight: 400;
     color: var(--text-dim);
     margin-top: 4px;
 }
@@ -1131,8 +1156,9 @@ body {
     gap: 15px;
     padding: 10px 25px;
     border-bottom: 1px solid var(--border-primary);
-    font-family: var(--font-mono);
+    font-family: var(--font-he);
     font-size: 12px;
+    font-weight: 400;
 }
 
 .history-stat {
@@ -1144,7 +1170,8 @@ body {
 
 .history-stat strong {
     color: var(--cyan);
-    font-family: var(--font-display);
+    font-family: var(--font-he);
+    font-weight: 700;
 }
 
 /* ═══════ RED ALERT FLASH ═══════ */
@@ -1177,7 +1204,7 @@ body {
     height: 100%;
     gap: 15px;
     color: var(--text-dim);
-    font-family: var(--font-mono);
+    font-family: var(--font-he);
     font-size: 12px;
 }
 
@@ -1195,7 +1222,7 @@ body {
     text-align: center;
     padding: 30px;
     color: var(--text-dim);
-    font-family: var(--font-mono);
+    font-family: var(--font-he);
     font-size: 12px;
 }
 
@@ -1215,9 +1242,8 @@ body {
     display: inline-block;
     padding: 1px 6px;
     border-radius: 2px;
-    font-family: var(--font-mono);
+    font-family: var(--font-he);
     font-size: 9px;
-    letter-spacing: 1px;
     font-weight: 600;
 }
 
@@ -1272,8 +1298,9 @@ body {
 
     .alert-feed {
         min-height: 300px;
-        max-height: 50vh;
+        max-height: none;
         order: 2;
+        flex: 1;
     }
 
     .alert-toolbar { flex-wrap: wrap; gap: 4px; padding: 4px 8px; }
@@ -1371,17 +1398,17 @@ body {
     border: 1px solid var(--border-primary);
     border-radius: 4px;
     padding: 8px 12px;
-    font-family: var(--font-mono);
+    font-family: var(--font-he);
     font-size: 10px;
     direction: rtl;
     pointer-events: auto;
     max-width: 140px;
 }
 .legend-title {
-    font-family: var(--font-display);
-    font-size: 9px;
+    font-family: var(--font-he);
+    font-size: 10px;
+    font-weight: 700;
     color: var(--cyan);
-    letter-spacing: 2px;
     margin-bottom: 6px;
     text-align: center;
 }
@@ -1535,12 +1562,12 @@ body {
 
 .login-field label {
     display: block;
-    font-family: var(--font-mono);
+    font-family: var(--font-he);
     font-size: 10px;
     color: var(--text-dim);
-    letter-spacing: 2px;
     text-align: right;
     margin-bottom: 6px;
+    font-weight: 400;
 }
 
 .login-input {
@@ -1585,9 +1612,10 @@ body {
     border: 1px solid var(--cyan-dim);
     border-radius: 4px;
     color: var(--cyan);
-    font-family: var(--font-display);
+    font-family: var(--font-he);
     font-size: 14px;
-    letter-spacing: 4px;
+    font-weight: 700;
+    letter-spacing: 2px;
     cursor: pointer;
     transition: all 0.3s ease;
 }
@@ -1599,7 +1627,7 @@ body {
 }
 
 .login-error {
-    font-family: var(--font-mono);
+    font-family: var(--font-he);
     font-size: 11px;
     color: var(--red);
     height: 16px;
@@ -1643,7 +1671,7 @@ body {
     z-index: 100;
     text-align: center;
     padding: 4px 10px;
-    font-family: var(--font-mono);
+    font-family: var(--font-he);
     font-size: 10px;
     color: var(--text-dim);
     background: linear-gradient(0deg, rgba(4, 8, 16, 0.9), transparent);
@@ -1900,12 +1928,6 @@ document.getElementById('loginInput').addEventListener('keydown', function(e) {
     <div class="panel alert-feed" id="alertFeedPanel">
         <div class="panel-header">
             <span class="panel-title">פיד חי</span>
-            <div style="display:flex; gap:8px; align-items:center;">
-                <span class="urgency-tag red">ודאי</span>
-                <span class="urgency-tag orange">חזק</span>
-                <span class="urgency-tag yellow">בינוני</span>
-                <span class="urgency-tag blue">חלש</span>
-            </div>
         </div>
         <div class="alert-toolbar">
             <button class="filter-chip active" data-filter="all" onclick="setFilter('all', this)">הכל</button>
@@ -2558,9 +2580,8 @@ function renderAlerts() {
             <div class="alert-full-text" style="display:none;">${escapeHtml(item.fullText || item.snippet || '')}</div>
             <div class="alert-meta-row" style="display:none;">
                 <span>${formatDateTime(item.timestamp)}</span>
-                ${sourceLink}
+                ${sourceUrl ? '<a href="' + escapeHtml(sourceUrl) + '" target="_blank" onclick="event.stopPropagation();" style="color:#00d4ff;text-decoration:none;cursor:pointer;">📡 הצג מקור: ' + escapeHtml(item.source || 'טלגרם') + '</a>' : '<span style="color:var(--text-dim);">📡 ' + escapeHtml(item.source || 'N/A') + '</span>'}
                 ${item.matchedKeywords ? '<span>KW: ' + escapeHtml(item.matchedKeywords.join(', ')) + '</span>' : ''}
-                ${coords ? '<a href="javascript:void(0)" onclick="flyToAlertLocation(' + coords.lat + ',' + coords.lng + ',event)" style="color:#00d4ff;text-decoration:none;cursor:pointer;">🗺️ הצג במפה</a>' : ''}
             </div>
         </div>
     `}).join('');
