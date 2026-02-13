@@ -7,7 +7,7 @@
 <meta http-equiv="Pragma" content="no-cache">
 <meta http-equiv="Expires" content="0">
 <title>מבט 443 | פלטפורמת מודיעין גזרתית</title>
-<link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg viewBox='0 0 100 100' xmlns='http://www.w3.org/2000/svg'%3E%3Crect width='100' height='100' rx='12' fill='%23040810'/%3E%3Cpath d='M50 15 Q65 15 73 27 Q78 35 77 47 Q75 57 68 63 L50 75 L32 63 Q25 57 23 47 Q22 35 27 27 Q35 15 50 15Z' fill='none' stroke='%2300d4ff' stroke-width='2'/%3E%3Cpath d='M33 20 L27 7 L38 17' fill='%2300d4ff' opacity='.6'/%3E%3Cpath d='M67 20 L73 7 L62 17' fill='%2300d4ff' opacity='.6'/%3E%3Ccircle cx='40' cy='37' r='9' fill='none' stroke='%2300d4ff' stroke-width='1.5'/%3E%3Ccircle cx='60' cy='37' r='9' fill='none' stroke='%2300d4ff' stroke-width='1.5'/%3E%3Ccircle cx='40' cy='37' r='4' fill='%23ffd000'/%3E%3Ccircle cx='60' cy='37' r='4' fill='%23ffd000'/%3E%3Ccircle cx='40' cy='37' r='1.5' fill='%23040810'/%3E%3Ccircle cx='60' cy='37' r='1.5' fill='%23040810'/%3E%3Cpath d='M47 43 L50 49 L53 43' fill='%23ff8800' opacity='.7'/%3E%3Cline x1='50' y1='65' x2='50' y2='93' stroke='%2300d4ff' stroke-width='2.5' opacity='.6'/%3E%3Cpath d='M44 67 L50 65 L56 67 L50 69Z' fill='%2300d4ff' opacity='.5'/%3E%3Cline x1='43' y1='68' x2='57' y2='68' stroke='%2300d4ff' stroke-width='1.5' opacity='.5'/%3E%3Cpath d='M48 91 L50 97 L52 91' fill='%2300d4ff' opacity='.5'/%3E%3C/svg%3E">
+<link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg viewBox='0 0 100 100' xmlns='http://www.w3.org/2000/svg'%3E%3Crect width='100' height='100' rx='12' fill='%230a0e08'/%3E%3Cpath d='M50 15 Q65 15 73 27 Q78 35 77 47 Q75 57 68 63 L50 75 L32 63 Q25 57 23 47 Q22 35 27 27 Q35 15 50 15Z' fill='none' stroke='%237cba3f' stroke-width='2'/%3E%3Cpath d='M33 20 L27 7 L38 17' fill='%237cba3f' opacity='.6'/%3E%3Cpath d='M67 20 L73 7 L62 17' fill='%237cba3f' opacity='.6'/%3E%3Ccircle cx='40' cy='37' r='9' fill='none' stroke='%237cba3f' stroke-width='1.5'/%3E%3Ccircle cx='60' cy='37' r='9' fill='none' stroke='%237cba3f' stroke-width='1.5'/%3E%3Ccircle cx='40' cy='37' r='4' fill='%23e8c400'/%3E%3Ccircle cx='60' cy='37' r='4' fill='%23e8c400'/%3E%3Ccircle cx='40' cy='37' r='1.5' fill='%230a0e08'/%3E%3Ccircle cx='60' cy='37' r='1.5' fill='%230a0e08'/%3E%3Cpath d='M47 43 L50 49 L53 43' fill='%23ff8800' opacity='.7'/%3E%3Cline x1='50' y1='65' x2='50' y2='93' stroke='%237cba3f' stroke-width='2.5' opacity='.6'/%3E%3Cpath d='M44 67 L50 65 L56 67 L50 69Z' fill='%237cba3f' opacity='.5'/%3E%3Cline x1='43' y1='68' x2='57' y2='68' stroke='%237cba3f' stroke-width='1.5' opacity='.5'/%3E%3Cpath d='M48 91 L50 97 L52 91' fill='%237cba3f' opacity='.5'/%3E%3C/svg%3E">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css" />
 <style>
 /* ═══════════════════════════════════════
@@ -15,35 +15,37 @@
    Futuristic Military Intelligence UI v2
    ═══════════════════════════════════════ */
 
-@import url('https://fonts.googleapis.com/css2?family=Heebo:wght@300;400;500;700;900&family=Orbitron:wght@400;500;700;900&family=Rajdhani:wght@300;400;500;600;700&family=Share+Tech+Mono&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Heebo:wght@300;400;500;700;900&family=Teko:wght@300;400;500;600;700&family=Rajdhani:wght@300;400;500;600;700&family=Share+Tech+Mono&display=swap');
 
 :root {
-    --bg-primary: #040810;
-    --bg-secondary: #0a1020;
-    --bg-panel: rgba(8, 16, 35, 0.85);
-    --bg-card: rgba(12, 22, 45, 0.9);
-    --border-primary: #0f3460;
-    --border-glow: #00d4ff;
-    --cyan: #00d4ff;
-    --cyan-dim: #00d4ff44;
+    --bg-primary: #0a0e08;
+    --bg-secondary: #12170e;
+    --bg-panel: rgba(14, 20, 10, 0.88);
+    --bg-card: rgba(18, 26, 12, 0.92);
+    --border-primary: #2a3a1a;
+    --border-glow: #7cba3f;
+    --cyan: #7cba3f;
+    --cyan-dim: #7cba3f44;
     --green: #00ff88;
     --green-dim: #00ff8844;
-    --red: #ff0040;
-    --red-dim: #ff004044;
+    --red: #ff2020;
+    --red-dim: #ff202044;
     --orange: #ff8800;
     --orange-dim: #ff880044;
-    --yellow: #ffd000;
-    --yellow-dim: #ffd00044;
-    --blue: #4488ff;
+    --yellow: #e8c400;
+    --yellow-dim: #e8c40044;
+    --blue: #5599dd;
     --purple: #a855f7;
     --purple-dim: #a855f744;
-    --text-primary: #e0e8f0;
-    --text-secondary: #9ab0c8;
-    --text-dim: #6880a0;
-    --font-display: 'Orbitron', 'Heebo', sans-serif;
+    --text-primary: #d4dcc8;
+    --text-secondary: #8a9a78;
+    --text-dim: #556848;
+    --font-display: 'Teko', 'Heebo', sans-serif;
     --font-body: 'Heebo', 'Rajdhani', sans-serif;
     --font-mono: 'Share Tech Mono', 'Heebo', monospace;
     --font-he: 'Heebo', sans-serif;
+    --accent: #7cba3f;
+    --accent-dim: #7cba3f44;
 }
 
 * { margin: 0; padding: 0; box-sizing: border-box; }
@@ -64,9 +66,9 @@ body {
     position: fixed;
     top: 0; left: 0; right: 0; bottom: 0;
     background-image:
-        linear-gradient(rgba(0, 212, 255, 0.03) 1px, transparent 1px),
-        linear-gradient(90deg, rgba(0, 212, 255, 0.03) 1px, transparent 1px);
-    background-size: 50px 50px;
+        linear-gradient(rgba(124, 186, 63, 0.025) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(124, 186, 63, 0.025) 1px, transparent 1px);
+    background-size: 40px 40px;
     z-index: 0;
     animation: gridPulse 4s ease-in-out infinite;
     pointer-events: none;
@@ -80,12 +82,12 @@ body {
 .scan-line {
     position: fixed;
     top: 0; left: 0; right: 0;
-    height: 3px;
-    background: linear-gradient(90deg, transparent, var(--cyan), transparent);
+    height: 2px;
+    background: linear-gradient(90deg, transparent, var(--accent), transparent);
     z-index: 1000;
-    animation: scanDown 4s linear infinite;
-    opacity: 0.4;
-    box-shadow: 0 0 20px var(--cyan), 0 0 60px var(--cyan-dim);
+    animation: scanDown 5s linear infinite;
+    opacity: 0.3;
+    box-shadow: 0 0 15px var(--accent), 0 0 40px var(--accent-dim);
     pointer-events: none;
 }
 
@@ -105,8 +107,8 @@ body {
 .corner-decor::before, .corner-decor::after {
     content: '';
     position: absolute;
-    background: var(--cyan);
-    box-shadow: 0 0 10px var(--cyan);
+    background: var(--accent);
+    box-shadow: 0 0 6px var(--accent);
 }
 .corner-tl { top: 10px; left: 10px; }
 .corner-tl::before { width: 30px; height: 2px; top: 0; left: 0; }
@@ -140,7 +142,7 @@ body {
     align-items: center;
     justify-content: space-between;
     padding: 0 20px;
-    background: linear-gradient(180deg, rgba(0, 212, 255, 0.08), transparent);
+    background: linear-gradient(180deg, rgba(124, 186, 63, 0.06), transparent);
     border-bottom: 1px solid var(--border-primary);
     position: relative;
 }
@@ -152,8 +154,8 @@ body {
     left: 0;
     right: 0;
     height: 1px;
-    background: linear-gradient(90deg, transparent, var(--cyan), transparent);
-    box-shadow: 0 0 15px var(--cyan-dim);
+    background: linear-gradient(90deg, transparent, var(--accent), transparent);
+    box-shadow: 0 0 10px var(--accent-dim);
 }
 
 .logo-section {
@@ -175,24 +177,17 @@ body {
 
 @keyframes hexPulse {
     0%, 100% { filter: brightness(1); }
-    50% { filter: brightness(1.4) drop-shadow(0 0 10px var(--cyan)); }
+    50% { filter: brightness(1.3) drop-shadow(0 0 8px var(--accent)); }
 }
 
 .system-title {
     font-family: var(--font-display);
-    font-weight: 900;
-    font-size: 22px;
-    letter-spacing: 4px;
-    background: linear-gradient(90deg, var(--cyan), #fff, var(--cyan));
-    background-size: 200% auto;
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-    animation: shimmer 3s linear infinite;
-}
-
-@keyframes shimmer {
-    0% { background-position: 200% center; }
-    100% { background-position: -200% center; }
+    font-weight: 600;
+    font-size: 28px;
+    letter-spacing: 6px;
+    color: var(--accent);
+    text-shadow: 0 0 12px var(--accent-dim), 0 1px 0 rgba(0,0,0,0.5);
+    text-transform: uppercase;
 }
 
 .system-subtitle {
@@ -259,9 +254,9 @@ body {
 }
 
 .header-btn:hover {
-    background: rgba(0, 212, 255, 0.1);
-    border-color: var(--cyan);
-    box-shadow: 0 0 15px var(--cyan-dim);
+    background: rgba(124, 186, 63, 0.1);
+    border-color: var(--accent);
+    box-shadow: 0 0 12px var(--accent-dim);
 }
 
 .header-btn .btn-icon {
@@ -310,9 +305,10 @@ body {
 .panel {
     background: var(--bg-panel);
     border: 1px solid var(--border-primary);
-    border-radius: 4px;
+    border-radius: 2px;
     overflow: hidden;
     position: relative;
+    clip-path: polygon(0 0, calc(100% - 12px) 0, 100% 12px, 100% 100%, 12px 100%, 0 calc(100% - 12px));
 }
 
 .panel::before {
@@ -323,7 +319,7 @@ body {
     right: 0;
     height: 1px;
     background: linear-gradient(90deg, transparent, var(--border-glow), transparent);
-    opacity: 0.5;
+    opacity: 0.4;
     z-index: 1;
 }
 
@@ -333,7 +329,7 @@ body {
     justify-content: space-between;
     padding: 10px 15px;
     border-bottom: 1px solid var(--border-primary);
-    background: rgba(0, 212, 255, 0.03);
+    background: rgba(124, 186, 63, 0.04);
 }
 
 .panel-title {
@@ -578,7 +574,7 @@ body {
     position: absolute;
     top: 0; left: 0; right: 0;
     height: 2px;
-    background: repeating-linear-gradient(90deg, transparent, transparent 4px, var(--cyan-dim) 4px, var(--cyan-dim) 5px);
+    background: repeating-linear-gradient(90deg, transparent, transparent 4px, var(--accent-dim) 4px, var(--accent-dim) 5px);
 }
 
 .map-coords {
@@ -622,9 +618,9 @@ body {
 }
 
 .map-btn:hover {
-    background: rgba(0, 212, 255, 0.15);
-    border-color: var(--cyan);
-    box-shadow: 0 0 10px var(--cyan-dim);
+    background: rgba(124, 186, 63, 0.12);
+    border-color: var(--accent);
+    box-shadow: 0 0 8px var(--accent-dim);
 }
 
 /* ═══════ RIGHT PANEL - AI SUMMARY ═══════ */
@@ -722,8 +718,8 @@ body {
     letter-spacing: 1px;
 }
 
-.filter-chip:hover { border-color: var(--cyan-dim); color: var(--text-secondary); }
-.filter-chip.active { border-color: var(--cyan); color: var(--cyan); background: rgba(0, 212, 255, 0.08); }
+.filter-chip:hover { border-color: var(--accent-dim); color: var(--text-secondary); }
+.filter-chip.active { border-color: var(--accent); color: var(--accent); background: rgba(124, 186, 63, 0.1); }
 .filter-chip.active.red { border-color: var(--red); color: var(--red); background: var(--red-dim); }
 .filter-chip.active.orange { border-color: var(--orange); color: var(--orange); background: var(--orange-dim); }
 .filter-chip.active.yellow { border-color: var(--yellow); color: var(--yellow); background: var(--yellow-dim); }
@@ -794,7 +790,7 @@ body {
 }
 
 .search-input::placeholder { color: var(--text-dim); }
-.search-input:focus { border-color: var(--cyan); box-shadow: 0 0 8px var(--cyan-dim); }
+.search-input:focus { border-color: var(--accent); box-shadow: 0 0 8px var(--accent-dim); }
 
 .alert-feed .panel-body {
     padding: 0;
@@ -815,10 +811,10 @@ body {
     cursor: pointer;
 }
 
-.alert-item:hover { background: rgba(0, 212, 255, 0.03); }
+.alert-item:hover { background: rgba(124, 186, 63, 0.04); }
 
 .alert-item.expanded {
-    background: rgba(0, 212, 255, 0.05);
+    background: rgba(124, 186, 63, 0.05);
     flex-direction: column;
     gap: 8px;
 }
@@ -826,7 +822,7 @@ body {
 .alert-item.new-alert { animation: alertFlash 2s ease; }
 
 @keyframes alertFlash {
-    0% { background: rgba(0, 212, 255, 0.2); }
+    0% { background: rgba(124, 186, 63, 0.15); }
     100% { background: transparent; }
 }
 
@@ -895,8 +891,8 @@ body {
     flex-shrink: 0;
 }
 .alert-check:hover {
-    border-color: var(--cyan);
-    background: rgba(0, 212, 255, 0.05);
+    border-color: var(--accent);
+    background: rgba(124, 186, 63, 0.06);
 }
 .alert-check.checked {
     border-color: var(--green);
@@ -1001,7 +997,7 @@ body {
 .history-overlay {
     position: fixed;
     top: 0; left: 0; right: 0; bottom: 0;
-    background: rgba(4, 8, 16, 0.95);
+    background: rgba(10, 14, 8, 0.96);
     z-index: 8000;
     display: none;
     flex-direction: column;
@@ -1023,7 +1019,7 @@ body {
     justify-content: space-between;
     padding: 15px 25px;
     border-bottom: 1px solid var(--border-primary);
-    background: linear-gradient(180deg, rgba(0, 212, 255, 0.06), transparent);
+    background: linear-gradient(180deg, rgba(124, 186, 63, 0.05), transparent);
 }
 
 .history-title {
@@ -1113,7 +1109,7 @@ body {
     margin-bottom: 8px;
     position: sticky;
     top: 0;
-    background: rgba(4, 8, 16, 0.95);
+    background: rgba(10, 14, 8, 0.96);
     z-index: 1;
 }
 
@@ -1129,7 +1125,7 @@ body {
 }
 
 .history-item:hover {
-    background: rgba(0, 212, 255, 0.03);
+    background: rgba(124, 186, 63, 0.04);
 }
 
 .history-item-time {
@@ -1188,8 +1184,8 @@ body {
     transition: all 0.2s ease;
 }
 .journal-note-btn:hover {
-    background: rgba(0, 212, 255, 0.1);
-    border-color: var(--cyan);
+    background: rgba(124, 186, 63, 0.1);
+    border-color: var(--accent);
 }
 .journal-note-form {
     margin-top: 8px;
@@ -1215,8 +1211,8 @@ body {
 }
 .journal-note-form input:focus,
 .journal-note-form textarea:focus {
-    border-color: var(--cyan);
-    box-shadow: 0 0 5px var(--cyan-dim);
+    border-color: var(--accent);
+    box-shadow: 0 0 5px var(--accent-dim);
 }
 .journal-note-form textarea {
     resize: vertical;
@@ -1250,7 +1246,7 @@ body {
 .journal-saved-note {
     margin-top: 6px;
     padding: 6px 8px;
-    background: rgba(0, 212, 255, 0.05);
+    background: rgba(124, 186, 63, 0.05);
     border: 1px solid var(--border-primary);
     border-radius: 4px;
     font-family: var(--font-he);
@@ -1283,7 +1279,7 @@ body {
     width: 90%;
     max-width: 420px;
     direction: rtl;
-    box-shadow: 0 0 40px rgba(0, 212, 255, 0.15);
+    box-shadow: 0 0 40px rgba(124, 186, 63, 0.12);
 }
 .report-form-title {
     font-family: var(--font-he);
@@ -1327,7 +1323,7 @@ body {
 }
 .report-field textarea { resize: vertical; min-height: 60px; }
 .report-field select { cursor: pointer; }
-.report-field select option { background: #0a1020; color: var(--text-primary); }
+.report-field select option { background: #12170e; color: var(--text-primary); }
 .report-urgency-row {
     display: flex;
     gap: 8px;
@@ -1614,17 +1610,17 @@ body {
 
 /* Dark tooltip */
 .dark-tooltip {
-    background: rgba(8, 16, 35, 0.95) !important;
-    color: #e0e8f0 !important;
-    border: 1px solid #0f3460 !important;
+    background: rgba(14, 20, 10, 0.96) !important;
+    color: #d4dcc8 !important;
+    border: 1px solid #2a3a1a !important;
     border-radius: 4px !important;
     font-family: 'Rajdhani', 'Share Tech Mono', monospace !important;
     font-size: 11px !important;
     padding: 8px 12px !important;
-    box-shadow: 0 0 20px rgba(0, 212, 255, 0.25) !important;
+    box-shadow: 0 0 20px rgba(124, 186, 63, 0.2) !important;
     max-width: 280px !important;
 }
-.dark-tooltip::before { border-top-color: #0f3460 !important; }
+.dark-tooltip::before { border-top-color: #2a3a1a !important; }
 
 /* ═══════ MAP LEGEND ═══════ */
 .map-legend {
@@ -1696,13 +1692,13 @@ body {
 }
 
 .leaflet-popup-content-wrapper {
-    background: rgba(8, 16, 35, 0.95) !important;
-    color: #e0e8f0 !important;
-    border: 1px solid #0f3460 !important;
-    border-radius: 4px !important;
-    box-shadow: 0 0 20px rgba(0, 212, 255, 0.2) !important;
+    background: rgba(14, 20, 10, 0.96) !important;
+    color: #d4dcc8 !important;
+    border: 1px solid #2a3a1a !important;
+    border-radius: 2px !important;
+    box-shadow: 0 0 20px rgba(124, 186, 63, 0.15) !important;
 }
-.leaflet-popup-tip { background: rgba(8, 16, 35, 0.95) !important; }
+.leaflet-popup-tip { background: rgba(14, 20, 10, 0.96) !important; }
 
 /* ═══════ LOGIN SCREEN ═══════ */
 .login-overlay {
@@ -1720,8 +1716,8 @@ body {
     position: absolute;
     top: 0; left: 0; right: 0; bottom: 0;
     background-image:
-        linear-gradient(rgba(0, 212, 255, 0.04) 1px, transparent 1px),
-        linear-gradient(90deg, rgba(0, 212, 255, 0.04) 1px, transparent 1px);
+        linear-gradient(rgba(124, 186, 63, 0.03) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(124, 186, 63, 0.03) 1px, transparent 1px);
     background-size: 40px 40px;
     animation: gridPulse 4s ease-in-out infinite;
     pointer-events: none;
@@ -1744,8 +1740,8 @@ body {
     padding: 50px 60px;
     border: 1px solid var(--border-primary);
     border-radius: 8px;
-    background: rgba(8, 16, 35, 0.9);
-    box-shadow: 0 0 60px rgba(0, 212, 255, 0.08), inset 0 0 40px rgba(0, 0, 0, 0.3);
+    background: rgba(14, 20, 10, 0.92);
+    box-shadow: 0 0 60px rgba(124, 186, 63, 0.06), inset 0 0 40px rgba(0, 0, 0, 0.3);
     min-width: 380px;
     max-width: 450px;
 }
@@ -1779,14 +1775,11 @@ body {
 
 .login-title {
     font-family: var(--font-display);
-    font-size: 28px;
-    font-weight: 900;
-    letter-spacing: 6px;
-    background: linear-gradient(90deg, var(--cyan), #fff, var(--cyan));
-    background-size: 200% auto;
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-    animation: shimmer 3s linear infinite;
+    font-size: 36px;
+    font-weight: 600;
+    letter-spacing: 8px;
+    color: var(--accent);
+    text-shadow: 0 0 20px var(--accent-dim), 0 2px 0 rgba(0,0,0,0.5);
     margin-bottom: 8px;
 }
 
@@ -1851,10 +1844,10 @@ body {
 .login-btn {
     width: 100%;
     padding: 12px;
-    background: linear-gradient(135deg, rgba(0, 212, 255, 0.15), rgba(68, 136, 255, 0.15));
-    border: 1px solid var(--cyan-dim);
-    border-radius: 4px;
-    color: var(--cyan);
+    background: linear-gradient(135deg, rgba(124, 186, 63, 0.12), rgba(80, 140, 30, 0.12));
+    border: 1px solid var(--accent-dim);
+    border-radius: 2px;
+    color: var(--accent);
     font-family: var(--font-he);
     font-size: 14px;
     font-weight: 700;
@@ -1864,9 +1857,9 @@ body {
 }
 
 .login-btn:hover {
-    background: linear-gradient(135deg, rgba(0, 212, 255, 0.25), rgba(68, 136, 255, 0.25));
-    border-color: var(--cyan);
-    box-shadow: 0 0 25px var(--cyan-dim);
+    background: linear-gradient(135deg, rgba(124, 186, 63, 0.2), rgba(80, 140, 30, 0.2));
+    border-color: var(--accent);
+    box-shadow: 0 0 20px var(--accent-dim);
 }
 
 .login-error {
@@ -1917,7 +1910,7 @@ body {
     font-family: var(--font-he);
     font-size: 10px;
     color: var(--text-dim);
-    background: linear-gradient(0deg, rgba(4, 8, 16, 0.9), transparent);
+    background: linear-gradient(0deg, rgba(10, 14, 8, 0.9), transparent);
     letter-spacing: 1px;
     pointer-events: auto;
 }
@@ -1937,37 +1930,37 @@ body {
 <body>
 
 <!-- LOGIN SCREEN -->
-<div id="loginOverlay" style="position:fixed;top:0;left:0;right:0;bottom:0;z-index:99999;background:#040810;display:flex;align-items:center;justify-content:center;flex-direction:column;">
-    <div style="position:absolute;top:0;left:0;right:0;bottom:0;background-image:linear-gradient(rgba(0,212,255,0.04) 1px,transparent 1px),linear-gradient(90deg,rgba(0,212,255,0.04) 1px,transparent 1px);background-size:40px 40px;pointer-events:none;"></div>
-    <div style="position:absolute;top:15px;left:50%;transform:translateX(-50%);font-family:'Orbitron',monospace;font-size:8px;letter-spacing:2px;color:#ff0040;pointer-events:none;white-space:nowrap;">CLASSIFIED // RESTRICTED ACCESS</div>
-    <div style="position:relative;z-index:10;text-align:center;padding:50px 60px;border:1px solid #0f3460;border-radius:8px;background:rgba(8,16,35,0.9);box-shadow:0 0 60px rgba(0,212,255,0.08);min-width:340px;">
+<div id="loginOverlay" style="position:fixed;top:0;left:0;right:0;bottom:0;z-index:99999;background:#0a0e08;display:flex;align-items:center;justify-content:center;flex-direction:column;">
+    <div style="position:absolute;top:0;left:0;right:0;bottom:0;background-image:linear-gradient(rgba(124,186,63,0.03) 1px,transparent 1px),linear-gradient(90deg,rgba(124,186,63,0.03) 1px,transparent 1px);background-size:40px 40px;pointer-events:none;"></div>
+    <div style="position:absolute;top:15px;left:50%;transform:translateX(-50%);font-family:'Teko',sans-serif;font-size:10px;letter-spacing:4px;color:#ff2020;pointer-events:none;white-space:nowrap;text-transform:uppercase;">CLASSIFIED // RESTRICTED ACCESS</div>
+    <div style="position:relative;z-index:10;text-align:center;padding:50px 60px;border:1px solid #2a3a1a;border-radius:2px;background:rgba(14,20,10,0.92);box-shadow:0 0 60px rgba(124,186,63,0.06);min-width:340px;clip-path:polygon(0 0,calc(100% - 16px) 0,100% 16px,100% 100%,16px 100%,0 calc(100% - 16px));">
         <div style="width:80px;height:80px;margin:0 auto 25px;display:flex;align-items:center;justify-content:center;">
             <svg viewBox="0 0 100 120" width="80" height="96" xmlns="http://www.w3.org/2000/svg">
-                <path d="M50 5 L90 25 L90 75 L50 115 L10 75 L10 25 Z" fill="none" stroke="#00d4ff" stroke-width="1.5" opacity="0.4"/>
-                <path d="M50 25 Q62 25 70 35 Q75 42 74 52 Q72 62 65 68 L50 80 L35 68 Q28 62 26 52 Q25 42 30 35 Q38 25 50 25Z" fill="rgba(0,212,255,0.08)" stroke="#00d4ff" stroke-width="1.2"/>
-                <path d="M35 28 L30 15 L40 25" fill="#00d4ff" opacity="0.5"/><path d="M65 28 L70 15 L60 25" fill="#00d4ff" opacity="0.5"/>
-                <circle cx="39" cy="42" r="9" fill="none" stroke="#00d4ff" stroke-width="1.2"/>
-                <circle cx="61" cy="42" r="9" fill="none" stroke="#00d4ff" stroke-width="1.2"/>
-                <circle cx="39" cy="42" r="4" fill="#ffd000"/><circle cx="61" cy="42" r="4" fill="#ffd000"/>
-                <circle cx="39" cy="42" r="1.5" fill="#040810"/><circle cx="61" cy="42" r="1.5" fill="#040810"/>
+                <path d="M50 5 L90 25 L90 75 L50 115 L10 75 L10 25 Z" fill="none" stroke="#7cba3f" stroke-width="1.5" opacity="0.4"/>
+                <path d="M50 25 Q62 25 70 35 Q75 42 74 52 Q72 62 65 68 L50 80 L35 68 Q28 62 26 52 Q25 42 30 35 Q38 25 50 25Z" fill="rgba(124,186,63,0.08)" stroke="#7cba3f" stroke-width="1.2"/>
+                <path d="M35 28 L30 15 L40 25" fill="#7cba3f" opacity="0.5"/><path d="M65 28 L70 15 L60 25" fill="#7cba3f" opacity="0.5"/>
+                <circle cx="39" cy="42" r="9" fill="none" stroke="#7cba3f" stroke-width="1.2"/>
+                <circle cx="61" cy="42" r="9" fill="none" stroke="#7cba3f" stroke-width="1.2"/>
+                <circle cx="39" cy="42" r="4" fill="#e8c400"/><circle cx="61" cy="42" r="4" fill="#e8c400"/>
+                <circle cx="39" cy="42" r="1.5" fill="#0a0e08"/><circle cx="61" cy="42" r="1.5" fill="#0a0e08"/>
                 <path d="M47 48 L50 54 L53 48" fill="#ff8800" opacity="0.6"/>
-                <line x1="50" y1="70" x2="50" y2="105" stroke="#00d4ff" stroke-width="1.8" opacity="0.7"/>
-                <path d="M45 72 L50 70 L55 72 L50 74 Z" fill="#00d4ff" opacity="0.5"/>
+                <line x1="50" y1="70" x2="50" y2="105" stroke="#7cba3f" stroke-width="1.8" opacity="0.7"/>
+                <path d="M45 72 L50 70 L55 72 L50 74 Z" fill="#7cba3f" opacity="0.5"/>
             </svg>
         </div>
-        <div style="font-family:'Orbitron',monospace;font-size:28px;font-weight:900;letter-spacing:6px;margin-bottom:8px;white-space:nowrap;background:linear-gradient(90deg,#00d4ff,#fff,#00d4ff);background-size:200% auto;-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;">MABAT 443</div>
-        <div style="font-family:'Heebo',sans-serif;font-size:13px;font-weight:300;color:#7088a0;letter-spacing:2px;margin-bottom:35px;">פלטפורמת מודיעין גזרתית</div>
+        <div style="font-family:'Teko',sans-serif;font-size:38px;font-weight:600;letter-spacing:8px;margin-bottom:8px;white-space:nowrap;color:#7cba3f;text-shadow:0 0 20px rgba(124,186,63,0.3),0 2px 0 rgba(0,0,0,0.5);">MABAT 443</div>
+        <div style="font-family:'Heebo',sans-serif;font-size:13px;font-weight:300;color:#556848;letter-spacing:2px;margin-bottom:35px;">פלטפורמת מודיעין גזרתית</div>
         <div style="margin-bottom:20px;text-align:right;">
-            <label style="display:block;font-family:'Heebo',sans-serif;font-size:11px;font-weight:400;color:#3a4a5c;margin-bottom:6px;">קוד גישה</label>
+            <label style="display:block;font-family:'Heebo',sans-serif;font-size:11px;font-weight:400;color:#3a4a2c;margin-bottom:6px;">קוד גישה</label>
             <input id="loginInput" type="text" autocomplete="off" data-lpignore="true" data-1p-ignore maxlength="10" placeholder="••••"
-                style="width:100%;padding:12px 16px;background:rgba(0,0,0,0.4);border:1px solid #0f3460;border-radius:4px;color:#00d4ff;font-family:'Share Tech Mono',monospace;font-size:18px;letter-spacing:8px;text-align:center;outline:none;box-sizing:border-box;-webkit-text-security:disc;-moz-text-security:disc;text-security:disc;"
-                onfocus="this.style.borderColor='#00d4ff';this.style.boxShadow='0 0 20px rgba(0,212,255,0.15)'"
-                onblur="this.style.borderColor='#0f3460';this.style.boxShadow='none'">
+                style="width:100%;padding:12px 16px;background:rgba(0,0,0,0.4);border:1px solid #2a3a1a;border-radius:2px;color:#7cba3f;font-family:'Share Tech Mono',monospace;font-size:18px;letter-spacing:8px;text-align:center;outline:none;box-sizing:border-box;-webkit-text-security:disc;-moz-text-security:disc;text-security:disc;"
+                onfocus="this.style.borderColor='#7cba3f';this.style.boxShadow='0 0 20px rgba(124,186,63,0.12)'"
+                onblur="this.style.borderColor='#2a3a1a';this.style.boxShadow='none'">
         </div>
-        <button onclick="doLogin()" style="width:100%;padding:12px;background:linear-gradient(135deg,rgba(0,212,255,0.15),rgba(68,136,255,0.15));border:1px solid rgba(0,212,255,0.3);border-radius:4px;color:#00d4ff;font-family:'Heebo',sans-serif;font-size:14px;font-weight:700;letter-spacing:2px;cursor:pointer;">כניסה למערכת</button>
-        <div id="loginError" style="font-family:'Share Tech Mono',monospace;font-size:11px;color:#ff0040;height:16px;margin-top:10px;letter-spacing:1px;"></div>
+        <button onclick="doLogin()" style="width:100%;padding:12px;background:linear-gradient(135deg,rgba(124,186,63,0.12),rgba(80,140,30,0.12));border:1px solid rgba(124,186,63,0.3);border-radius:2px;color:#7cba3f;font-family:'Heebo',sans-serif;font-size:14px;font-weight:700;letter-spacing:2px;cursor:pointer;text-transform:uppercase;">כניסה למערכת</button>
+        <div id="loginError" style="font-family:'Share Tech Mono',monospace;font-size:11px;color:#ff2020;height:16px;margin-top:10px;letter-spacing:1px;"></div>
     </div>
-    <div style="position:absolute;bottom:15px;font-family:'Heebo',sans-serif;font-size:11px;color:#6880a0;pointer-events:auto;"><a href="https://wa.me/972542012000" target="_blank" style="color:#00ff88;text-decoration:none;">נבנה ע"י אלחי פיין | 054-201-2000</a></div>
+    <div style="position:absolute;bottom:15px;font-family:'Heebo',sans-serif;font-size:11px;color:#556848;pointer-events:auto;"><a href="https://wa.me/972542012000" target="_blank" style="color:#00ff88;text-decoration:none;">נבנה ע"י אלחי פיין | 054-201-2000</a></div>
 </div>
 <script>
 function doLogin() {
@@ -1980,10 +1973,10 @@ function doLogin() {
         setTimeout(function() { ov.style.display = 'none'; }, 800);
     } else {
         err.textContent = 'קוד גישה שגוי // ACCESS DENIED';
-        input.style.borderColor = '#ff0040';
-        input.style.boxShadow = '0 0 20px rgba(255,0,64,0.15)';
+        input.style.borderColor = '#ff2020';
+        input.style.boxShadow = '0 0 20px rgba(255,32,32,0.15)';
         input.value = '';
-        setTimeout(function() { err.textContent = ''; input.style.borderColor = '#0f3460'; input.style.boxShadow = 'none'; }, 2000);
+        setTimeout(function() { err.textContent = ''; input.style.borderColor = '#2a3a1a'; input.style.boxShadow = 'none'; }, 2000);
     }
 }
 document.getElementById('loginInput').addEventListener('keydown', function(e) {
@@ -2009,25 +2002,25 @@ document.getElementById('loginInput').addEventListener('keydown', function(e) {
     <header class="header">
         <div class="logo-section">
             <div class="logo-hex"><svg viewBox="0 0 100 120" width="40" height="48" xmlns="http://www.w3.org/2000/svg">
-<path d="M50 5 L90 25 L90 75 L50 115 L10 75 L10 25 Z" fill="none" stroke="#00d4ff" stroke-width="2" opacity="0.4"/>
-<path d="M50 10 L85 28 L85 72 L50 108 L15 72 L15 28 Z" fill="rgba(0,212,255,0.05)" stroke="#0f3460" stroke-width="1"/>
-<path d="M12 52 Q5 42 8 30 Q12 38 22 42 L30 50 Z" fill="#00d4ff" opacity="0.3" stroke="#00d4ff" stroke-width="0.7"/>
-<path d="M88 52 Q95 42 92 30 Q88 38 78 42 L70 50 Z" fill="#00d4ff" opacity="0.3" stroke="#00d4ff" stroke-width="0.7"/>
-<path d="M50 25 Q62 25 70 35 Q75 42 74 52 Q72 62 65 68 L50 80 L35 68 Q28 62 26 52 Q25 42 30 35 Q38 25 50 25Z" fill="rgba(0,212,255,0.1)" stroke="#00d4ff" stroke-width="1.5"/>
-<path d="M35 28 L30 15 L40 25" fill="#00d4ff" opacity="0.6" stroke="#00d4ff" stroke-width="1"/>
-<path d="M65 28 L70 15 L60 25" fill="#00d4ff" opacity="0.6" stroke="#00d4ff" stroke-width="1"/>
-<circle cx="39" cy="42" r="9" fill="none" stroke="#00d4ff" stroke-width="1.5"/>
-<circle cx="61" cy="42" r="9" fill="none" stroke="#00d4ff" stroke-width="1.5"/>
-<circle cx="39" cy="42" r="4" fill="#ffd000" opacity="0.9"><animate attributeName="opacity" values="0.9;0.4;0.9" dur="3s" repeatCount="indefinite"/></circle>
-<circle cx="61" cy="42" r="4" fill="#ffd000" opacity="0.9"><animate attributeName="opacity" values="0.9;0.4;0.9" dur="3s" repeatCount="indefinite"/></circle>
-<circle cx="39" cy="42" r="1.5" fill="#040810"/>
-<circle cx="61" cy="42" r="1.5" fill="#040810"/>
-<path d="M28 36 Q39 30 50 36 Q61 30 72 36" fill="none" stroke="#00d4ff" stroke-width="1.2" opacity="0.6"/>
+<path d="M50 5 L90 25 L90 75 L50 115 L10 75 L10 25 Z" fill="none" stroke="#7cba3f" stroke-width="2" opacity="0.4"/>
+<path d="M50 10 L85 28 L85 72 L50 108 L15 72 L15 28 Z" fill="rgba(124,186,63,0.05)" stroke="#2a3a1a" stroke-width="1"/>
+<path d="M12 52 Q5 42 8 30 Q12 38 22 42 L30 50 Z" fill="#7cba3f" opacity="0.3" stroke="#7cba3f" stroke-width="0.7"/>
+<path d="M88 52 Q95 42 92 30 Q88 38 78 42 L70 50 Z" fill="#7cba3f" opacity="0.3" stroke="#7cba3f" stroke-width="0.7"/>
+<path d="M50 25 Q62 25 70 35 Q75 42 74 52 Q72 62 65 68 L50 80 L35 68 Q28 62 26 52 Q25 42 30 35 Q38 25 50 25Z" fill="rgba(124,186,63,0.1)" stroke="#7cba3f" stroke-width="1.5"/>
+<path d="M35 28 L30 15 L40 25" fill="#7cba3f" opacity="0.6" stroke="#7cba3f" stroke-width="1"/>
+<path d="M65 28 L70 15 L60 25" fill="#7cba3f" opacity="0.6" stroke="#7cba3f" stroke-width="1"/>
+<circle cx="39" cy="42" r="9" fill="none" stroke="#7cba3f" stroke-width="1.5"/>
+<circle cx="61" cy="42" r="9" fill="none" stroke="#7cba3f" stroke-width="1.5"/>
+<circle cx="39" cy="42" r="4" fill="#e8c400" opacity="0.9"><animate attributeName="opacity" values="0.9;0.4;0.9" dur="3s" repeatCount="indefinite"/></circle>
+<circle cx="61" cy="42" r="4" fill="#e8c400" opacity="0.9"><animate attributeName="opacity" values="0.9;0.4;0.9" dur="3s" repeatCount="indefinite"/></circle>
+<circle cx="39" cy="42" r="1.5" fill="#0a0e08"/>
+<circle cx="61" cy="42" r="1.5" fill="#0a0e08"/>
+<path d="M28 36 Q39 30 50 36 Q61 30 72 36" fill="none" stroke="#7cba3f" stroke-width="1.2" opacity="0.6"/>
 <path d="M47 48 L50 54 L53 48" fill="#ff8800" opacity="0.7" stroke="#ff8800" stroke-width="0.7"/>
-<line x1="50" y1="70" x2="50" y2="105" stroke="#00d4ff" stroke-width="2" opacity="0.6"/>
-<path d="M45 72 L50 70 L55 72 L50 74 Z" fill="#00d4ff" opacity="0.5"/>
-<line x1="44" y1="73" x2="56" y2="73" stroke="#00d4ff" stroke-width="1.5" opacity="0.5"/>
-<path d="M48 103 L50 110 L52 103" fill="#00d4ff" opacity="0.4"/>
+<line x1="50" y1="70" x2="50" y2="105" stroke="#7cba3f" stroke-width="2" opacity="0.6"/>
+<path d="M45 72 L50 70 L55 72 L50 74 Z" fill="#7cba3f" opacity="0.5"/>
+<line x1="44" y1="73" x2="56" y2="73" stroke="#7cba3f" stroke-width="1.5" opacity="0.5"/>
+<path d="M48 103 L50 110 L52 103" fill="#7cba3f" opacity="0.4"/>
 </svg></div>
             <div>
                 <div class="system-title">MABAT 443</div>
@@ -2605,9 +2598,9 @@ function buildLocationPopup(loc, priority, color) {
             `<b style="color:${color};font-size:13px;">${loc.he}</b>` +
             `<span style="font-size:9px;padding:1px 6px;border:1px solid ${color};border-radius:3px;color:${color};letter-spacing:1px;">${priority}</span>` +
         `</div>` +
-        `<div style="color:#9ab0c8;font-size:10px;margin-bottom:4px;">${loc.lat.toFixed(3)}N, ${loc.lng.toFixed(3)}E</div>` +
+        `<div style="color:#8a9a78;font-size:10px;margin-bottom:4px;">${loc.lat.toFixed(3)}N, ${loc.lng.toFixed(3)}E</div>` +
         `<div style="text-align:center;margin-top:4px;">` +
-            `<a href="${mapsLink}" target="_blank" style="color:#00d4ff;font-size:10px;text-decoration:none;">📍 פתח במפות Google</a>` +
+            `<a href="${mapsLink}" target="_blank" style="color:#7cba3f;font-size:10px;text-decoration:none;">📍 פתח במפות Google</a>` +
         `</div>` +
     `</div>`;
 }
@@ -2626,12 +2619,12 @@ function initMap() {
     }).addTo(map);
 
     L.circle([SECTOR_CENTER.lat, SECTOR_CENTER.lng], {
-        radius: 15000, color: '#00d4ff', fillColor: '#00d4ff',
+        radius: 15000, color: '#7cba3f', fillColor: '#7cba3f',
         fillOpacity: 0.03, weight: 1, dashArray: '8, 8', opacity: 0.3
     }).addTo(map);
 
     L.circle([SECTOR_CENTER.lat, SECTOR_CENTER.lng], {
-        radius: 200, color: '#00d4ff', fillColor: '#00d4ff',
+        radius: 200, color: '#7cba3f', fillColor: '#7cba3f',
         fillOpacity: 0.3, weight: 2
     }).addTo(map);
 
@@ -2694,25 +2687,25 @@ function initMap() {
                     `<b style="color:${pColor};font-size:14px;">${loc.he}</b>` +
                     `<span style="font-size:9px;padding:1px 6px;border:1px solid ${pColor};border-radius:3px;color:${pColor};letter-spacing:1px;">${loc.priority}</span>` +
                 `</div>` +
-                (loc.pop ? `<div style="color:#9ab0c8;font-size:10px;margin-bottom:4px;">אוכלוסייה: ${loc.pop}</div>` : '') +
-                `<div style="color:#e0e8f0;font-size:11px;line-height:1.4;margin-bottom:6px;border-right:2px solid ${pColor};padding-right:6px;">${loc.history || ''}</div>` +
+                (loc.pop ? `<div style="color:#8a9a78;font-size:10px;margin-bottom:4px;">אוכלוסייה: ${loc.pop}</div>` : '') +
+                `<div style="color:#d4dcc8;font-size:11px;line-height:1.4;margin-bottom:6px;border-right:2px solid ${pColor};padding-right:6px;">${loc.history || ''}</div>` +
                 `<div style="margin-bottom:5px;">${threatTags}</div>` +
-                `<div style="border-top:1px solid #0f3460;padding-top:4px;display:flex;gap:12px;">` +
+                `<div style="border-top:1px solid #2a3a1a;padding-top:4px;display:flex;gap:12px;">` +
                     `<div style="text-align:center;">` +
-                        `<div style="font-size:9px;color:#9ab0c8;">24 שע'</div>` +
+                        `<div style="font-size:9px;color:#8a9a78;">24 שע'</div>` +
                         `<b style="color:${count24h > 0 ? '#ff8800' : '#00ff88'};font-size:14px;">${count24h}</b>` +
                     `</div>` +
                     `<div style="text-align:center;">` +
-                        `<div style="font-size:9px;color:#9ab0c8;">72 שע'</div>` +
+                        `<div style="font-size:9px;color:#8a9a78;">72 שע'</div>` +
                         `<b style="color:${count72h > 0 ? '#ffd000' : '#00ff88'};font-size:14px;">${count72h}</b>` +
                     `</div>` +
                     `<div style="flex:1;text-align:center;">` +
-                        `<div style="font-size:9px;color:#9ab0c8;">אחרון</div>` +
-                        `<span style="color:#e0e8f0;font-size:10px;">${lastEvent}</span>` +
+                        `<div style="font-size:9px;color:#8a9a78;">אחרון</div>` +
+                        `<span style="color:#d4dcc8;font-size:10px;">${lastEvent}</span>` +
                     `</div>` +
                 `</div>` +
-                `<div style="border-top:1px solid #0f3460;margin-top:6px;padding-top:6px;text-align:center;">` +
-                    `<a href="${mapsLink}" target="_blank" style="color:#00d4ff;font-size:10px;text-decoration:none;">📍 פתח במפות Google</a>` +
+                `<div style="border-top:1px solid #2a3a1a;margin-top:6px;padding-top:6px;text-align:center;">` +
+                    `<a href="${mapsLink}" target="_blank" style="color:#7cba3f;font-size:10px;text-decoration:none;">📍 פתח במפות Google</a>` +
                 `</div>` +
             `</div>`;
             this.unbindPopup();
@@ -2728,7 +2721,7 @@ function initMap() {
         [31.880, 35.160], [31.882, 35.175]
     ];
     L.polyline(route443, {
-        color: '#00d4ff', weight: 2, opacity: 0.5, dashArray: '10, 6'
+        color: '#7cba3f', weight: 2, opacity: 0.5, dashArray: '10, 6'
     }).addTo(map);
 }
 
@@ -2796,7 +2789,7 @@ function updateMapMarkers(news) {
                 <b style="color:${color};">[${item.urgencyLabel || 'ALERT'}]</b><br>
                 <b>${escapeHtml(item.title || '')}</b><br>
                 <small>${escapeHtml(item.snippet || '')}</small><br>
-                <small style="color:#888;">${escapeHtml(item.source)} | ${formatTime(item.timestamp)}</small>
+                <small style="color:#556848;">${escapeHtml(item.source)} | ${formatTime(item.timestamp)}</small>
             </div>
         `, { className: 'dark-tooltip', maxWidth: 280 }).addTo(map);
 
@@ -2975,8 +2968,8 @@ function renderAlerts() {
         const coords = lookupCoords(item);
         const locationTag = locationName
             ? (coords
-                ? `<a href="javascript:void(0)" onclick="flyToAlertLocation(${coords.lat},${coords.lng},event)" style="color:#00d4ff;font-size:10px;text-decoration:none;display:inline-flex;align-items:center;gap:3px;margin-top:2px;cursor:pointer;">📍 ${escapeHtml(locationName)}</a>`
-                : `<span style="color:#00d4ff;font-size:10px;display:inline-flex;align-items:center;gap:3px;margin-top:2px;">📍 ${escapeHtml(locationName)}</span>`)
+                ? `<a href="javascript:void(0)" onclick="flyToAlertLocation(${coords.lat},${coords.lng},event)" style="color:#7cba3f;font-size:10px;text-decoration:none;display:inline-flex;align-items:center;gap:3px;margin-top:2px;cursor:pointer;">📍 ${escapeHtml(locationName)}</a>`
+                : `<span style="color:#7cba3f;font-size:10px;display:inline-flex;align-items:center;gap:3px;margin-top:2px;">📍 ${escapeHtml(locationName)}</span>`)
             : '';
         // Source link - only shown in expanded view
         const sourceUrl = item.sourceUrl || getSourceUrl(item.source);
@@ -3001,7 +2994,7 @@ function renderAlerts() {
             </div>
             ${(item.fullText || item.snippet) ? '<div class="alert-full-text" style="display:none;">' + escapeHtml(item.fullText || item.snippet) + '</div>' : ''}
             <div class="alert-meta-row" style="display:none;">
-                ${sourceUrl ? '<a href="' + escapeHtml(sourceUrl) + '" target="_blank" onclick="event.stopPropagation();" style="color:#00d4ff;text-decoration:none;cursor:pointer;">📡 הצג מקור: ' + escapeHtml(item.source || 'טלגרם') + '</a>' : '<span style="color:var(--text-dim);">📡 ' + escapeHtml(item.source || 'N/A') + '</span>'}
+                ${sourceUrl ? '<a href="' + escapeHtml(sourceUrl) + '" target="_blank" onclick="event.stopPropagation();" style="color:#7cba3f;text-decoration:none;cursor:pointer;">📡 הצג מקור: ' + escapeHtml(item.source || 'טלגרם') + '</a>' : '<span style="color:var(--text-dim);">📡 ' + escapeHtml(item.source || 'N/A') + '</span>'}
                 ${item.matchedKeywords ? '<span>KW: ' + escapeHtml(item.matchedKeywords.join(', ')) + '</span>' : ''}
             </div>
         </div>
@@ -3061,7 +3054,7 @@ function flyToAlertLocation(lat, lng, event) {
         map.flyTo([lat, lng], 15, { duration: 1 });
         // Flash a temporary marker
         const pulse = L.circleMarker([lat, lng], {
-            radius: 20, color: '#00d4ff', fillColor: '#00d4ff',
+            radius: 20, color: '#7cba3f', fillColor: '#7cba3f',
             fillOpacity: 0.3, weight: 2
         }).addTo(map);
         setTimeout(() => map.removeLayer(pulse), 3000);
@@ -3309,12 +3302,12 @@ function renderHistory() {
                 const urgLabel = urgLabels[item.urgency] || '';
                 const sourceUrl = item.sourceUrl || getSourceUrl(item.source);
                 const sourceTag = sourceUrl
-                    ? `<a href="${escapeHtml(sourceUrl)}" target="_blank" style="color:#00d4ff;font-size:10px;text-decoration:none;">📡 ${escapeHtml(item.source || '')}</a>`
+                    ? `<a href="${escapeHtml(sourceUrl)}" target="_blank" style="color:#7cba3f;font-size:10px;text-decoration:none;">📡 ${escapeHtml(item.source || '')}</a>`
                     : `<span style="color:var(--text-dim);font-size:10px;">📡 ${escapeHtml(item.source || '')}</span>`;
                 const locTag = hLocName
                     ? (hCoords
-                        ? `<a href="javascript:void(0)" onclick="toggleHistory();setTimeout(()=>{map.flyTo([${hCoords.lat},${hCoords.lng}],15,{duration:1})},300)" style="color:#00d4ff;font-size:10px;text-decoration:none;cursor:pointer;">📍 ${escapeHtml(hLocName)}</a>`
-                        : `<span style="color:#00d4ff;font-size:10px;">📍 ${escapeHtml(hLocName)}</span>`)
+                        ? `<a href="javascript:void(0)" onclick="toggleHistory();setTimeout(()=>{map.flyTo([${hCoords.lat},${hCoords.lng}],15,{duration:1})},300)" style="color:#7cba3f;font-size:10px;text-decoration:none;cursor:pointer;">📍 ${escapeHtml(hLocName)}</a>`
+                        : `<span style="color:#7cba3f;font-size:10px;">📍 ${escapeHtml(hLocName)}</span>`)
                     : '';
                 const noteId = item.id || item.timestamp || '';
                 const note = journalNotes[noteId];
