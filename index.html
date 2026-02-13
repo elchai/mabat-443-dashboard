@@ -38,8 +38,8 @@
     --purple: #a855f7;
     --purple-dim: #a855f744;
     --text-primary: #e0e8f0;
-    --text-secondary: #7088a0;
-    --text-dim: #3a4a5c;
+    --text-secondary: #9ab0c8;
+    --text-dim: #6880a0;
     --font-display: 'Orbitron', monospace;
     --font-body: 'Rajdhani', sans-serif;
     --font-mono: 'Share Tech Mono', monospace;
@@ -1219,12 +1219,18 @@ body {
         gap: 8px;
         min-height: 60px;
         height: auto;
+        justify-content: center;
+    }
+
+    .logo-section {
+        width: 100%;
+        justify-content: center;
     }
 
     .system-title { font-size: 16px; letter-spacing: 2px; }
     .system-subtitle { font-size: 9px; display: none; }
     .logo-hex { width: 35px; height: 35px; }
-    .header-center { gap: 6px; flex-wrap: wrap; }
+    .header-center { gap: 6px; flex-wrap: wrap; justify-content: center; width: 100%; }
     .header-center .status-badge { padding: 3px 8px; font-size: 10px; }
     .header-right { display: none; }
 
@@ -1248,8 +1254,8 @@ body {
     .timeline-bars { height: 25px; }
 
     .alert-item { padding: 8px 10px; gap: 8px; }
-    .alert-title { font-size: 12px; }
-    .alert-snippet { font-size: 9px; }
+    .alert-title { font-size: 12px; white-space: normal; overflow: visible; text-overflow: unset; }
+    .alert-snippet { font-size: 10px; white-space: normal; overflow: visible; text-overflow: unset; line-height: 1.5; }
     .alert-source { font-size: 8px; padding: 1px 4px; }
 
     .left-panel {
@@ -1775,7 +1781,7 @@ document.getElementById('loginInput').addEventListener('keydown', function(e) {
     <!-- RIGHT PANEL - AI SUMMARY -->
     <div class="panel right-panel">
         <div class="panel-header">
-            <span class="panel-title">תדריך AI</span>
+            <span class="panel-title">סקירה כללית</span>
             <span class="ai-badge">GEMINI AI</span>
         </div>
         <div class="panel-body" id="summaryBody">
@@ -2009,6 +2015,21 @@ function updateClock() {
     document.getElementById('dateDisplay').textContent = `יום ${days[now.getDay()]} | ${now.getDate()} ${months[now.getMonth()]} ${now.getFullYear()}`;
 }
 
+// ═══════ LOCATION POPUP BUILDER ═══════
+function buildLocationPopup(loc, priority, color) {
+    const mapsLink = `https://www.google.com/maps?q=${loc.lat},${loc.lng}`;
+    return `<div style="direction:rtl;text-align:right;min-width:160px;">` +
+        `<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:4px;">` +
+            `<b style="color:${color};font-size:13px;">${loc.he}</b>` +
+            `<span style="font-size:9px;padding:1px 6px;border:1px solid ${color};border-radius:3px;color:${color};letter-spacing:1px;">${priority}</span>` +
+        `</div>` +
+        `<div style="color:#9ab0c8;font-size:10px;margin-bottom:4px;">${loc.lat.toFixed(3)}N, ${loc.lng.toFixed(3)}E</div>` +
+        `<div style="text-align:center;margin-top:4px;">` +
+            `<a href="${mapsLink}" target="_blank" style="color:#00d4ff;font-size:10px;text-decoration:none;">📍 פתח במפות Google</a>` +
+        `</div>` +
+    `</div>`;
+}
+
 // ═══════ MAP ═══════
 function initMap() {
     map = L.map('map', {
@@ -2035,22 +2056,28 @@ function initMap() {
     P1_LOCATIONS.forEach(loc => {
         L.circleMarker([loc.lat, loc.lng], {
             radius: 6, color: '#ff0040', fillColor: '#ff0040', fillOpacity: 0.4, weight: 1.5
-        }).bindTooltip(`<b>P1</b> ${loc.he}`, { className: 'dark-tooltip' }).addTo(map);
+        }).bindTooltip(`<b>P1</b> ${loc.he}`, { className: 'dark-tooltip' })
+          .bindPopup(buildLocationPopup(loc, 'P1', '#ff0040'), { className: 'dark-tooltip', maxWidth: 280 })
+          .addTo(map);
     });
 
     P2_LOCATIONS.forEach(loc => {
         L.circleMarker([loc.lat, loc.lng], {
             radius: 5, color: '#ff8800', fillColor: '#ff8800', fillOpacity: 0.3, weight: 1
-        }).bindTooltip(`<b>P2</b> ${loc.he}`, { className: 'dark-tooltip' }).addTo(map);
+        }).bindTooltip(`<b>P2</b> ${loc.he}`, { className: 'dark-tooltip' })
+          .bindPopup(buildLocationPopup(loc, 'P2', '#ff8800'), { className: 'dark-tooltip', maxWidth: 280 })
+          .addTo(map);
     });
 
     P3_LOCATIONS.forEach(loc => {
         L.circleMarker([loc.lat, loc.lng], {
             radius: 4, color: '#4488ff', fillColor: '#4488ff', fillOpacity: 0.3, weight: 1
-        }).bindTooltip(`<b>P3</b> ${loc.he}`, { className: 'dark-tooltip' }).addTo(map);
+        }).bindTooltip(`<b>P3</b> ${loc.he}`, { className: 'dark-tooltip' })
+          .bindPopup(buildLocationPopup(loc, 'P3', '#4488ff'), { className: 'dark-tooltip', maxWidth: 280 })
+          .addTo(map);
     });
 
-    // KEY VILLAGES - larger highlighted markers with sector history tooltips
+    // KEY VILLAGES - larger highlighted markers with sector history popups
     KEY_VILLAGES.forEach(loc => {
         const pColor = loc.priority === 'P1' ? '#ff0040' : loc.priority === 'P2' ? '#ff8800' : '#4488ff';
         const marker = L.circleMarker([loc.lat, loc.lng], {
@@ -2061,40 +2088,46 @@ function initMap() {
             weight: 2
         }).addTo(map);
 
-        // Rich tooltip with sector history + live data
-        marker.on('mouseover', function() {
+        marker.bindTooltip(`<b>${loc.priority}</b> ${loc.he}`, { className: 'dark-tooltip' });
+
+        // Rich popup on click with sector history + live data
+        marker.on('click', function() {
             const count24h = getVillageReportCount(loc, 24);
             const count72h = getVillageReportCount(loc, 72);
             const lastEvent = getVillageLastEvent(loc);
             const threatTags = (loc.threats || []).map(t =>
                 `<span style="display:inline-block;padding:1px 5px;margin:1px;border-radius:3px;background:rgba(255,0,64,0.15);border:1px solid rgba(255,0,64,0.3);font-size:9px;color:#ff8800;">${t}</span>`
             ).join('');
+            const mapsLink = `https://www.google.com/maps?q=${loc.lat},${loc.lng}`;
 
-            const tooltipHtml = `<div style="direction:rtl;text-align:right;min-width:200px;max-width:260px;">` +
+            const popupHtml = `<div style="direction:rtl;text-align:right;min-width:200px;max-width:260px;">` +
                 `<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:4px;">` +
                     `<b style="color:${pColor};font-size:14px;">${loc.he}</b>` +
                     `<span style="font-size:9px;padding:1px 6px;border:1px solid ${pColor};border-radius:3px;color:${pColor};letter-spacing:1px;">${loc.priority}</span>` +
                 `</div>` +
-                (loc.pop ? `<div style="color:#7088a0;font-size:10px;margin-bottom:4px;">אוכלוסייה: ${loc.pop}</div>` : '') +
+                (loc.pop ? `<div style="color:#9ab0c8;font-size:10px;margin-bottom:4px;">אוכלוסייה: ${loc.pop}</div>` : '') +
                 `<div style="color:#e0e8f0;font-size:11px;line-height:1.4;margin-bottom:6px;border-right:2px solid ${pColor};padding-right:6px;">${loc.history || ''}</div>` +
                 `<div style="margin-bottom:5px;">${threatTags}</div>` +
                 `<div style="border-top:1px solid #0f3460;padding-top:4px;display:flex;gap:12px;">` +
                     `<div style="text-align:center;">` +
-                        `<div style="font-size:9px;color:#7088a0;">24 שע'</div>` +
+                        `<div style="font-size:9px;color:#9ab0c8;">24 שע'</div>` +
                         `<b style="color:${count24h > 0 ? '#ff8800' : '#00ff88'};font-size:14px;">${count24h}</b>` +
                     `</div>` +
                     `<div style="text-align:center;">` +
-                        `<div style="font-size:9px;color:#7088a0;">72 שע'</div>` +
+                        `<div style="font-size:9px;color:#9ab0c8;">72 שע'</div>` +
                         `<b style="color:${count72h > 0 ? '#ffd000' : '#00ff88'};font-size:14px;">${count72h}</b>` +
                     `</div>` +
                     `<div style="flex:1;text-align:center;">` +
-                        `<div style="font-size:9px;color:#7088a0;">אחרון</div>` +
+                        `<div style="font-size:9px;color:#9ab0c8;">אחרון</div>` +
                         `<span style="color:#e0e8f0;font-size:10px;">${lastEvent}</span>` +
                     `</div>` +
                 `</div>` +
+                `<div style="border-top:1px solid #0f3460;margin-top:6px;padding-top:6px;text-align:center;">` +
+                    `<a href="${mapsLink}" target="_blank" style="color:#00d4ff;font-size:10px;text-decoration:none;">📍 פתח במפות Google</a>` +
+                `</div>` +
             `</div>`;
-            this.unbindTooltip();
-            this.bindTooltip(tooltipHtml, { className: 'dark-tooltip', permanent: false, direction: 'top', maxWidth: 280 }).openTooltip();
+            this.unbindPopup();
+            this.bindPopup(popupHtml, { className: 'dark-tooltip', maxWidth: 280 }).openPopup();
         });
 
         // Outer pulse ring
@@ -2315,7 +2348,20 @@ function renderAlerts() {
 
     items.sort((a, b) => (b.timestamp || 0) - (a.timestamp || 0));
 
-    feed.innerHTML = items.map(item => `
+    feed.innerHTML = items.map(item => {
+        const locationName = item.matchedLocations ? item.matchedLocations.join(', ') : '';
+        const hasCoords = item.coordinates && (item.coordinates.lat || item.coordinates.lon || item.coordinates.lng);
+        const coordLat = hasCoords ? item.coordinates.lat : '';
+        const coordLng = hasCoords ? (item.coordinates.lon || item.coordinates.lng) : '';
+        const mapsLink = hasCoords ? `https://www.google.com/maps?q=${coordLat},${coordLng}` : '';
+        const locationTag = locationName
+            ? (hasCoords
+                ? `<a href="${mapsLink}" target="_blank" onclick="event.stopPropagation();" style="color:#00d4ff;font-size:10px;text-decoration:none;display:inline-flex;align-items:center;gap:3px;margin-top:3px;">📍 ${escapeHtml(locationName)}</a>`
+                : `<span style="color:#9ab0c8;font-size:10px;display:inline-flex;align-items:center;gap:3px;margin-top:3px;">📍 ${escapeHtml(locationName)}</span>`)
+            : (hasCoords
+                ? `<a href="${mapsLink}" target="_blank" onclick="event.stopPropagation();" style="color:#00d4ff;font-size:10px;text-decoration:none;display:inline-flex;align-items:center;gap:3px;margin-top:3px;">📍 מיקום על המפה</a>`
+                : '');
+        return `
         <div class="alert-item" onclick="toggleAlertExpand(this)">
             <div class="alert-row">
                 <span class="alert-time">${formatTime(item.timestamp)}</span>
@@ -2323,18 +2369,20 @@ function renderAlerts() {
                 <div class="alert-content">
                     <div class="alert-title">${escapeHtml(item.title || 'N/A')}</div>
                     <div class="alert-snippet">${escapeHtml((item.snippet || item.fullText || '').substring(0, 120))}</div>
+                    ${locationTag}
                 </div>
                 <span class="alert-source">${escapeHtml(item.source || 'N/A')}</span>
             </div>
             <div class="alert-full-text" style="display:none;">${escapeHtml(item.fullText || item.snippet || '')}</div>
             <div class="alert-meta-row" style="display:none;">
                 <span>${formatDateTime(item.timestamp)}</span>
-                ${item.matchedLocations ? '<span>LOC: ' + escapeHtml(item.matchedLocations.join(', ')) + '</span>' : ''}
+                ${item.matchedLocations ? '<span>📍 ' + escapeHtml(item.matchedLocations.join(', ')) + '</span>' : ''}
                 ${item.matchedKeywords ? '<span>KW: ' + escapeHtml(item.matchedKeywords.join(', ')) + '</span>' : ''}
                 ${item.distance ? '<span>' + item.distance.toFixed(1) + ' km</span>' : ''}
+                ${hasCoords ? '<a href="' + mapsLink + '" target="_blank" onclick="event.stopPropagation();" style="color:#00d4ff;text-decoration:none;">🗺️ Google Maps</a>' : ''}
             </div>
         </div>
-    `).join('');
+    `}).join('');
 }
 
 function toggleAlertExpand(el) {
@@ -2580,17 +2628,30 @@ function renderHistory() {
     body.innerHTML = Object.entries(groups).map(([date, dateItems]) => `
         <div class="history-date-group">
             <div class="history-date-header">${date} (${dateItems.length})</div>
-            ${dateItems.map(item => `
+            ${dateItems.map(item => {
+                const hHasCoords = item.coordinates && (item.coordinates.lat || item.coordinates.lon || item.coordinates.lng);
+                const hCoordLat = hHasCoords ? item.coordinates.lat : '';
+                const hCoordLng = hHasCoords ? (item.coordinates.lon || item.coordinates.lng) : '';
+                const hMapsLink = hHasCoords ? `https://www.google.com/maps?q=${hCoordLat},${hCoordLng}` : '';
+                const hLocName = item.matchedLocations ? item.matchedLocations.join(', ') : '';
+                const hLocTag = hLocName
+                    ? (hHasCoords
+                        ? `<a href="${hMapsLink}" target="_blank" style="color:#00d4ff;font-size:10px;text-decoration:none;">📍 ${escapeHtml(hLocName)}</a>`
+                        : `<span style="color:#9ab0c8;font-size:10px;">📍 ${escapeHtml(hLocName)}</span>`)
+                    : (hHasCoords
+                        ? `<a href="${hMapsLink}" target="_blank" style="color:#00d4ff;font-size:10px;text-decoration:none;">📍 מיקום</a>`
+                        : '');
+                return `
                 <div class="history-item">
                     <span class="history-item-time">${formatTime(item.timestamp)}</span>
                     <div class="history-item-urgency" style="background:${colors[item.urgency] || '#666'}; box-shadow: 0 0 6px ${colors[item.urgency] || '#666'};"></div>
                     <div class="history-item-content">
                         <div class="history-item-title">${escapeHtml(item.title || 'N/A')}</div>
                         <div class="history-item-text">${escapeHtml((item.snippet || item.fullText || '').substring(0, 200))}</div>
-                        <div class="history-item-source">${escapeHtml(item.source || 'N/A')}${item.matchedLocations ? ' | ' + escapeHtml(item.matchedLocations.join(', ')) : ''}</div>
+                        <div class="history-item-source">${escapeHtml(item.source || 'N/A')} ${hLocTag}</div>
                     </div>
                 </div>
-            `).join('')}
+            `}).join('')}
         </div>
     `).join('');
 }
