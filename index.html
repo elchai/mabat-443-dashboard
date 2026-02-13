@@ -394,6 +394,7 @@ body {
     100% { transform: rotate(360deg); }
 }
 
+.threat-circle.level-green { border-color: var(--green); box-shadow: 0 0 30px rgba(0, 255, 136, 0.2); }
 .threat-circle.level-gray { border-color: #666; }
 .threat-circle.level-blue { border-color: var(--blue); box-shadow: 0 0 30px rgba(68, 136, 255, 0.2); }
 .threat-circle.level-yellow { border-color: var(--yellow); box-shadow: 0 0 30px rgba(255, 208, 0, 0.2); }
@@ -1309,8 +1310,7 @@ body {
 }
 
 @media (max-width: 480px) {
-    .header-center .status-badge:nth-child(2),
-    .header-center .status-badge:nth-child(3) { display: none; }
+    .header-center .status-badge:nth-child(2) { display: none; }
     .header-btn { padding: 4px 8px; font-size: 10px; }
     .header-btn .btn-icon { font-size: 12px; }
     .logo-section { gap: 8px; }
@@ -1681,7 +1681,7 @@ document.getElementById('loginInput').addEventListener('keydown', function(e) {
                 <span>סריקה</span>
                 <span id="lastScan" style="color: var(--cyan);">--:--</span>
             </div>
-            <div class="status-badge">
+            <div class="status-badge" onclick="scrollToAlerts()" style="cursor:pointer;">
                 <span>התראות</span>
                 <span id="alertCount" style="color: var(--orange);">0</span>
             </div>
@@ -2209,9 +2209,14 @@ async function fetchData() {
 
         // Skip Firebase error responses
         if (news && !news.error) {
-            // Normalize urgencyScore → urgency
+            // Normalize urgencyScore → urgency, and ensure timestamp
             Object.values(news).forEach(item => {
                 if (!item.urgency && item.urgencyScore) item.urgency = item.urgencyScore;
+                if (!item.timestamp) {
+                    if (item.publishedAt) item.timestamp = new Date(item.publishedAt).getTime();
+                    else if (item.date) item.timestamp = new Date(item.date).getTime();
+                    else if (item.fetchedAt) item.timestamp = new Date(item.fetchedAt).getTime();
+                }
             });
             // Detect new alerts for flash
             if (!isFirstLoad) {
@@ -2354,13 +2359,12 @@ function renderAlerts() {
         const coordLat = hasCoords ? item.coordinates.lat : '';
         const coordLng = hasCoords ? (item.coordinates.lon || item.coordinates.lng) : '';
         const mapsLink = hasCoords ? `https://www.google.com/maps?q=${coordLat},${coordLng}` : '';
-        const locationTag = locationName
-            ? (hasCoords
-                ? `<a href="${mapsLink}" target="_blank" onclick="event.stopPropagation();" style="color:#00d4ff;font-size:10px;text-decoration:none;display:inline-flex;align-items:center;gap:3px;margin-top:3px;">📍 ${escapeHtml(locationName)}</a>`
-                : `<span style="color:#9ab0c8;font-size:10px;display:inline-flex;align-items:center;gap:3px;margin-top:3px;">📍 ${escapeHtml(locationName)}</span>`)
-            : (hasCoords
-                ? `<a href="${mapsLink}" target="_blank" onclick="event.stopPropagation();" style="color:#00d4ff;font-size:10px;text-decoration:none;display:inline-flex;align-items:center;gap:3px;margin-top:3px;">📍 מיקום על המפה</a>`
+        const flyBtn = hasCoords
+            ? `<a href="javascript:void(0)" onclick="flyToAlertLocation(${coordLat},${coordLng},event)" style="color:#00d4ff;font-size:10px;text-decoration:none;display:inline-flex;align-items:center;gap:3px;margin-top:3px;cursor:pointer;">📍 ${escapeHtml(locationName || 'הצג במפה')}</a>`
+            : (locationName
+                ? `<span style="color:#9ab0c8;font-size:10px;display:inline-flex;align-items:center;gap:3px;margin-top:3px;">📍 ${escapeHtml(locationName)}</span>`
                 : '');
+        const locationTag = flyBtn;
         return `
         <div class="alert-item" onclick="toggleAlertExpand(this)">
             <div class="alert-row">
@@ -2379,7 +2383,7 @@ function renderAlerts() {
                 ${item.matchedLocations ? '<span>📍 ' + escapeHtml(item.matchedLocations.join(', ')) + '</span>' : ''}
                 ${item.matchedKeywords ? '<span>KW: ' + escapeHtml(item.matchedKeywords.join(', ')) + '</span>' : ''}
                 ${item.distance ? '<span>' + item.distance.toFixed(1) + ' km</span>' : ''}
-                ${hasCoords ? '<a href="' + mapsLink + '" target="_blank" onclick="event.stopPropagation();" style="color:#00d4ff;text-decoration:none;">🗺️ Google Maps</a>' : ''}
+                ${hasCoords ? '<a href="javascript:void(0)" onclick="flyToAlertLocation(' + coordLat + ',' + coordLng + ',event)" style="color:#00d4ff;text-decoration:none;cursor:pointer;">🗺️ הצג במפה</a>' : ''}
             </div>
         </div>
     `}).join('');
@@ -2408,6 +2412,30 @@ function toggleAlertExpand(el) {
         fullText.style.display = 'block';
         metaRow.style.display = 'flex';
     }
+}
+
+function scrollToAlerts() {
+    const alertPanel = document.getElementById('alertFeedPanel');
+    alertPanel.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    // Brief highlight flash
+    alertPanel.style.boxShadow = '0 0 20px var(--cyan)';
+    setTimeout(() => { alertPanel.style.boxShadow = ''; }, 1500);
+}
+
+function flyToAlertLocation(lat, lng, event) {
+    event.stopPropagation();
+    if (mapIsFullscreen) toggleMapFullscreen();
+    const mapEl = document.getElementById('mapPanel');
+    mapEl.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    setTimeout(() => {
+        map.flyTo([lat, lng], 15, { duration: 1 });
+        // Flash a temporary marker
+        const pulse = L.circleMarker([lat, lng], {
+            radius: 20, color: '#00d4ff', fillColor: '#00d4ff',
+            fillOpacity: 0.3, weight: 2
+        }).addTo(map);
+        setTimeout(() => map.removeLayer(pulse), 3000);
+    }, 400);
 }
 
 // ═══════ RENDER TIMELINE ═══════
@@ -2501,7 +2529,7 @@ function renderThreatLevel() {
     const label = document.getElementById('threatLabel');
 
     const levels = {
-        0: { class: 'level-gray', label: 'שקט', color: '#666' },
+        0: { class: 'level-green', label: 'תקין', color: '#00ff88' },
         1: { class: 'level-gray', label: 'מינימלי', color: '#666' },
         2: { class: 'level-blue', label: 'חלש', color: '#4488ff' },
         3: { class: 'level-yellow', label: 'בינוני', color: '#ffd000' },
