@@ -2099,17 +2099,17 @@ document.getElementById('loginInput').addEventListener('keydown', function(e) {
             </div>
             <div class="header-divider"></div>
             <div class="header-actions-group">
-                <button class="header-btn" onclick="toggleHistory()">
-                    <span class="btn-icon" id="alertCount" style="background:var(--orange);color:#000;border-radius:50%;width:20px;height:20px;display:inline-flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;">0</span>
-                    <span>יומן מבצעים</span>
+                <button class="header-btn" onclick="loadDemoData()" style="color:var(--yellow);border-color:var(--yellow-dim);">
+                    <span class="btn-icon">&#9881;</span>
+                    <span>הדגמה</span>
                 </button>
                 <button class="header-btn" onclick="toggleReportForm()" style="color:var(--green);border-color:var(--green-dim);">
                     <span class="btn-icon">&#x2795;</span>
                     <span>דיווח שטח</span>
                 </button>
-                <button class="header-btn" onclick="loadDemoData()" style="color:var(--yellow);border-color:var(--yellow-dim);">
-                    <span class="btn-icon">&#9881;</span>
-                    <span>הדגמה</span>
+                <button class="header-btn" onclick="toggleHistory()">
+                    <span class="btn-icon" id="alertCount" style="background:var(--orange);color:#000;border-radius:50%;width:20px;height:20px;display:inline-flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;">0</span>
+                    <span>יומן מבצעים</span>
                 </button>
             </div>
         </div>
