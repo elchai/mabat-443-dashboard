@@ -2676,14 +2676,14 @@ function renderAlerts() {
         return `
         <div class="alert-item${isChecked ? ' alert-checked' : ''}" onclick="toggleAlertExpand(this)">
             <div class="alert-row">
+                <div class="alert-check${isChecked ? ' checked' : ''}" onclick="toggleAlertCheck(this,'${alertId}',event)" title="סמן כנקרא">
+                    ${isChecked ? '✓' : ''}
+                </div>
                 <span class="alert-time">${formatTimeWithDate(item.timestamp)}</span>
                 <div class="alert-urgency ${item._isAnarchist ? 'urgency-anarchist' : 'urgency-' + (item.urgency || 1)}"></div>
                 <div class="alert-content">
                     <div class="alert-title">${escapeHtml(item.title || 'N/A')}</div>
                     ${locationTag}
-                </div>
-                <div class="alert-check${isChecked ? ' checked' : ''}" onclick="toggleAlertCheck(this,'${alertId}',event)" title="סמן כנקרא">
-                    ${isChecked ? '✓' : ''}
                 </div>
             </div>
             <div class="alert-full-text" style="display:none;">${escapeHtml(item.fullText || item.snippet || '')}</div>
