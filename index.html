@@ -2497,6 +2497,7 @@ function updateMapMarkers(news) {
 
 // ═══════ FETCH DATA ═══════
 async function fetchData() {
+    if (isDemoMode) return; // Don't overwrite demo data
     try {
         const [newsRes, summaryRes, metaRes] = await Promise.all([
             fetch(`${FIREBASE_URL}/auto-news.json`),
