@@ -80,20 +80,78 @@ body {
 }
 
 .scan-line {
-    position: fixed;
-    top: 0; left: 0; right: 0;
-    height: 2px;
-    background: linear-gradient(90deg, transparent, var(--accent), transparent);
-    z-index: 1000;
-    animation: scanDown 5s linear infinite;
-    opacity: 0.3;
-    box-shadow: 0 0 15px var(--accent), 0 0 40px var(--accent-dim);
-    pointer-events: none;
+    display: none;
 }
 
-@keyframes scanDown {
-    0% { top: -3px; }
-    100% { top: 100vh; }
+/* ═══════ RADAR SONAR SWEEP ═══════ */
+.radar-sweep {
+    position: absolute;
+    z-index: 999;
+    pointer-events: none;
+    border-radius: 50%;
+    overflow: hidden;
+}
+
+.radar-sweep::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0;
+    width: 100%;
+    height: 100%;
+    border-radius: 50%;
+    background: conic-gradient(
+        from 0deg,
+        transparent 0deg,
+        transparent 340deg,
+        rgba(124, 186, 63, 0.12) 355deg,
+        rgba(124, 186, 63, 0.06) 358deg,
+        transparent 360deg
+    );
+    animation: radarSpin 4s linear infinite;
+}
+
+.radar-sweep::after {
+    content: '';
+    position: absolute;
+    top: 50%; left: 50%;
+    width: 2px;
+    height: 50%;
+    transform-origin: top center;
+    background: linear-gradient(to bottom, rgba(124, 186, 63, 0.6), transparent);
+    animation: radarSpin 4s linear infinite;
+    box-shadow: 0 0 8px rgba(124, 186, 63, 0.4);
+}
+
+@keyframes radarSpin {
+    from { transform: rotate(0deg); }
+    to { transform: rotate(360deg); }
+}
+
+.radar-crosshair {
+    position: absolute;
+    z-index: 998;
+    pointer-events: none;
+    border-radius: 50%;
+    border: 1px solid rgba(124, 186, 63, 0.08);
+}
+
+.radar-ring-inner {
+    position: absolute;
+    z-index: 998;
+    pointer-events: none;
+    border-radius: 50%;
+    border: 1px dashed rgba(124, 186, 63, 0.06);
+}
+
+.radar-center-dot {
+    position: absolute;
+    z-index: 998;
+    pointer-events: none;
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: rgba(124, 186, 63, 0.5);
+    box-shadow: 0 0 10px rgba(124, 186, 63, 0.3);
 }
 
 /* ═══════ CORNER DECORATIONS ═══════ */
@@ -1986,7 +2044,7 @@ document.getElementById('loginInput').addEventListener('keydown', function(e) {
 
 <!-- Background Effects -->
 <div class="bg-grid"></div>
-<div class="scan-line"></div>
+<!-- Scan line replaced by radar sonar in map -->
 <div class="corner-decor corner-tl"></div>
 <div class="corner-decor corner-tr"></div>
 <div class="corner-decor corner-bl"></div>
@@ -2748,6 +2806,61 @@ function initMap() {
     L.polyline(route443, {
         color: '#7cba3f', weight: 2, opacity: 0.5, dashArray: '10, 6'
     }).addTo(map);
+
+    // ═══════ RADAR SONAR SWEEP ═══════
+    const mapContainer = document.getElementById('map');
+
+    const radarSweep = document.createElement('div');
+    radarSweep.className = 'radar-sweep';
+    mapContainer.appendChild(radarSweep);
+
+    const radarCrosshair = document.createElement('div');
+    radarCrosshair.className = 'radar-crosshair';
+    mapContainer.appendChild(radarCrosshair);
+
+    const radarRingInner = document.createElement('div');
+    radarRingInner.className = 'radar-ring-inner';
+    mapContainer.appendChild(radarRingInner);
+
+    const radarDot = document.createElement('div');
+    radarDot.className = 'radar-center-dot';
+    mapContainer.appendChild(radarDot);
+
+    function updateRadarPosition() {
+        const center = map.latLngToContainerPoint([SECTOR_CENTER.lat, SECTOR_CENTER.lng]);
+        // Calculate pixel radius for the 15km circle
+        const metersPerDeg = 111320;
+        const edgeLat = SECTOR_CENTER.lat + (15000 / metersPerDeg);
+        const edgePoint = map.latLngToContainerPoint([edgeLat, SECTOR_CENTER.lng]);
+        const radiusPx = Math.abs(center.y - edgePoint.y);
+
+        // Main sweep
+        radarSweep.style.width = radiusPx * 2 + 'px';
+        radarSweep.style.height = radiusPx * 2 + 'px';
+        radarSweep.style.left = (center.x - radiusPx) + 'px';
+        radarSweep.style.top = (center.y - radiusPx) + 'px';
+
+        // Outer crosshair ring (at 2/3 radius)
+        const r2 = radiusPx * 0.66;
+        radarCrosshair.style.width = r2 * 2 + 'px';
+        radarCrosshair.style.height = r2 * 2 + 'px';
+        radarCrosshair.style.left = (center.x - r2) + 'px';
+        radarCrosshair.style.top = (center.y - r2) + 'px';
+
+        // Inner ring (at 1/3 radius)
+        const r3 = radiusPx * 0.33;
+        radarRingInner.style.width = r3 * 2 + 'px';
+        radarRingInner.style.height = r3 * 2 + 'px';
+        radarRingInner.style.left = (center.x - r3) + 'px';
+        radarRingInner.style.top = (center.y - r3) + 'px';
+
+        // Center dot
+        radarDot.style.left = (center.x - 3) + 'px';
+        radarDot.style.top = (center.y - 3) + 'px';
+    }
+
+    map.on('move zoom moveend zoomend resize', updateRadarPosition);
+    updateRadarPosition();
 }
 
 function toggleMapFullscreen() {
