@@ -1771,13 +1771,13 @@ document.getElementById('loginInput').addEventListener('keydown', function(e) {
                 <span>סריקה</span>
                 <span id="lastScan" style="color: var(--cyan);">--:--</span>
             </div>
-            <div class="status-badge" onclick="scrollToAlerts()" style="cursor:pointer;">
+            <div class="status-badge" onclick="toggleHistory()" style="cursor:pointer;">
                 <span>התראות</span>
                 <span id="alertCount" style="color: var(--orange);">0</span>
             </div>
             <button class="header-btn" onclick="toggleHistory()">
                 <span class="btn-icon">&#9776;</span>
-                <span>היסטוריה</span>
+                <span>יומן מבצעים</span>
             </button>
             <button class="header-btn" onclick="loadDemoData()" style="color:var(--yellow);border-color:var(--yellow-dim);">
                 <span class="btn-icon">&#9881;</span>
@@ -1953,12 +1953,12 @@ document.getElementById('loginInput').addEventListener('keydown', function(e) {
 <!-- HISTORY OVERLAY -->
 <div class="history-overlay" id="historyOverlay">
     <div class="history-header">
-        <div class="history-title">יומן היסטורי</div>
+        <div class="history-title">יומן מבצעים</div>
         <button class="history-close" onclick="toggleHistory()">סגור ESC</button>
     </div>
     <div class="history-stat-bar" id="historyStats"></div>
     <div class="history-filters">
-        <input type="text" class="history-search" id="historySearch" placeholder="חיפוש בהיסטוריה..." oninput="renderHistory()">
+        <input type="text" class="history-search" id="historySearch" placeholder="חיפוש ביומן..." oninput="renderHistory()">
         <button class="filter-chip active" data-hfilter="all" onclick="setHistoryFilter('all', this)">הכל</button>
         <button class="filter-chip red" data-hfilter="5" onclick="setHistoryFilter(5, this)">ודאי</button>
         <button class="filter-chip orange" data-hfilter="4" onclick="setHistoryFilter(4, this)">חזק</button>
@@ -1966,7 +1966,7 @@ document.getElementById('loginInput').addEventListener('keydown', function(e) {
         <button class="filter-chip blue" data-hfilter="2" onclick="setHistoryFilter(2, this)">חלש</button>
     </div>
     <div class="history-body" id="historyBody">
-        <div class="loading-state"><div class="loading-spinner"></div><span>טוען היסטוריה...</span></div>
+        <div class="loading-state"><div class="loading-spinner"></div><span>טוען יומן מבצעים...</span></div>
     </div>
 </div>
 
@@ -2170,33 +2170,29 @@ function initMap() {
         fillOpacity: 0.3, weight: 2
     }).addTo(map);
 
-    // Arab villages - orange
-    P1_LOCATIONS.forEach(loc => {
+    // Collect all KEY_VILLAGE coords to avoid duplicates from P1/P2
+    const keyVillageCoords = new Set(KEY_VILLAGES.map(v => `${v.lat},${v.lng}`));
+
+    // Arab villages from P1/P2 that are NOT already in KEY_VILLAGES - orange, same size
+    [...P1_LOCATIONS, ...P2_LOCATIONS].forEach(loc => {
+        if (keyVillageCoords.has(`${loc.lat},${loc.lng}`)) return; // skip duplicates
         L.circleMarker([loc.lat, loc.lng], {
             radius: 6, color: '#ff8800', fillColor: '#ff8800', fillOpacity: 0.4, weight: 1.5
         }).bindTooltip(loc.he, { className: 'dark-tooltip' })
-          .bindPopup(buildLocationPopup(loc, 'P1', '#ff8800'), { className: 'dark-tooltip', maxWidth: 280 })
+          .bindPopup(buildLocationPopup(loc, 'כפר', '#ff8800'), { className: 'dark-tooltip', maxWidth: 280 })
           .addTo(map);
     });
 
-    P2_LOCATIONS.forEach(loc => {
-        L.circleMarker([loc.lat, loc.lng], {
-            radius: 5, color: '#ff8800', fillColor: '#ff8800', fillOpacity: 0.3, weight: 1
-        }).bindTooltip(loc.he, { className: 'dark-tooltip' })
-          .bindPopup(buildLocationPopup(loc, 'P2', '#ff8800'), { className: 'dark-tooltip', maxWidth: 280 })
-          .addTo(map);
-    });
-
-    // Routes & checkpoints - cyan dashed
+    // Routes & checkpoints - cyan
     P3_LOCATIONS.forEach(loc => {
         L.circleMarker([loc.lat, loc.lng], {
             radius: 4, color: '#00d4ff', fillColor: '#00d4ff', fillOpacity: 0.3, weight: 1
         }).bindTooltip(loc.he, { className: 'dark-tooltip' })
-          .bindPopup(buildLocationPopup(loc, 'P3', '#00d4ff'), { className: 'dark-tooltip', maxWidth: 280 })
+          .bindPopup(buildLocationPopup(loc, 'ציר', '#00d4ff'), { className: 'dark-tooltip', maxWidth: 280 })
           .addTo(map);
     });
 
-    // Israeli settlements - blue
+    // Israeli settlements - blue, same size as villages
     ISRAELI_LOCATIONS.forEach(loc => {
         L.circleMarker([loc.lat, loc.lng], {
             radius: 6, color: '#4488ff', fillColor: '#4488ff', fillOpacity: 0.4, weight: 1.5
@@ -2205,15 +2201,15 @@ function initMap() {
           .addTo(map);
     });
 
-    // KEY VILLAGES - larger highlighted markers with sector history popups (all orange = Arab villages)
+    // KEY VILLAGES - orange, same size, with rich popups on click
     KEY_VILLAGES.forEach(loc => {
         const pColor = '#ff8800';
         const marker = L.circleMarker([loc.lat, loc.lng], {
-            radius: 8,
+            radius: 6,
             color: pColor,
             fillColor: pColor,
-            fillOpacity: 0.5,
-            weight: 2
+            fillOpacity: 0.4,
+            weight: 1.5
         }).addTo(map);
 
         marker.bindTooltip(loc.he, { className: 'dark-tooltip' });
@@ -2258,16 +2254,6 @@ function initMap() {
             this.bindPopup(popupHtml, { className: 'dark-tooltip', maxWidth: 280 }).openPopup();
         });
 
-        // Outer pulse ring
-        L.circleMarker([loc.lat, loc.lng], {
-            radius: 14,
-            color: pColor,
-            fillColor: 'transparent',
-            fillOpacity: 0,
-            weight: 1,
-            opacity: 0.3,
-            dashArray: '4,4'
-        }).addTo(map);
     });
 
     const route443 = [
@@ -2598,14 +2584,6 @@ function toggleAlertCheck(el, alertId, event) {
         item.classList.add('alert-checked');
     }
     localStorage.setItem('mabat443-checked', JSON.stringify([...checkedAlerts]));
-}
-
-function scrollToAlerts() {
-    const alertPanel = document.getElementById('alertFeedPanel');
-    alertPanel.scrollIntoView({ behavior: 'smooth', block: 'start' });
-    // Brief highlight flash
-    alertPanel.style.boxShadow = '0 0 20px var(--cyan)';
-    setTimeout(() => { alertPanel.style.boxShadow = ''; }, 1500);
 }
 
 function flyToAlertLocation(lat, lng, event) {
