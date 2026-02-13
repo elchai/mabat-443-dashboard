@@ -2015,6 +2015,17 @@ function updateClock() {
     document.getElementById('dateDisplay').textContent = `יום ${days[now.getDay()]} | ${now.getDate()} ${months[now.getMonth()]} ${now.getFullYear()}`;
 }
 
+// ═══════ SOURCE URL HELPER ═══════
+function getSourceUrl(sourceName) {
+    if (!sourceName) return '';
+    const sourceMap = {};
+    מקורות.forEach(src => {
+        sourceMap[src.id] = src.tg ? `https://t.me/${src.tg}` : (src.url || '');
+        sourceMap[src.name] = src.tg ? `https://t.me/${src.tg}` : (src.url || '');
+    });
+    return sourceMap[sourceName] || '';
+}
+
 // ═══════ LOCATION POPUP BUILDER ═══════
 function buildLocationPopup(loc, priority, color) {
     const mapsLink = `https://www.google.com/maps?q=${loc.lat},${loc.lng}`;
@@ -2354,33 +2365,37 @@ function renderAlerts() {
     items.sort((a, b) => (b.timestamp || 0) - (a.timestamp || 0));
 
     feed.innerHTML = items.map(item => {
-        const locationName = item.matchedLocations ? item.matchedLocations.join(', ') : '';
+        // Location: prefer locationHe from backend, fallback to matchedLocations
+        const locationName = item.locationHe || (item.matchedLocations ? item.matchedLocations.join(', ') : '') || '';
         const hasCoords = item.coordinates && (item.coordinates.lat || item.coordinates.lon || item.coordinates.lng);
         const coordLat = hasCoords ? item.coordinates.lat : '';
         const coordLng = hasCoords ? (item.coordinates.lon || item.coordinates.lng) : '';
-        const mapsLink = hasCoords ? `https://www.google.com/maps?q=${coordLat},${coordLng}` : '';
-        const flyBtn = hasCoords
+        const locationTag = hasCoords
             ? `<a href="javascript:void(0)" onclick="flyToAlertLocation(${coordLat},${coordLng},event)" style="color:#00d4ff;font-size:10px;text-decoration:none;display:inline-flex;align-items:center;gap:3px;margin-top:3px;cursor:pointer;">📍 ${escapeHtml(locationName || 'הצג במפה')}</a>`
             : (locationName
                 ? `<span style="color:#9ab0c8;font-size:10px;display:inline-flex;align-items:center;gap:3px;margin-top:3px;">📍 ${escapeHtml(locationName)}</span>`
                 : '');
-        const locationTag = flyBtn;
+        // Source link
+        const sourceUrl = item.sourceUrl || getSourceUrl(item.source);
+        const sourceTag = sourceUrl
+            ? `<a href="${escapeHtml(sourceUrl)}" target="_blank" onclick="event.stopPropagation();" class="alert-source" style="text-decoration:none;color:var(--text-dim);">${escapeHtml(item.source || 'N/A')}</a>`
+            : `<span class="alert-source">${escapeHtml(item.source || 'N/A')}</span>`;
         return `
         <div class="alert-item" onclick="toggleAlertExpand(this)">
             <div class="alert-row">
                 <span class="alert-time">${formatTime(item.timestamp)}</span>
                 <div class="alert-urgency ${item._isAnarchist ? 'urgency-anarchist' : 'urgency-' + (item.urgency || 1)}"></div>
                 <div class="alert-content">
-                    <div class="alert-title">${escapeHtml(item.title || 'N/A')}</div>
+                    <div class="alert-title">${escapeHtml(item.title || 'N/A')}${locationName ? ' <span style="color:#00d4ff;font-weight:normal;font-size:11px;">(' + escapeHtml(locationName) + ')</span>' : ''}</div>
                     <div class="alert-snippet">${escapeHtml((item.snippet || item.fullText || '').substring(0, 120))}</div>
                     ${locationTag}
                 </div>
-                <span class="alert-source">${escapeHtml(item.source || 'N/A')}</span>
+                ${sourceTag}
             </div>
             <div class="alert-full-text" style="display:none;">${escapeHtml(item.fullText || item.snippet || '')}</div>
             <div class="alert-meta-row" style="display:none;">
                 <span>${formatDateTime(item.timestamp)}</span>
-                ${item.matchedLocations ? '<span>📍 ' + escapeHtml(item.matchedLocations.join(', ')) + '</span>' : ''}
+                ${locationName ? '<span>📍 ' + escapeHtml(locationName) + '</span>' : ''}
                 ${item.matchedKeywords ? '<span>KW: ' + escapeHtml(item.matchedKeywords.join(', ')) + '</span>' : ''}
                 ${item.distance ? '<span>' + item.distance.toFixed(1) + ' km</span>' : ''}
                 ${hasCoords ? '<a href="javascript:void(0)" onclick="flyToAlertLocation(' + coordLat + ',' + coordLng + ',event)" style="color:#00d4ff;text-decoration:none;cursor:pointer;">🗺️ הצג במפה</a>' : ''}
