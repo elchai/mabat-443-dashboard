@@ -15,7 +15,7 @@
    Futuristic Military Intelligence UI v2
    ═══════════════════════════════════════ */
 
-@import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;500;700;900&family=Rajdhani:wght@300;400;500;600;700&family=Share+Tech+Mono&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Heebo:wght@300;400;500;700;900&family=Orbitron:wght@400;500;700;900&family=Rajdhani:wght@300;400;500;600;700&family=Share+Tech+Mono&display=swap');
 
 :root {
     --bg-primary: #040810;
@@ -41,8 +41,8 @@
     --text-secondary: #9ab0c8;
     --text-dim: #6880a0;
     --font-display: 'Orbitron', monospace;
-    --font-body: 'Rajdhani', sans-serif;
-    --font-mono: 'Share Tech Mono', monospace;
+    --font-body: 'Heebo', 'Rajdhani', sans-serif;
+    --font-mono: 'Share Tech Mono', 'Heebo', monospace;
 }
 
 * { margin: 0; padding: 0; box-sizing: border-box; }
@@ -51,6 +51,7 @@ body {
     background: var(--bg-primary);
     color: var(--text-primary);
     font-family: var(--font-body);
+    font-weight: 400;
     overflow: hidden;
     height: 100vh;
     width: 100vw;
@@ -605,12 +606,13 @@ body {
 }
 
 .summary-text {
-    font-family: var(--font-body);
+    font-family: 'Heebo', var(--font-body);
     font-size: 14px;
     line-height: 1.8;
     color: var(--text-primary);
     direction: rtl;
     white-space: pre-wrap;
+    font-weight: 300;
 }
 
 .summary-meta {
@@ -824,9 +826,9 @@ body {
 .alert-content { flex: 1; min-width: 0; }
 
 .alert-title {
-    font-family: var(--font-body);
+    font-family: 'Heebo', var(--font-body);
     font-size: 13px;
-    font-weight: 600;
+    font-weight: 500;
     color: var(--text-primary);
     margin-bottom: 3px;
     display: -webkit-box;
@@ -1884,7 +1886,7 @@ document.getElementById('loginInput').addEventListener('keydown', function(e) {
     <div class="panel right-panel">
         <div class="panel-header">
             <span class="panel-title">סקירה כללית</span>
-            <span class="ai-badge">GEMINI AI</span>
+            <span class="ai-badge">AI NEWS</span>
         </div>
         <div class="panel-body" id="summaryBody">
             <div class="loading-state">
@@ -2119,6 +2121,28 @@ function updateClock() {
     const days = ['ראשון', 'שני', 'שלישי', 'רביעי', 'חמישי', 'שישי', 'שבת'];
     const months = ['ינואר', 'פברואר', 'מרץ', 'אפריל', 'מאי', 'יוני', 'יולי', 'אוגוסט', 'ספטמבר', 'אוקטובר', 'נובמבר', 'דצמבר'];
     document.getElementById('dateDisplay').textContent = `יום ${days[now.getDay()]} | ${now.getDate()} ${months[now.getMonth()]} ${now.getFullYear()}`;
+}
+
+// ═══════ LOCATION COORDS LOOKUP ═══════
+function lookupCoords(item) {
+    // If item already has coordinates, use them
+    if (item.coordinates && (item.coordinates.lat)) {
+        return { lat: item.coordinates.lat, lng: item.coordinates.lon || item.coordinates.lng };
+    }
+    // Lookup by locationHe or matchedLocations
+    const locName = (item.locationHe || '').toLowerCase();
+    const matchedLocs = (item.matchedLocations || []).map(l => l.toLowerCase());
+    const allLocs = [...KEY_VILLAGES, ...P1_LOCATIONS, ...P2_LOCATIONS, ...ISRAELI_LOCATIONS, ...P3_LOCATIONS];
+    for (const loc of allLocs) {
+        const names = [loc.he, loc.name, loc.altHe].filter(Boolean).map(n => n.toLowerCase());
+        if (names.some(n => locName.includes(n) || n.includes(locName)) && locName) {
+            return { lat: loc.lat, lng: loc.lng };
+        }
+        if (matchedLocs.some(ml => names.some(n => ml.includes(n) || n.includes(ml)))) {
+            return { lat: loc.lat, lng: loc.lng };
+        }
+    }
+    return null;
 }
 
 // ═══════ SOURCE URL HELPER ═══════
@@ -2358,10 +2382,12 @@ async function fetchData() {
             Object.values(news).forEach(item => {
                 if (!item.urgency && item.urgencyScore) item.urgency = item.urgencyScore;
                 if (!item.timestamp) {
-                    if (item.publishedAt) item.timestamp = new Date(item.publishedAt).getTime();
+                    if (item.publishedAt) item.timestamp = typeof item.publishedAt === 'number' ? item.publishedAt : new Date(item.publishedAt).getTime();
                     else if (item.date) item.timestamp = new Date(item.date).getTime();
-                    else if (item.fetchedAt) item.timestamp = new Date(item.fetchedAt).getTime();
+                    else if (item.fetchedAt) item.timestamp = typeof item.fetchedAt === 'number' ? item.fetchedAt : new Date(item.fetchedAt).getTime();
                 }
+                if (item.timestamp && item.timestamp < 1000000000000) item.timestamp = item.timestamp * 1000;
+                if (!item.locationHe && item.matchedLocations) item.locationHe = item.matchedLocations.join(', ');
             });
             // Detect new alerts for flash
             if (!isFirstLoad) {
@@ -2501,16 +2527,13 @@ function renderAlerts() {
     feed.innerHTML = items.map((item, idx) => {
         // Location: prefer locationHe from backend, fallback to matchedLocations
         const locationName = item.locationHe || (item.matchedLocations ? item.matchedLocations.join(', ') : '') || '';
-        const hasCoords = item.coordinates && (item.coordinates.lat || item.coordinates.lon || item.coordinates.lng);
-        const coordLat = hasCoords ? item.coordinates.lat : '';
-        const coordLng = hasCoords ? (item.coordinates.lon || item.coordinates.lng) : '';
+        // Lookup coordinates from location name or item data
+        const coords = lookupCoords(item);
         const locationTag = locationName
-            ? (hasCoords
-                ? `<a href="javascript:void(0)" onclick="flyToAlertLocation(${coordLat},${coordLng},event)" style="color:#00d4ff;font-size:10px;text-decoration:none;display:inline-flex;align-items:center;gap:3px;margin-top:2px;cursor:pointer;">📍 ${escapeHtml(locationName)}</a>`
+            ? (coords
+                ? `<a href="javascript:void(0)" onclick="flyToAlertLocation(${coords.lat},${coords.lng},event)" style="color:#00d4ff;font-size:10px;text-decoration:none;display:inline-flex;align-items:center;gap:3px;margin-top:2px;cursor:pointer;">📍 ${escapeHtml(locationName)}</a>`
                 : `<span style="color:#00d4ff;font-size:10px;display:inline-flex;align-items:center;gap:3px;margin-top:2px;">📍 ${escapeHtml(locationName)}</span>`)
-            : (hasCoords
-                ? `<a href="javascript:void(0)" onclick="flyToAlertLocation(${coordLat},${coordLng},event)" style="color:#00d4ff;font-size:10px;text-decoration:none;display:inline-flex;align-items:center;gap:3px;margin-top:2px;cursor:pointer;">📍 הצג במפה</a>`
-                : '');
+            : '';
         // Source link - only shown in expanded view
         const sourceUrl = item.sourceUrl || getSourceUrl(item.source);
         const sourceLink = sourceUrl
@@ -2537,8 +2560,7 @@ function renderAlerts() {
                 <span>${formatDateTime(item.timestamp)}</span>
                 ${sourceLink}
                 ${item.matchedKeywords ? '<span>KW: ' + escapeHtml(item.matchedKeywords.join(', ')) + '</span>' : ''}
-                ${item.distance ? '<span>' + item.distance.toFixed(1) + ' km</span>' : ''}
-                ${hasCoords ? '<a href="javascript:void(0)" onclick="flyToAlertLocation(' + coordLat + ',' + coordLng + ',event)" style="color:#00d4ff;text-decoration:none;cursor:pointer;">🗺️ הצג במפה</a>' : ''}
+                ${coords ? '<a href="javascript:void(0)" onclick="flyToAlertLocation(' + coords.lat + ',' + coords.lng + ',event)" style="color:#00d4ff;text-decoration:none;cursor:pointer;">🗺️ הצג במפה</a>' : ''}
             </div>
         </div>
     `}).join('');
@@ -2764,10 +2786,24 @@ async function fetchHistory() {
     try {
         const res = await fetch(`${FIREBASE_URL}/auto-news.json`);
         const data = await res.json();
-        if (data) allNewsData = data;
+        if (data) {
+            // Normalize all items
+            Object.values(data).forEach(item => {
+                if (!item.urgency && item.urgencyScore) item.urgency = item.urgencyScore;
+                if (!item.timestamp) {
+                    if (item.publishedAt) item.timestamp = typeof item.publishedAt === 'number' ? item.publishedAt : new Date(item.publishedAt).getTime();
+                    else if (item.date) item.timestamp = new Date(item.date).getTime();
+                    else if (item.fetchedAt) item.timestamp = typeof item.fetchedAt === 'number' ? item.fetchedAt : new Date(item.fetchedAt).getTime();
+                }
+                // Handle seconds vs milliseconds (if timestamp < year 2000 in ms, it's probably seconds)
+                if (item.timestamp && item.timestamp < 1000000000000) item.timestamp = item.timestamp * 1000;
+                if (!item.locationHe && item.matchedLocations) item.locationHe = item.matchedLocations.join(', ');
+            });
+            allNewsData = data;
+        }
         renderHistory();
     } catch (e) {
-        document.getElementById('historyBody').innerHTML = '<div class="empty-state">שגיאה LOADING HISTORY</div>';
+        document.getElementById('historyBody').innerHTML = '<div class="empty-state">שגיאה בטעינת יומן</div>';
     }
 }
 
@@ -2817,30 +2853,36 @@ function renderHistory() {
 
     const colors = { 5: 'var(--red)', 4: 'var(--orange)', 3: 'var(--yellow)', 2: 'var(--blue)', 1: '#666' };
 
+    const urgLabels = { 5: 'ודאי', 4: 'חזק', 3: 'בינוני', 2: 'חלש', 1: 'מידע' };
+
     body.innerHTML = Object.entries(groups).map(([date, dateItems]) => `
         <div class="history-date-group">
-            <div class="history-date-header">${date} (${dateItems.length})</div>
+            <div class="history-date-header">${date} <span style="color:var(--text-dim);">(${dateItems.length} דיווחים)</span></div>
             ${dateItems.map(item => {
-                const hHasCoords = item.coordinates && (item.coordinates.lat || item.coordinates.lon || item.coordinates.lng);
-                const hCoordLat = hHasCoords ? item.coordinates.lat : '';
-                const hCoordLng = hHasCoords ? (item.coordinates.lon || item.coordinates.lng) : '';
-                const hMapsLink = hHasCoords ? `https://www.google.com/maps?q=${hCoordLat},${hCoordLng}` : '';
-                const hLocName = item.matchedLocations ? item.matchedLocations.join(', ') : '';
-                const hLocTag = hLocName
-                    ? (hHasCoords
-                        ? `<a href="${hMapsLink}" target="_blank" style="color:#00d4ff;font-size:10px;text-decoration:none;">📍 ${escapeHtml(hLocName)}</a>`
-                        : `<span style="color:#9ab0c8;font-size:10px;">📍 ${escapeHtml(hLocName)}</span>`)
-                    : (hHasCoords
-                        ? `<a href="${hMapsLink}" target="_blank" style="color:#00d4ff;font-size:10px;text-decoration:none;">📍 מיקום</a>`
-                        : '');
+                const hLocName = item.locationHe || (item.matchedLocations ? item.matchedLocations.join(', ') : '') || '';
+                const hCoords = lookupCoords(item);
+                const urgColor = colors[item.urgency] || '#666';
+                const urgLabel = urgLabels[item.urgency] || '';
+                const sourceUrl = item.sourceUrl || getSourceUrl(item.source);
+                const sourceTag = sourceUrl
+                    ? `<a href="${escapeHtml(sourceUrl)}" target="_blank" style="color:#00d4ff;font-size:10px;text-decoration:none;">📡 ${escapeHtml(item.source || '')}</a>`
+                    : `<span style="color:var(--text-dim);font-size:10px;">📡 ${escapeHtml(item.source || '')}</span>`;
+                const locTag = hLocName
+                    ? (hCoords
+                        ? `<a href="javascript:void(0)" onclick="toggleHistory();setTimeout(()=>{map.flyTo([${hCoords.lat},${hCoords.lng}],15,{duration:1})},300)" style="color:#00d4ff;font-size:10px;text-decoration:none;cursor:pointer;">📍 ${escapeHtml(hLocName)}</a>`
+                        : `<span style="color:#00d4ff;font-size:10px;">📍 ${escapeHtml(hLocName)}</span>`)
+                    : '';
                 return `
-                <div class="history-item">
+                <div class="history-item" style="border-right:3px solid ${urgColor};">
                     <span class="history-item-time">${formatTime(item.timestamp)}</span>
-                    <div class="history-item-urgency" style="background:${colors[item.urgency] || '#666'}; box-shadow: 0 0 6px ${colors[item.urgency] || '#666'};"></div>
+                    <div class="history-item-urgency" style="background:${urgColor}; box-shadow: 0 0 6px ${urgColor};"></div>
                     <div class="history-item-content">
                         <div class="history-item-title">${escapeHtml(item.title || 'N/A')}</div>
-                        <div class="history-item-text">${escapeHtml((item.snippet || item.fullText || '').substring(0, 200))}</div>
-                        <div class="history-item-source">${escapeHtml(item.source || 'N/A')} ${hLocTag}</div>
+                        <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin-top:3px;">
+                            <span style="font-size:9px;padding:1px 6px;border-radius:3px;background:${urgColor}22;border:1px solid ${urgColor};color:${urgColor};">${urgLabel}</span>
+                            ${locTag}
+                            ${sourceTag}
+                        </div>
                     </div>
                 </div>
             `}).join('')}
