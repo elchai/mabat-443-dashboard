@@ -525,17 +525,25 @@ body {
     clip-path: polygon(0 0, calc(100% - 12px) 0, 100% 12px, 100% 100%, 12px 100%, 0 calc(100% - 12px));
 }
 
-/* Top accent glow line */
+/* Top accent glow line - sits on header bar top edge */
 .panel::before {
     content: '';
     position: absolute;
     top: 5px;
-    left: 15px;
-    right: 15px;
+    left: 10px;
+    right: 10px;
     height: 1px;
-    background: linear-gradient(90deg, transparent, rgba(160,216,85,0.7) 30%, rgba(160,216,85,0.9) 50%, rgba(160,216,85,0.7) 70%, transparent);
-    z-index: 3;
-    box-shadow: 0 0 6px rgba(124,186,63,0.5), 0 0 15px rgba(124,186,63,0.2);
+    background: linear-gradient(90deg,
+        transparent,
+        rgba(210,225,180,0.50) 20%,
+        rgba(230,240,200,0.70) 40%,
+        rgba(255,255,240,0.80) 50%,
+        rgba(230,240,200,0.70) 60%,
+        rgba(210,225,180,0.50) 80%,
+        transparent
+    );
+    z-index: 4;
+    box-shadow: 0 0 3px rgba(200,210,170,0.4), 0 0 8px rgba(200,210,170,0.15);
 }
 
 .panel::after {
@@ -553,22 +561,58 @@ body {
     align-items: center;
     justify-content: space-between;
     padding: 10px 15px;
+    /* ── METALLIC GOLD/OLIVE HEADER BAR ── */
     background:
         linear-gradient(180deg,
-            rgba(60,78,42,0.35) 0%,
-            rgba(35,48,22,0.55) 30%,
-            rgba(16,24,10,0.80) 60%,
-            rgba(40,55,28,0.30) 100%
+            #b8c49a 0%,
+            #a0ad88 3%,
+            #8a9970 8%,
+            #6e7e52 20%,
+            #556840 40%,
+            #4a5c38 55%,
+            #3e5030 70%,
+            #495a3a 85%,
+            #5a6c48 95%,
+            #6e7e52 100%
         );
     position: relative;
     z-index: 1;
-    /* Header has its own 3D bevel */
+    overflow: hidden;
+    /* 3D beveled edges - bright top, dark bottom */
     box-shadow:
+        inset 0 2px 0 0 rgba(210,220,190,0.70),
+        inset 0 -2px 0 0 rgba(20,28,12,0.80),
         0 1px 0 var(--frame-outer-top),
-        0 2px 0 var(--frame-inner-top),
+        0 2px 0 var(--frame-mid),
         0 3px 0 var(--frame-inner-bottom),
-        0 4px 8px rgba(0,0,0,0.4);
+        0 4px 8px rgba(0,0,0,0.5);
     margin: 5px 5px 0 5px;
+    border-top: 1px solid rgba(230,240,210,0.45);
+    border-bottom: 1px solid rgba(10,14,6,0.9);
+}
+
+/* ── GLEAM / FLASH EFFECT (ברק) ── */
+.panel-header::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -20%;
+    width: 60%;
+    height: 100%;
+    background: linear-gradient(
+        105deg,
+        transparent 0%,
+        transparent 35%,
+        rgba(255,255,255,0.06) 40%,
+        rgba(255,255,255,0.15) 45%,
+        rgba(255,255,255,0.25) 48%,
+        rgba(255,255,255,0.15) 51%,
+        rgba(255,255,255,0.06) 55%,
+        transparent 60%,
+        transparent 100%
+    );
+    pointer-events: none;
+    z-index: 2;
 }
 
 .panel-title {
@@ -576,9 +620,13 @@ body {
     font-size: 11px;
     font-weight: 700;
     letter-spacing: 3px;
-    color: #b0e865;
-    text-shadow: 0 0 8px rgba(124,186,63,0.7), 0 0 20px rgba(124,186,63,0.4), 0 0 40px rgba(124,186,63,0.15);
+    color: #d4e8b8;
+    text-shadow:
+        0 1px 0 rgba(255,255,255,0.20),
+        0 -1px 1px rgba(0,0,0,0.50);
     text-transform: uppercase;
+    position: relative;
+    z-index: 3;
 }
 
 .panel-indicator {
@@ -588,6 +636,8 @@ body {
     background: radial-gradient(circle at 35% 35%, #80ffb0, var(--green) 50%, #006630);
     box-shadow: 0 0 6px var(--green), 0 0 12px var(--green), 0 0 25px rgba(0,255,136,0.3), inset 0 -1px 2px rgba(0,0,0,0.4);
     animation: dotPulse 2s ease-in-out infinite;
+    position: relative;
+    z-index: 3;
 }
 
 .panel-body {
