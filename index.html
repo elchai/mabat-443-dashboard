@@ -990,6 +990,61 @@ body {
     color: var(--text-dim);
 }
 
+/* ═══════ VOTE BUTTONS ═══════ */
+.vote-buttons { display:flex; gap:6px; align-items:center; margin-right:auto; }
+.vote-btn { background:none; border:1px solid var(--border-primary); color:var(--text-dim); font-size:14px; width:28px; height:28px; border-radius:4px; cursor:pointer; display:flex; align-items:center; justify-content:center; transition:all 0.2s ease; }
+.vote-btn:hover { border-color:var(--cyan); background:rgba(0,212,255,0.06); }
+.vote-btn.vote-like.active { border-color:var(--green); color:var(--green); background:rgba(0,255,136,0.1); }
+.vote-btn.vote-dislike.active { border-color:var(--red); color:var(--red); background:var(--red-dim); }
+.alert-item.alert-false { opacity:0.6; }
+.alert-item.alert-false .alert-title { text-decoration:line-through; text-decoration-color:var(--red); }
+.false-badge { display:inline-block; font-family:var(--font-he); font-size:9px; font-weight:700; color:var(--red); background:var(--red-dim); border:1px solid var(--red); border-radius:3px; padding:0px 5px; margin-left:6px; }
+.verified-badge { display:inline-block; font-family:var(--font-he); font-size:9px; font-weight:700; color:var(--green); background:rgba(0,255,136,0.1); border:1px solid var(--green); border-radius:3px; padding:0px 5px; margin-left:6px; }
+
+/* ═══════ PUBLISHER PROFILE OVERLAY ═══════ */
+.publisher-overlay { position:fixed; top:0; left:0; right:0; bottom:0; z-index:8001; background:rgba(4,8,16,0.8); display:none; align-items:center; justify-content:center; backdrop-filter:blur(4px); }
+.publisher-overlay.visible { display:flex; }
+.publisher-card { background:linear-gradient(180deg, rgba(10,20,45,0.95), rgba(4,8,16,0.98)); border:1px solid var(--border-primary); padding:25px; width:90%; max-width:460px; max-height:85vh; overflow-y:auto; direction:rtl; border-radius:6px; box-shadow:0 0 30px rgba(0,212,255,0.1), 0 8px 40px rgba(0,0,0,0.8); }
+.publisher-card-header { display:flex; align-items:center; gap:15px; margin-bottom:18px; padding-bottom:12px; border-bottom:1px solid var(--border-primary); }
+.publisher-photo { width:64px; height:64px; border-radius:50%; border:2px solid var(--cyan); object-fit:cover; background:var(--bg-secondary); flex-shrink:0; }
+.publisher-photo-placeholder { width:64px; height:64px; border-radius:50%; border:2px solid var(--border-primary); background:var(--bg-secondary); display:flex; align-items:center; justify-content:center; font-size:24px; color:var(--text-dim); flex-shrink:0; }
+.publisher-name { font-family:var(--font-he); font-size:18px; font-weight:700; color:var(--text-primary); }
+.publisher-subtitle { font-family:var(--font-he); font-size:11px; color:var(--text-secondary); margin-top:2px; }
+.publisher-info-grid { display:grid; grid-template-columns:auto 1fr; gap:8px 12px; margin-bottom:15px; }
+.publisher-info-label { font-family:var(--font-he); font-size:11px; font-weight:500; color:var(--text-dim); white-space:nowrap; }
+.publisher-info-value { font-family:var(--font-he); font-size:12px; color:var(--text-primary); }
+.publisher-stats { display:flex; gap:12px; padding:10px 0; border-top:1px solid var(--border-primary); border-bottom:1px solid var(--border-primary); margin-bottom:12px; }
+.publisher-stat-box { text-align:center; flex:1; }
+.publisher-stat-value { font-family:var(--font-mono); font-size:16px; font-weight:700; color:var(--cyan); }
+.publisher-stat-label { font-family:var(--font-he); font-size:9px; color:var(--text-dim); margin-top:2px; }
+.publisher-actions { display:flex; gap:8px; justify-content:center; margin-top:12px; }
+.publisher-btn { background:linear-gradient(180deg, rgba(10,20,50,0.6), rgba(4,8,20,0.8)); border:1px solid var(--border-primary); color:var(--text-secondary); font-family:var(--font-he); font-size:11px; padding:6px 14px; border-radius:4px; cursor:pointer; transition:all 0.2s ease; }
+.publisher-btn:hover { border-color:var(--cyan); color:var(--cyan); }
+.publisher-btn.primary { border-color:var(--cyan); color:var(--cyan); }
+.publisher-edit-field { margin-bottom:8px; }
+.publisher-edit-field label { display:block; font-family:var(--font-he); font-size:10px; color:var(--text-dim); margin-bottom:3px; }
+.publisher-edit-field input, .publisher-edit-field textarea { width:100%; padding:6px 10px; border:1px solid var(--border-primary); background:rgba(0,0,0,0.3); color:var(--text-primary); font-family:var(--font-he); font-size:11px; border-radius:3px; outline:none; direction:rtl; }
+.publisher-edit-field textarea { min-height:50px; resize:vertical; }
+.source-link-clickable { cursor:pointer; transition:color 0.2s ease; }
+.source-link-clickable:hover { color:var(--cyan) !important; text-decoration:underline; }
+
+/* ═══════ KEYWORDS OVERLAY ═══════ */
+.keywords-overlay { position:fixed; top:0; left:0; right:0; bottom:0; background:rgba(4,8,16,0.97); z-index:8000; display:none; flex-direction:column; }
+.keywords-overlay.visible { display:flex; }
+.keywords-header { display:flex; align-items:center; justify-content:space-between; padding:15px 25px; background:linear-gradient(180deg, rgba(10,20,50,0.5), rgba(4,8,16,0.95)); border-bottom:1px solid var(--border-primary); }
+.keywords-title { font-family:var(--font-he); font-size:18px; font-weight:700; color:var(--cyan); }
+.keywords-body { flex:1; overflow-y:auto; padding:20px; }
+.keyword-category { margin-bottom:12px; padding:12px; background:var(--bg-card); border:1px solid var(--border-primary); border-radius:4px; }
+.keyword-category-header { display:flex; align-items:center; justify-content:space-between; margin-bottom:8px; }
+.keyword-category-name { font-family:var(--font-he); font-size:14px; font-weight:600; color:var(--text-primary); }
+.keyword-category-count { font-family:var(--font-mono); font-size:10px; color:var(--text-dim); padding:2px 8px; border:1px solid var(--border-primary); border-radius:3px; }
+.keyword-tags { display:flex; flex-wrap:wrap; gap:5px; direction:rtl; }
+.keyword-tag { font-family:var(--font-he); font-size:11px; padding:3px 8px; background:rgba(0,212,255,0.05); border:1px solid var(--border-primary); border-radius:3px; color:var(--text-secondary); }
+.keyword-urgency-badge { display:inline-block; font-family:var(--font-mono); font-size:8px; padding:0 4px; border-radius:2px; }
+.keywords-stat-bar { display:flex; gap:12px; padding:8px 25px; flex-wrap:wrap; border-bottom:1px solid var(--border-primary); }
+.keywords-stat { font-family:var(--font-he); font-size:11px; color:var(--text-secondary); }
+.keywords-stat strong { font-family:var(--font-mono); font-size:13px; }
+
 .alert-source {
     font-family: var(--font-he);
     font-size: 9px;
@@ -2240,6 +2295,7 @@ document.getElementById('loginInput').addEventListener('keydown', function(e) {
             <button class="filter-chip blue" data-filter="2" onclick="setFilter(2, this)">חלש</button>
             <button class="filter-chip purple" data-filter="anarchist" onclick="setFilter('anarchist', this)">אנרכיסטים</button>
             <button class="filter-chip green" data-filter="field" onclick="setFilter('field', this)">שטח</button>
+            <button class="filter-chip" data-filter="false" onclick="setFilter('false', this)" style="border-color:#888;color:#888;">שגוי</button>
             <input type="text" class="search-input" id="searchInput" placeholder="חיפוש..." oninput="applyFilters()">
         </div>
         <div class="timeline-graph">
@@ -2269,6 +2325,7 @@ document.getElementById('loginInput').addEventListener('keydown', function(e) {
             <div class="config-item"><span class="config-key">AI</span><span class="config-val">GEMINI 2.0</span></div>
             <div class="config-item"><span class="config-key">שמירה</span><span class="config-val">72 שעות</span></div>
             <div class="config-item"><span class="config-key">רענון</span><span class="config-val" id="nextRefresh">30s</span></div>
+            <div class="config-item" style="cursor:pointer;" onclick="toggleKeywords()"><span class="config-key">מילות מפתח</span><span class="config-val" style="color:var(--cyan);">הצג &#9660;</span></div>
         </div>
     </div>
 
@@ -2312,6 +2369,23 @@ document.getElementById('loginInput').addEventListener('keydown', function(e) {
     </div>
 </div>
 
+<!-- KEYWORDS OVERLAY -->
+<div class="keywords-overlay" id="keywordsOverlay">
+    <div class="keywords-header">
+        <div class="keywords-title">מילות מפתח סריקה</div>
+        <button class="history-close" onclick="toggleKeywords()">סגור ESC</button>
+    </div>
+    <div class="keywords-stat-bar" id="keywordsStats"></div>
+    <div class="keywords-body" id="keywordsBody">
+        <div class="loading-state"><div class="loading-spinner"></div><span>טוען מילות מפתח...</span></div>
+    </div>
+</div>
+
+<!-- PUBLISHER PROFILE OVERLAY -->
+<div class="publisher-overlay" id="publisherOverlay" onclick="if(event.target===this)closePublisherProfile()">
+    <div class="publisher-card" id="publisherCard"></div>
+</div>
+
 <!-- HISTORY OVERLAY -->
 <div class="history-overlay" id="historyOverlay">
     <div class="history-header">
@@ -2326,6 +2400,7 @@ document.getElementById('loginInput').addEventListener('keydown', function(e) {
         <button class="filter-chip orange" data-hfilter="4" onclick="setHistoryFilter(4, this)">חזק</button>
         <button class="filter-chip yellow" data-hfilter="3" onclick="setHistoryFilter(3, this)">בינוני</button>
         <button class="filter-chip blue" data-hfilter="2" onclick="setHistoryFilter(2, this)">חלש</button>
+        <button class="filter-chip" data-hfilter="false" onclick="setHistoryFilter('false', this)" style="border-color:#888;color:#888;">שגוי</button>
     </div>
     <div class="history-body" id="historyBody">
         <div class="loading-state"><div class="loading-spinner"></div><span>טוען יומן מבצעים...</span></div>
@@ -2480,6 +2555,33 @@ let mapIsFullscreen = false;
 let showAnarchists = true;
 let checkedAlerts = new Set(JSON.parse(localStorage.getItem('mabat443-checked') || '[]'));
 let journalNotes = {};
+let alertVotes = {};
+
+// Load alert votes from Firebase
+async function loadAlertVotes() {
+    try {
+        const res = await fetch(`${FIREBASE_URL}/alert-votes.json`);
+        const data = await res.json();
+        if (data && !data.error) alertVotes = data;
+    } catch (e) {
+        console.error('Error loading alert votes:', e);
+    }
+}
+
+// Toggle vote on an alert
+async function toggleVote(alertId, voteType, event) {
+    event.stopPropagation();
+    const current = alertVotes[alertId];
+    if (current && current.vote === voteType) {
+        delete alertVotes[alertId];
+        try { await fetch(`${FIREBASE_URL}/alert-votes/${alertId}.json`, { method: 'DELETE' }); } catch (e) { console.error('Error removing vote:', e); }
+    } else {
+        const voteData = { vote: voteType, votedAt: Date.now() };
+        alertVotes[alertId] = voteData;
+        try { await fetch(`${FIREBASE_URL}/alert-votes/${alertId}.json`, { method: 'PUT', body: JSON.stringify(voteData) }); } catch (e) { console.error('Error saving vote:', e); }
+    }
+    renderAlerts();
+}
 
 // Load journal notes from Firebase
 async function loadJournalNotes() {
@@ -3080,6 +3182,8 @@ function renderAlerts() {
         items = items.filter(i => i._isAnarchist);
     } else if (activeFilter === 'field') {
         items = items.filter(i => i.isFieldReport);
+    } else if (activeFilter === 'false') {
+        items = items.filter(i => { const aid = i.id || i.timestamp; return aid && alertVotes[aid] && alertVotes[aid].vote === 'dislike'; });
     } else if (activeFilter !== 'all') {
         items = items.filter(i => i.urgency === activeFilter);
     }
@@ -3107,25 +3211,23 @@ function renderAlerts() {
     items.sort((a, b) => (b.timestamp || 0) - (a.timestamp || 0));
 
     feed.innerHTML = items.map((item, idx) => {
-        // Location: prefer locationHe from backend, fallback to matchedLocations
         const locationName = item.locationHe || (item.matchedLocations ? item.matchedLocations.join(', ') : '') || '';
-        // Lookup coordinates from location name or item data
         const coords = lookupCoords(item);
         const locationTag = locationName
             ? (coords
                 ? `<a href="javascript:void(0)" onclick="flyToAlertLocation(${coords.lat},${coords.lng},event)" style="color:#00d4ff;font-size:10px;text-decoration:none;display:inline-flex;align-items:center;gap:3px;margin-top:2px;cursor:pointer;">📍 ${escapeHtml(locationName)}</a>`
                 : `<span style="color:#00d4ff;font-size:10px;display:inline-flex;align-items:center;gap:3px;margin-top:2px;">📍 ${escapeHtml(locationName)}</span>`)
             : '';
-        // Source link - only shown in expanded view
         const sourceUrl = item.sourceUrl || getSourceUrl(item.source);
-        const sourceLink = sourceUrl
-            ? `<a href="${escapeHtml(sourceUrl)}" target="_blank" onclick="event.stopPropagation();" style="text-decoration:none;color:#00d4ff;font-size:10px;">📡 ${escapeHtml(item.source || 'N/A')}</a>`
-            : `<span style="color:var(--text-dim);font-size:10px;">📡 ${escapeHtml(item.source || 'N/A')}</span>`;
-        // Alert ID for checkmark persistence
+        const srcObj = מקורות.find(s => s.id === item.source || s.name === item.source);
+        const srcIdForProfile = srcObj ? srcObj.id : (item.source || '');
         const alertId = item.id || item.timestamp || idx;
         const isChecked = checkedAlerts.has(String(alertId));
+        const vote = alertVotes[alertId];
+        const isDisliked = vote && vote.vote === 'dislike';
+        const isLiked = vote && vote.vote === 'like';
         return `
-        <div class="alert-item${isChecked ? ' alert-checked' : ''}" onclick="toggleAlertExpand(this)">
+        <div class="alert-item${isChecked ? ' alert-checked' : ''}${isDisliked ? ' alert-false' : ''}" onclick="toggleAlertExpand(this)">
             <div class="alert-row">
                 <div class="alert-check${isChecked ? ' checked' : ''}" onclick="toggleAlertCheck(this,'${alertId}',event)" title="סמן כנקרא">
                     ${isChecked ? '✓' : ''}
@@ -3133,14 +3235,19 @@ function renderAlerts() {
                 <span class="alert-time">${formatTimeWithDate(item.timestamp)}</span>
                 <div class="alert-urgency ${item.isFieldReport ? 'urgency-field' : item._isAnarchist ? 'urgency-anarchist' : 'urgency-' + (item.urgency || 1)}"></div>
                 <div class="alert-content">
-                    <div class="alert-title">${escapeHtml(item.title || 'N/A')}</div>
+                    <div class="alert-title">${isDisliked ? '<span class="false-badge">שגוי</span>' : ''}${isLiked ? '<span class="verified-badge">אומת</span>' : ''}${escapeHtml(item.title || 'N/A')}</div>
                     ${locationTag}
                 </div>
             </div>
             ${(item.fullText || item.snippet) ? '<div class="alert-full-text" style="display:none;">' + escapeHtml(item.fullText || item.snippet) + '</div>' : ''}
             <div class="alert-meta-row" style="display:none;">
-                ${sourceUrl ? '<a href="' + escapeHtml(sourceUrl) + '" target="_blank" onclick="event.stopPropagation();" style="color:#00d4ff;text-decoration:none;cursor:pointer;">📡 הצג מקור: ' + escapeHtml(item.source || 'טלגרם') + '</a>' : '<span style="color:var(--text-dim);">📡 ' + escapeHtml(item.source || 'N/A') + '</span>'}
+                <a href="javascript:void(0)" onclick="openPublisherProfile('${escapeHtml(srcIdForProfile)}',event)" class="source-link-clickable" style="color:#00d4ff;font-size:10px;text-decoration:none;">&#128225; ${escapeHtml(item.source || 'N/A')}</a>
+                ${sourceUrl ? '<a href="' + escapeHtml(sourceUrl) + '" target="_blank" onclick="event.stopPropagation();" style="color:var(--text-dim);font-size:10px;text-decoration:none;">&#128279; מקור</a>' : ''}
                 ${item.matchedKeywords ? '<span>KW: ' + escapeHtml(item.matchedKeywords.join(', ')) + '</span>' : ''}
+                <div class="vote-buttons">
+                    <button class="vote-btn vote-like${isLiked ? ' active' : ''}" onclick="toggleVote('${alertId}','like',event)" title="אמין" style="opacity:${isLiked ? '1' : '0.4'};">&#128077;</button>
+                    <button class="vote-btn vote-dislike${isDisliked ? ' active' : ''}" onclick="toggleVote('${alertId}','dislike',event)" title="שגוי" style="opacity:${isDisliked ? '1' : '0.4'};">&#128078;</button>
+                </div>
             </div>
         </div>
     `}).join('');
@@ -3337,14 +3444,13 @@ function renderSources() {
         const count = sourceCounts[src.id] || sourceCounts[src.name] || 0;
         const isActive = count > 0;
         const typeLabels = { local: 'LOCAL', regional: 'AREA', national: 'NATL', news: 'NEWS' };
-        const link = src.tg ? `https://t.me/${src.tg}` : (src.url || '#');
         return `
-            <a class="source-item" href="${link}" target="_blank" style="text-decoration:none;cursor:pointer;">
+            <div class="source-item" style="cursor:pointer;" onclick="openPublisherProfile('${escapeHtml(src.id)}',event)">
                 <div class="source-dot ${isActive ? 'active' : 'inactive'}"></div>
-                <span class="source-name">${src.name}</span>
+                <span class="source-name source-link-clickable">${src.name}</span>
                 <span class="source-type ${src.type}">${typeLabels[src.type]}</span>
                 <span class="source-count">${count > 0 ? count : ''}</span>
-            </a>
+            </div>
         `;
     }).join('');
 }
@@ -3394,7 +3500,9 @@ function renderHistory() {
     const searchText = (document.getElementById('historySearch').value || '').toLowerCase();
     let items = Object.values(allNewsData);
 
-    if (historyFilter !== 'all') {
+    if (historyFilter === 'false') {
+        items = items.filter(i => { const aid = i.id || i.timestamp; return aid && alertVotes[aid] && alertVotes[aid].vote === 'dislike'; });
+    } else if (historyFilter !== 'all') {
         items = items.filter(i => i.urgency === historyFilter);
     }
     if (searchText) {
@@ -3446,9 +3554,9 @@ function renderHistory() {
                 const urgColor = colors[item.urgency] || '#666';
                 const urgLabel = urgLabels[item.urgency] || '';
                 const sourceUrl = item.sourceUrl || getSourceUrl(item.source);
-                const sourceTag = sourceUrl
-                    ? `<a href="${escapeHtml(sourceUrl)}" target="_blank" style="color:#00d4ff;font-size:10px;text-decoration:none;">📡 ${escapeHtml(item.source || '')}</a>`
-                    : `<span style="color:var(--text-dim);font-size:10px;">📡 ${escapeHtml(item.source || '')}</span>`;
+                const hSrcObj = מקורות.find(s => s.id === item.source || s.name === item.source);
+                const hSrcId = hSrcObj ? hSrcObj.id : (item.source || '');
+                const sourceTag = `<a href="javascript:void(0)" onclick="event.stopPropagation();openPublisherProfile('${escapeHtml(hSrcId)}',event)" class="source-link-clickable" style="color:#00d4ff;font-size:10px;text-decoration:none;">📡 ${escapeHtml(item.source || '')}</a>`;
                 const locTag = hLocName
                     ? (hCoords
                         ? `<a href="javascript:void(0)" onclick="toggleHistory();setTimeout(()=>{map.flyTo([${hCoords.lat},${hCoords.lng}],15,{duration:1})},300)" style="color:#00d4ff;font-size:10px;text-decoration:none;cursor:pointer;">📍 ${escapeHtml(hLocName)}</a>`
@@ -3456,6 +3564,10 @@ function renderHistory() {
                     : '';
                 const noteId = item.id || item.timestamp || '';
                 const note = journalNotes[noteId];
+                const hVote = alertVotes[noteId];
+                const hIsDisliked = hVote && hVote.vote === 'dislike';
+                const hIsLiked = hVote && hVote.vote === 'like';
+                const voteBadge = hIsDisliked ? '<span class="false-badge">שגוי</span>' : hIsLiked ? '<span class="verified-badge">אומת</span>' : '';
                 const noteHtml = note
                     ? `<div class="journal-saved-note">
                         <div><strong>מדווח:</strong> ${escapeHtml(note.reporter || '-')}</div>
@@ -3467,15 +3579,19 @@ function renderHistory() {
                        </div>`
                     : '';
                 return `
-                <div class="history-item" style="border-right:3px solid ${urgColor};">
+                <div class="history-item${hIsDisliked ? ' alert-false' : ''}" style="border-right:3px solid ${urgColor};">
                     <span class="history-item-time">${formatTime(item.timestamp)}</span>
                     <div class="history-item-urgency" style="background:${urgColor}; box-shadow: 0 0 6px ${urgColor};"></div>
                     <div class="history-item-content">
-                        <div class="history-item-title">${escapeHtml(item.title || 'N/A')}</div>
+                        <div class="history-item-title">${voteBadge}${escapeHtml(item.title || 'N/A')}</div>
                         <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin-top:3px;">
                             <span style="font-size:9px;padding:1px 6px;border-radius:3px;background:${urgColor}22;border:1px solid ${urgColor};color:${urgColor};">${urgLabel}</span>
                             ${locTag}
                             ${sourceTag}
+                            <div class="vote-buttons" style="margin-right:4px;">
+                                <button class="vote-btn vote-like${hIsLiked ? ' active' : ''}" onclick="event.stopPropagation();toggleVote('${noteId}','like',event).then(()=>renderHistory())" title="אמין" style="opacity:${hIsLiked ? '1' : '0.4'};width:24px;height:24px;font-size:12px;">&#128077;</button>
+                                <button class="vote-btn vote-dislike${hIsDisliked ? ' active' : ''}" onclick="event.stopPropagation();toggleVote('${noteId}','dislike',event).then(()=>renderHistory())" title="שגוי" style="opacity:${hIsDisliked ? '1' : '0.4'};width:24px;height:24px;font-size:12px;">&#128078;</button>
+                            </div>
                             <button class="journal-note-btn" onclick="event.stopPropagation();toggleNoteForm('${noteId}')">${note ? '📝' : '➕ הוסף מידע'}</button>
                         </div>
                         ${noteHtml}
@@ -3570,18 +3686,320 @@ function escapeHtml(text) {
     return div.innerHTML;
 }
 
+// ═══════ PUBLISHER PROFILE ═══════
+const DEFAULT_PROFILES = {
+    deiribzi: { name:"قرية دير إبزيع - כפר דיר איביע", photo:"https://cdn4.telesco.pe/file/Lf4x4EuQBrehvCfG6S7CFCVjc3ARbjiGcB12p5Rl3DE6cy8PTbCz3A0WT3aCnhpQQ5MShaXs1sPnQQACdcjREQNnHqTZQuSlQllhGKk8MCiBnm1scBlLO3EE3cSpPIV9NpAtePCgwWdy-ky9N8p3N2hwuu6QDA2wdXxQuadLLXOaQaZ0ABJkG0ifulnul-1axJYhBAqdKOybsf9S1CqH2n_ek4e5Wya7VzeDIpXC7tKPt0FIEtRFGM_Rkeds4kZEz_G2odhCELjf4CjC0xy8w8q-b-hNzf9D00WV50GstOWi8MHbxcn0hHNsH-RrPXq8wEkwUfrgz74orfLm_szIDA.jpg", location:"דיר איביע, פלסטין", subscribers:"223", notes:"ערוץ מקומי - חדשות כפר, תמונות וסרטונים, הודעות ואירועים" },
+    beit_liqya: { name:"أخبار بيت لقيا - חדשות בית ליקיא", photo:"https://cdn4.telesco.pe/file/j3rhtUkeyfeslJKedu5tQGunxlwKss2b6bksvkVBFqw2ynpN1iVO6dmQoLZBCtPRCK2hjXic-ohwE4hSvCRhXWQhjQANV3vQakxh0hNC1bB_iJGQd061k6-erAGw5GaOsXx8V3BU81qIgWUpuUIL7Fa3dU7T3beiTjVj7nFDpv93pqg8Omj2EiVZnqat45faRFHbaXuJm2m5CpmsLRTw--FUeykBGPXoHwQuDuLVXjhHuyjA6uXftEocudDmGKhqyECksx2_uMWiPVO3yjt0-wuuYqPXUMOdb-YVzbOKp-Fu4YhIm2mT8RrRKJOmDMO0unnXVM5EGL7ioyKU_E39ug.jpg", location:"בית ליקיא, פלסטין", subscribers:"2,408", notes:"ערוץ חדשות מקומי - מעקב ופרסום חדשות. בוט: @Liqya136854bot" },
+    beit_sira: { name:"بيت سيرا - בית סירא", photo:"https://cdn4.telesco.pe/file/BeI6Msb8Dq7fydrWxadoZ63seN4bXlpLHPiJea5Mhm7C0yLCKiKiHiqCDMBgaXH-KdbpBbR9I3jogfDMJ63lUW2En7XOY_pkwWokThMPWQGMwDgOS74SMzcinH_w4RaaKUI01mLeqKZ31NnZ2f7EPdRUBpucrXn9rOQBn5K2S_1RFS0_BMRNBCYWbdlfWXCybDJdTQMjUPHa43JWxrcZ-cnS2EDtTnm2lNPbMWYWJ7f1KekZNG5vykXJ52n93UBS5dUfhRn0CU16b0A1D3E5nB9B9XZSYk7jfdE85AVQHqqPNskcS-KKEy5xIT9F9IGYofmorWuwGFQE5kE729hXcg.jpg", location:"בית סירא, פלסטין", subscribers:"48", notes:"ערוץ מקומי - חדשות הכפר" },
+    ramallahnew: { name:"رام الله الاخباري - רמאללה חדשות", photo:"https://cdn4.telesco.pe/file/a0AchnUtvNk5Ualo6VpWgP-gwDQahikTK7FhwqzLOPNs3UpkwAPJEo7l6Flw3XSiQTq3mQPJoOaHdH7ABgRK2wCRTYzbwMtRFvM9zOQ5ET2yeG8La5C6Zf1Rx00aYDbHxnAmgOYJSjPCt_WmiNBuuo5yBnjVJ7jYkoQi0wsYV9txCYQ7ExWEuKt1TlsyPHm9F6HfQZ9pL3sHhLHPXKrcJXoxFYn8n71tU0AmyqrmPL7jRLdBoP3rpmnS87mlE67haVxPOIwn7Ax6kn9duHJ5dlUaJMG_6i4XO0p152nhhyKEIK4HuOCn1b1GSrF3ARLTbwdWnFDqnfhd7PRbzOyW0g.jpg", location:"רמאללה, פלסטין", subscribers:"211,854", notes:"ערוץ מאומת. הוקם 28/11/2014. מפרסם חדשות 24/7. מעל מיליון מבקרים חודשיים." },
+    ramallahmix1: { name:"Ramallah Mix - רמאללה מיקס", photo:"https://cdn4.telesco.pe/file/N2cQjmJto-Tm47JiSlkESPRmyQ-Os20O5fVj-Y0mNdywPAgxpIfG5B_n1mZ3dAiF9w_uv6cOUwbtOO-apFsQKyyvBD8rcaI5ZN-qF2NqcFx6aUuZ-53uMzs-UIUCfo2VN22T8oFRmdA8mUN4E10myc7RXKFP7DOYokqvGhb4D-_c3jHOnb0irkeYdVAnR9254cd0wz2oDKIQTPaWYhQwogBDuP6XhGqlIrAvWf3eacsYVninCNWmSBjiknqVqp_VJ2I6m-4PGztwmGTQ9-SdHVHrk5gx1I-0bRvlyMVo-GW_6cFZ_OjngSzsSMjhjE5Uv4zL7mhtyaY2HwGP3TNgag.jpg", location:"רמאללה, פלסטין", subscribers:"367,705", notes:"ערוץ מאומת. אתר: www.rmix.ps" },
+    QudsN: { name:"شبكة قدس الإخبارية - רשת קודס", photo:"https://cdn4.telesco.pe/file/iQMxjgSvEZedhB5reOIAnMa9OgpOzU2CK5pE88OP0ztUriKj2H-36sLyy2XWnQOU7jz2WetoHq9dJMT61xAeWKQDzcMkAE7zlQZp52VtVhp2vNIjVhUQjKbP3uOz58S91hQY2qPi2gzGtzEALauYQGgrzDfUhJWnzrltgomNj6zc8bD92Xi4I6wD8dJzZheNBBdxUilciH6RHqDJ6NqNWWl1TSwzEXbCTL2gSmqM3U4JUe03ap1zyHXBdNfcf-2KbJ6Wtbr8ndBJqop9rNNB2gSZb3CqDTrfwjswni-UfUA_IMfhDVO61cVNNJTpUibT-x1G7TE0ihIN8scIjJ74Iw.jpg", location:"פלסטין", subscribers:"699,392", notes:"רשת מדיה פלסטינית עצמאית. ערוצים: תרגום עברית, אנגלית, ארכיון, אסירים. בוט: @QudsNN_bot" },
+    palinfo: { name:"مركز الاعلام - מרכז תקשורת", location:"פלסטין", notes:"מרכז תקשורת פלסטיני. @palaborz" },
+    PalestineResist: { name:"Resistance News Network", location:"פלסטין", subscribers:"142,177", notes:"The pulse of the resistance. גיבוי: @RNN_Backup, @RNN_Prisoners, @RNN_Archive" },
+    "google-news": { name:"Google News", location:"גלובלי", notes:"מנוע חדשות גוגל - חיפוש בערבית ועברית" }
+};
+
+let publisherProfiles = {};
+let currentPublisherId = null;
+
+async function loadPublisherProfiles() {
+    // Start with defaults
+    publisherProfiles = JSON.parse(JSON.stringify(DEFAULT_PROFILES));
+    try {
+        const res = await fetch(`${FIREBASE_URL}/publisher-profiles.json`);
+        const data = await res.json();
+        if (data && !data.error) {
+            // Merge Firebase data over defaults
+            Object.keys(data).forEach(k => { publisherProfiles[k] = { ...publisherProfiles[k], ...data[k] }; });
+        }
+    } catch (e) {
+        console.error('Error loading publisher profiles:', e);
+    }
+}
+
+function openPublisherProfile(sourceId, event) {
+    if (event) event.stopPropagation();
+    currentPublisherId = sourceId;
+    const srcObj = מקורות.find(s => s.id === sourceId);
+    const profile = publisherProfiles[sourceId] || {};
+    const card = document.getElementById('publisherCard');
+
+    // Compute stats from allNewsData
+    const allItems = Object.values(allNewsData);
+    const srcItems = allItems.filter(i => i.source === sourceId || i.source === (srcObj ? srcObj.name : ''));
+    const totalReports = srcItems.length;
+    const lastReport = srcItems.length > 0 ? Math.max(...srcItems.map(i => i.timestamp || 0)) : 0;
+    const locCounts = {};
+    srcItems.forEach(i => {
+        const loc = i.locationHe || (i.matchedLocations ? i.matchedLocations.join(', ') : '');
+        if (loc) locCounts[loc] = (locCounts[loc] || 0) + 1;
+    });
+    const topLocations = Object.entries(locCounts).sort((a,b) => b[1]-a[1]).slice(0,3).map(e => e[0]);
+
+    const srcName = profile.name || (srcObj ? srcObj.name : sourceId);
+    const srcType = srcObj ? ({ local:'מקומי', regional:'אזורי', national:'ארצי', news:'חדשות' }[srcObj.type] || srcObj.type) : '';
+    const tgLink = srcObj && srcObj.tg ? `https://t.me/${srcObj.tg}` : '';
+
+    card.innerHTML = `
+        <div class="publisher-card-header">
+            ${profile.photo
+                ? `<img src="${escapeHtml(profile.photo)}" class="publisher-photo" onerror="this.outerHTML='<div class=\\'publisher-photo-placeholder\\'>📡</div>'">`
+                : '<div class="publisher-photo-placeholder">📡</div>'}
+            <div>
+                <div class="publisher-name">${escapeHtml(srcName)}</div>
+                <div class="publisher-subtitle">${escapeHtml(srcType)}${tgLink ? ' | <a href="' + escapeHtml(tgLink) + '" target="_blank" style="color:var(--cyan);text-decoration:none;" onclick="event.stopPropagation();">Telegram ↗</a>' : ''}</div>
+            </div>
+        </div>
+        <div class="publisher-stats">
+            <div class="publisher-stat-box">
+                <div class="publisher-stat-value">${totalReports}</div>
+                <div class="publisher-stat-label">דיווחים</div>
+            </div>
+            <div class="publisher-stat-box">
+                <div class="publisher-stat-value">${lastReport ? formatTimeWithDate(lastReport) : '--'}</div>
+                <div class="publisher-stat-label">דיווח אחרון</div>
+            </div>
+            <div class="publisher-stat-box">
+                <div class="publisher-stat-value">${profile.subscribers || '--'}</div>
+                <div class="publisher-stat-label">מנויים</div>
+            </div>
+        </div>
+        ${topLocations.length > 0 ? `<div style="margin-bottom:12px;"><span style="font-family:var(--font-he);font-size:10px;color:var(--text-dim);">מיקומים עיקריים:</span> <span style="font-family:var(--font-he);font-size:11px;color:var(--cyan);">${topLocations.map(l => escapeHtml(l)).join(' | ')}</span></div>` : ''}
+        <div class="publisher-info-grid" id="publisherInfoGrid">
+            <span class="publisher-info-label">מיקום</span><span class="publisher-info-value">${escapeHtml(profile.location || '--')}</span>
+            <span class="publisher-info-label">גיל</span><span class="publisher-info-value">${escapeHtml(profile.age || '--')}</span>
+            <span class="publisher-info-label">עיסוק</span><span class="publisher-info-value">${escapeHtml(profile.occupation || '--')}</span>
+            <span class="publisher-info-label">בן/בת זוג</span><span class="publisher-info-value">${escapeHtml(profile.partner || '--')}</span>
+            <span class="publisher-info-label">תחביבים</span><span class="publisher-info-value">${escapeHtml(profile.hobbies || '--')}</span>
+            <span class="publisher-info-label">הערות</span><span class="publisher-info-value">${escapeHtml(profile.notes || '--')}</span>
+        </div>
+        <div id="publisherEditForm" style="display:none;">
+            <div class="publisher-edit-field"><label>שם</label><input id="pe_name" value="${escapeHtml(profile.name || srcName)}"></div>
+            <div class="publisher-edit-field"><label>תמונה</label><div style="display:flex;gap:6px;align-items:center;"><input id="pe_photo" value="${escapeHtml(profile.photo || '')}" placeholder="URL תמונה" style="flex:1;"><label style="cursor:pointer;padding:5px 10px;border:1px solid var(--cyan);border-radius:3px;color:var(--cyan);font-size:10px;white-space:nowrap;">📷 העלה<input type="file" id="pe_photo_file" accept="image/*" style="display:none;" onchange="handlePhotoUpload(this)"></label></div></div>
+            <div class="publisher-edit-field"><label>מיקום</label><input id="pe_location" value="${escapeHtml(profile.location || '')}"></div>
+            <div class="publisher-edit-field"><label>גיל</label><input id="pe_age" value="${escapeHtml(profile.age || '')}"></div>
+            <div class="publisher-edit-field"><label>עיסוק</label><input id="pe_occupation" value="${escapeHtml(profile.occupation || '')}"></div>
+            <div class="publisher-edit-field"><label>בן/בת זוג</label><input id="pe_partner" value="${escapeHtml(profile.partner || '')}"></div>
+            <div class="publisher-edit-field"><label>תחביבים</label><input id="pe_hobbies" value="${escapeHtml(profile.hobbies || '')}"></div>
+            <div class="publisher-edit-field"><label>מנויים</label><input id="pe_subscribers" value="${escapeHtml(profile.subscribers || '')}"></div>
+            <div class="publisher-edit-field"><label>הערות</label><textarea id="pe_notes">${escapeHtml(profile.notes || '')}</textarea></div>
+        </div>
+        <div class="publisher-actions">
+            <button class="publisher-btn" id="publisherEditBtn" onclick="togglePublisherEdit()">✏️ עריכה</button>
+            <button class="publisher-btn primary" id="publisherSaveBtn" onclick="savePublisherProfile()" style="display:none;">💾 שמור</button>
+            <button class="publisher-btn" onclick="closePublisherProfile()">סגור</button>
+        </div>
+    `;
+
+    document.getElementById('publisherOverlay').classList.add('visible');
+}
+
+function togglePublisherEdit() {
+    const form = document.getElementById('publisherEditForm');
+    const grid = document.getElementById('publisherInfoGrid');
+    const editBtn = document.getElementById('publisherEditBtn');
+    const saveBtn = document.getElementById('publisherSaveBtn');
+    const isEditing = form.style.display !== 'none';
+    form.style.display = isEditing ? 'none' : 'block';
+    grid.style.display = isEditing ? 'grid' : 'none';
+    editBtn.textContent = isEditing ? '✏️ עריכה' : '❌ ביטול';
+    saveBtn.style.display = isEditing ? 'none' : 'inline-block';
+}
+
+async function savePublisherProfile() {
+    if (!currentPublisherId) return;
+    const profileData = {
+        name: document.getElementById('pe_name').value.trim(),
+        photo: document.getElementById('pe_photo').value.trim(),
+        location: document.getElementById('pe_location').value.trim(),
+        age: document.getElementById('pe_age').value.trim(),
+        occupation: document.getElementById('pe_occupation').value.trim(),
+        partner: document.getElementById('pe_partner').value.trim(),
+        hobbies: document.getElementById('pe_hobbies').value.trim(),
+        subscribers: document.getElementById('pe_subscribers').value.trim(),
+        notes: document.getElementById('pe_notes').value.trim(),
+        lastUpdated: Date.now()
+    };
+    publisherProfiles[currentPublisherId] = profileData;
+    try {
+        await fetch(`${FIREBASE_URL}/publisher-profiles/${currentPublisherId}.json`, {
+            method: 'PUT',
+            body: JSON.stringify(profileData)
+        });
+    } catch (e) { console.error('Error saving publisher profile:', e); }
+    // Refresh the card
+    openPublisherProfile(currentPublisherId);
+}
+
+function handlePhotoUpload(input) {
+    const file = input.files[0];
+    if (!file) return;
+    if (file.size > 500000) { alert('תמונה גדולה מדי (מקסימום 500KB)'); return; }
+    const reader = new FileReader();
+    reader.onload = function(e) {
+        document.getElementById('pe_photo').value = e.target.result;
+    };
+    reader.readAsDataURL(file);
+}
+
+function closePublisherProfile() {
+    document.getElementById('publisherOverlay').classList.remove('visible');
+    currentPublisherId = null;
+}
+
+// ═══════ KEYWORDS OVERLAY ═══════
+let systemKeywords = null;
+
+async function loadSystemKeywords() {
+    try {
+        const res = await fetch(`${FIREBASE_URL}/system-keywords.json`);
+        const data = await res.json();
+        if (data && !data.error) systemKeywords = data;
+    } catch (e) {
+        console.error('Error loading system keywords:', e);
+    }
+}
+
+function toggleKeywords() {
+    const overlay = document.getElementById('keywordsOverlay');
+    overlay.classList.toggle('visible');
+    if (overlay.classList.contains('visible') && !systemKeywords) {
+        loadSystemKeywords().then(() => renderKeywords());
+    } else if (overlay.classList.contains('visible')) {
+        renderKeywords();
+    }
+}
+
+function renderKeywords() {
+    const body = document.getElementById('keywordsBody');
+    const statsBar = document.getElementById('keywordsStats');
+    if (!systemKeywords) {
+        body.innerHTML = '<div class="empty-state">לא נמצאו מילות מפתח<br><small style="color:var(--text-dim);">המידע מסונכרן מהשרת</small></div>';
+        statsBar.innerHTML = '';
+        return;
+    }
+
+    // Count totals
+    let eventCount = 0, peopleCount = 0, violenceCount = 0, noiseCount = 0, locationCount = 0, persianCount = 0;
+    if (systemKeywords.eventKeywords) systemKeywords.eventKeywords.forEach(cat => eventCount += (cat.keywords || []).length);
+    peopleCount = (systemKeywords.peopleKeywords || []).length;
+    violenceCount = (systemKeywords.violenceKeywords || []).length;
+    noiseCount = (systemKeywords.ignoreKeywords || []).length + (systemKeywords.globalNoiseKeywords || []).length + (systemKeywords.ignorePhrases || []).length;
+    locationCount = (systemKeywords.locationFilterKeywords || []).length;
+    persianCount = (systemKeywords.persianKeywords || []).length;
+
+    statsBar.innerHTML = `
+        <span class="keywords-stat"><strong style="color:var(--red);">${eventCount}</strong> אירועים</span>
+        <span class="keywords-stat"><strong style="color:var(--orange);">${peopleCount}</strong> אנשים</span>
+        <span class="keywords-stat"><strong style="color:var(--yellow);">${violenceCount}</strong> אלימות</span>
+        <span class="keywords-stat"><strong style="color:#888;">${noiseCount}</strong> מסננים</span>
+        <span class="keywords-stat"><strong style="color:var(--blue);">${locationCount}</strong> מיקומים</span>
+        <span class="keywords-stat"><strong style="color:#c084fc;">${persianCount}</strong> פרסית</span>
+    `;
+
+    let html = '';
+
+    // Event keywords
+    if (systemKeywords.eventKeywords) {
+        html += '<div style="font-family:var(--font-he);font-size:15px;font-weight:700;color:var(--red);margin-bottom:10px;">קטגוריות אירועים</div>';
+        systemKeywords.eventKeywords.forEach(cat => {
+            const urgColors = { 1:'#666', 2:'var(--blue)', 3:'var(--yellow)', 4:'var(--orange)', 5:'var(--red)' };
+            const urgColor = urgColors[cat.urgencyBoost] || '#666';
+            html += `<div class="keyword-category">
+                <div class="keyword-category-header">
+                    <span class="keyword-category-name">${escapeHtml(cat.nameHe || cat.id)}</span>
+                    <span>
+                        <span class="keyword-urgency-badge" style="background:${urgColor}22;color:${urgColor};border:1px solid ${urgColor};">+${cat.urgencyBoost}</span>
+                        <span class="keyword-category-count">${(cat.keywords || []).length}</span>
+                    </span>
+                </div>
+                <div class="keyword-tags">${(cat.keywords || []).map(kw => `<span class="keyword-tag" style="border-color:${urgColor}44;">${escapeHtml(kw)}</span>`).join('')}</div>
+            </div>`;
+        });
+    }
+
+    // People keywords
+    if (systemKeywords.peopleKeywords && systemKeywords.peopleKeywords.length) {
+        html += `<div class="keyword-category">
+            <div class="keyword-category-header">
+                <span class="keyword-category-name" style="color:var(--orange);">מילות אנשים</span>
+                <span class="keyword-category-count">${systemKeywords.peopleKeywords.length}</span>
+            </div>
+            <div class="keyword-tags">${systemKeywords.peopleKeywords.map(kw => `<span class="keyword-tag" style="border-color:var(--orange)44;">${escapeHtml(kw)}</span>`).join('')}</div>
+        </div>`;
+    }
+
+    // Violence keywords
+    if (systemKeywords.violenceKeywords && systemKeywords.violenceKeywords.length) {
+        html += `<div class="keyword-category">
+            <div class="keyword-category-header">
+                <span class="keyword-category-name" style="color:var(--yellow);">מילות אלימות</span>
+                <span class="keyword-category-count">${systemKeywords.violenceKeywords.length}</span>
+            </div>
+            <div class="keyword-tags">${systemKeywords.violenceKeywords.map(kw => `<span class="keyword-tag" style="border-color:var(--yellow)44;">${escapeHtml(kw)}</span>`).join('')}</div>
+        </div>`;
+    }
+
+    // Ignore / noise keywords
+    const noiseTypes = [
+        { key: 'ignoreKeywords', label: 'מילות סינון', color: '#888' },
+        { key: 'globalNoiseKeywords', label: 'רעש גלובלי', color: '#888' },
+        { key: 'ignorePhrases', label: 'ביטויי סינון', color: '#888' }
+    ];
+    noiseTypes.forEach(nt => {
+        const arr = systemKeywords[nt.key];
+        if (arr && arr.length) {
+            html += `<div class="keyword-category">
+                <div class="keyword-category-header">
+                    <span class="keyword-category-name" style="color:${nt.color};">${nt.label}</span>
+                    <span class="keyword-category-count">${arr.length}</span>
+                </div>
+                <div class="keyword-tags">${arr.map(kw => `<span class="keyword-tag" style="border-color:#88888844;">${escapeHtml(kw)}</span>`).join('')}</div>
+            </div>`;
+        }
+    });
+
+    // Location filter keywords
+    if (systemKeywords.locationFilterKeywords && systemKeywords.locationFilterKeywords.length) {
+        html += `<div class="keyword-category">
+            <div class="keyword-category-header">
+                <span class="keyword-category-name" style="color:var(--blue);">מסנני מיקום</span>
+                <span class="keyword-category-count">${systemKeywords.locationFilterKeywords.length}</span>
+            </div>
+            <div class="keyword-tags">${systemKeywords.locationFilterKeywords.map(kw => `<span class="keyword-tag" style="border-color:var(--blue)44;">${escapeHtml(kw)}</span>`).join('')}</div>
+        </div>`;
+    }
+
+    // Persian keywords
+    if (systemKeywords.persianKeywords && systemKeywords.persianKeywords.length) {
+        html += `<div class="keyword-category">
+            <div class="keyword-category-header">
+                <span class="keyword-category-name" style="color:#c084fc;">מילות פרסית (סינון)</span>
+                <span class="keyword-category-count">${systemKeywords.persianKeywords.length}</span>
+            </div>
+            <div class="keyword-tags">${systemKeywords.persianKeywords.map(kw => `<span class="keyword-tag" style="border-color:#c084fc44;">${escapeHtml(kw)}</span>`).join('')}</div>
+        </div>`;
+    }
+
+    body.innerHTML = html;
+}
+
 // ═══════ KEYBOARD SHORTCUTS ═══════
 document.addEventListener('keydown', (e) => {
     if (e.key === 'Escape') {
         if (mapIsFullscreen) toggleMapFullscreen();
         const history = document.getElementById('historyOverlay');
         if (history.classList.contains('visible')) toggleHistory();
+        const keywords = document.getElementById('keywordsOverlay');
+        if (keywords.classList.contains('visible')) toggleKeywords();
+        const publisher = document.getElementById('publisherOverlay');
+        if (publisher.classList.contains('visible')) closePublisherProfile();
     }
     if (e.key === 'f' || e.key === 'F') {
-        if (document.activeElement.tagName !== 'INPUT') toggleMapFullscreen();
+        if (document.activeElement.tagName !== 'INPUT' && document.activeElement.tagName !== 'TEXTAREA') toggleMapFullscreen();
     }
     if (e.key === 'h' || e.key === 'H') {
-        if (document.activeElement.tagName !== 'INPUT') toggleHistory();
+        if (document.activeElement.tagName !== 'INPUT' && document.activeElement.tagName !== 'TEXTAREA') toggleHistory();
     }
 });
 
@@ -3767,9 +4185,14 @@ function loadDemoData() {
     newsData = demoNews;
     allNewsData = { ...allNewsData, ...demoNews };
 
+    // Load default profiles for demo
+    if (Object.keys(publisherProfiles).length === 0) {
+        publisherProfiles = JSON.parse(JSON.stringify(DEFAULT_PROFILES));
+    }
+
     // Demo summary
     summaryData = {
-        summary: '📊 סיכום מצב גזרה 443:\n\nבשעות האחרונות נרשמה עלייה בפעילות בגזרה. אירוע הירי בבית עור א-תחתא הוא האירוע החמור ביותר. נרשמו מספר מוקדי חיכוך נוספים: חסימת כביש 443 באזור ספא, השלכת אבנים בצומת בית חורון, ועימות בבית סירא.\n\nפעילות אנרכיסטים: הפגנה שבועית בבילעין עם פעילי ISM. תיעוד בצלם ברנתיס.\n\n⚠️ המלצות:\n• הגברת כוננות באזור בית עור - כביש 443\n• סיור מוגבר ספא-בית סירא\n• מעקב אחר פעילות אנרכיסטים בבילעין',
+        summary: 'בשעות האחרונות נרשמה עלייה בפעילות בגזרה. אירוע הירי בבית עור א-תחתא הוא האירוע החמור ביותר. נרשמו מספר מוקדי חיכוך נוספים: חסימת כביש 443 באזור ספא, השלכת אבנים בצומת בית חורון, ועימות בבית סירא.\n\nפעילות אנרכיסטים: הפגנה שבועית בבילעין עם פעילי ISM. תיעוד בצלם ברנתיס.\n\nהמלצות:\n• הגברת כוננות באזור בית עור - כביש 443\n• סיור מוגבר ספא-בית סירא\n• מעקב אחר פעילות אנרכיסטים בבילעין',
         aiProvider: 'Gemini',
         generatedAt: now - (15 * 60000)
     };
@@ -3835,6 +4258,8 @@ document.addEventListener('DOMContentLoaded', () => {
 
     try { fetchData(); } catch(e) { console.error('Fetch init error:', e); }
     try { loadJournalNotes(); } catch(e) { console.error('Notes init error:', e); }
+    try { loadAlertVotes(); } catch(e) { console.error('Votes init error:', e); }
+    try { loadPublisherProfiles(); } catch(e) { console.error('Profiles init error:', e); }
     try { startRefreshCycle(); } catch(e) { console.error('Refresh init error:', e); }
 });
 </script>
