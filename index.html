@@ -879,6 +879,7 @@ body {
 }
 
 .alert-item.new-alert { animation: alertFlash 2s ease; }
+.alert-item.keyword-hit { border-right: 3px solid var(--yellow); background: rgba(255,208,0,0.06); }
 
 @keyframes alertFlash {
     0% { background: rgba(0, 212, 255, 0.2); }
@@ -1734,7 +1735,11 @@ body {
     box-shadow: 0 0 20px rgba(0, 212, 255, 0.25) !important;
     max-width: 280px !important;
 }
+/* Tooltip arrows for all directions */
 .dark-tooltip::before { border-top-color: #0f3460 !important; }
+.leaflet-tooltip-right.dark-tooltip::before { border-right-color: #0f3460 !important; border-top-color: transparent !important; }
+.leaflet-tooltip-left.dark-tooltip::before { border-left-color: #0f3460 !important; border-top-color: transparent !important; }
+.leaflet-tooltip-bottom.dark-tooltip::before { border-bottom-color: #0f3460 !important; border-top-color: transparent !important; }
 
 /* ═══════ MAP LEGEND ═══════ */
 .map-legend {
@@ -1813,6 +1818,63 @@ body {
     box-shadow: 0 0 20px rgba(0, 212, 255, 0.2) !important;
 }
 .leaflet-popup-tip { background: rgba(8, 16, 35, 0.95) !important; }
+
+/* ═══════ ROUTE LINES ═══════ */
+.route-line {
+    filter: drop-shadow(0 0 4px currentColor);
+}
+
+/* ═══════ 3D SECTOR CIRCLE ═══════ */
+.sector-ring {
+    filter: drop-shadow(0 0 8px rgba(0, 212, 255, 0.5)) drop-shadow(0 0 20px rgba(0, 212, 255, 0.2));
+    animation: sectorPulse 3s ease-in-out infinite;
+}
+.sector-outer-glow {
+    filter: drop-shadow(0 0 15px rgba(0, 212, 255, 0.3));
+}
+.sector-center-glow {
+    filter: drop-shadow(0 0 12px rgba(0, 212, 255, 0.6));
+    animation: centerGlow 2s ease-in-out infinite;
+}
+.sector-center-dot {
+    filter: drop-shadow(0 0 6px rgba(0, 212, 255, 0.8));
+}
+@keyframes sectorPulse {
+    0%, 100% { opacity: 0.7; }
+    50% { opacity: 1; }
+}
+@keyframes centerGlow {
+    0%, 100% { opacity: 0.6; filter: drop-shadow(0 0 12px rgba(0, 212, 255, 0.6)); }
+    50% { opacity: 1; filter: drop-shadow(0 0 20px rgba(0, 212, 255, 0.9)); }
+}
+
+/* ═══════ 3D MARKERS ═══════ */
+.marker-3d {
+    filter: drop-shadow(0 2px 3px rgba(0, 0, 0, 0.6)) drop-shadow(0 0 6px currentColor);
+    transition: filter 0.2s ease, opacity 0.2s ease;
+}
+.marker-3d:hover {
+    filter: drop-shadow(0 2px 3px rgba(0, 0, 0, 0.6)) drop-shadow(0 0 14px currentColor) brightness(1.4);
+}
+.marker-glow-ring {
+    animation: markerGlowPulse 2.5s ease-in-out infinite;
+}
+@keyframes markerGlowPulse {
+    0%, 100% { opacity: 0.4; }
+    50% { opacity: 0.8; }
+}
+.marker-key {
+    filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.7)) drop-shadow(0 0 8px rgba(255, 136, 0, 0.5));
+}
+.marker-outside {
+    opacity: 0.6;
+}
+.marker-outside:hover {
+    opacity: 1;
+}
+.marker-city {
+    filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.5)) drop-shadow(0 0 10px currentColor);
+}
 
 /* ═══════ LOGIN SCREEN ═══════ */
 .login-overlay {
@@ -2326,6 +2388,14 @@ document.getElementById('loginInput').addEventListener('keydown', function(e) {
             <div class="config-item"><span class="config-key">שמירה</span><span class="config-val">72 שעות</span></div>
             <div class="config-item"><span class="config-key">רענון</span><span class="config-val" id="nextRefresh">30s</span></div>
             <div class="config-item" style="cursor:pointer;" onclick="toggleKeywords()"><span class="config-key">מילות מפתח</span><span class="config-val" style="color:var(--cyan);">הצג &#9660;</span></div>
+            <div style="border-top:1px solid var(--border-primary);margin-top:6px;padding-top:6px;">
+                <div class="config-item"><span class="config-key" style="font-size:10px;letter-spacing:2px;color:var(--cyan);">INTEL LAYERS</span><span class="config-val" style="font-size:9px;">LIVE</span></div>
+                <div class="config-item" id="weatherRow"><span class="config-key">מזג אוויר</span><span class="config-val" id="weatherVal">--</span></div>
+                <div class="config-item" id="calendarRow"><span class="config-key">לוח תאריכים</span><span class="config-val" id="calendarVal" style="color:var(--green);">רגיל</span></div>
+                <div class="config-item" id="sentimentRow"><span class="config-key">סנטימנט</span><span class="config-val" id="sentimentVal">--</span></div>
+                <div class="config-item" id="trendsRow"><span class="config-key">מגמות</span><span class="config-val" id="trendsVal" style="color:var(--green);">0</span></div>
+                <div class="config-item"><span class="config-key">מקורות</span><span class="config-val" style="font-size:9px;">TG+RSS+ACLED+OCHA+Waze</span></div>
+            </div>
         </div>
     </div>
 
@@ -2512,6 +2582,7 @@ const P3_LOCATIONS = [
 ];
 
 const ISRAELI_LOCATIONS = [
+    // בתוך הגזרה
     { name: "Modi'in Illit", he: "מודיעין עילית", lat: 31.930, lng: 35.050 },
     { name: "Givat Zeev", he: "גבעת זאב", lat: 31.860, lng: 35.170 },
     { name: "Beit Horon", he: "בית חורון", lat: 31.860, lng: 35.148 },
@@ -2526,6 +2597,44 @@ const ISRAELI_LOCATIONS = [
     { name: "Har Adar", he: "הר אדר", lat: 31.826, lng: 35.130 },
     { name: "Beit Arye-Ofarim", he: "בית אריה-עופרים", lat: 31.960, lng: 35.050 },
     { name: "Matityahu", he: "מתתיהו", lat: 31.925, lng: 35.034 },
+    // מחוץ לגזרה
+    { name: "Modi'in", he: "מודיעין", lat: 31.897, lng: 34.968, outside: true },
+    { name: "Maccabim-Reut", he: "מכבים-רעות", lat: 31.908, lng: 35.010, outside: true },
+    { name: "Mevaseret Zion", he: "מבשרת ציון", lat: 31.803, lng: 35.153, outside: true },
+    { name: "Ramot", he: "רמות (ירושלים)", lat: 31.804, lng: 35.196, outside: true },
+    { name: "Pisgat Zeev", he: "פסגת זאב", lat: 31.822, lng: 35.238, outside: true },
+    { name: "Neve Yaakov", he: "נווה יעקב", lat: 31.828, lng: 35.230, outside: true },
+    { name: "Atarot", he: "עטרות", lat: 31.844, lng: 35.218, outside: true },
+    { name: "Kiryat Yearim", he: "קריית יערים", lat: 31.810, lng: 35.107, outside: true },
+    { name: "Abu Ghosh", he: "אבו גוש", lat: 31.806, lng: 35.108, outside: true },
+    { name: "Beit Nekofa", he: "בית נקופה", lat: 31.793, lng: 35.120, outside: true },
+    { name: "Dolev", he: "דולב", lat: 31.950, lng: 35.120, outside: true },
+    { name: "Talmon", he: "טלמון", lat: 31.955, lng: 35.090, outside: true },
+    { name: "Ateret", he: "עטרת", lat: 31.975, lng: 35.105, outside: true },
+    { name: "Ofer Camp", he: "מחנה עופר", lat: 31.908, lng: 35.155, outside: true },
+];
+
+// ערים ומוקדים מחוץ לגזרה (לא ערבי ולא ישראלי - ערים גדולות לקונטקסט)
+const CITIES_OUTSIDE = [
+    { name: "Jerusalem", he: "ירושלים", lat: 31.768, lng: 35.213, type: 'city' },
+    { name: "Ramallah", he: "רמאללה", lat: 31.902, lng: 35.204, type: 'city' },
+    { name: "El-Bireh", he: "אל-בירה", lat: 31.906, lng: 35.222, type: 'city' },
+    { name: "Beit Jala", he: "בית ג'אלה", lat: 31.717, lng: 35.188, type: 'city' },
+    { name: "Latrun", he: "לטרון", lat: 31.838, lng: 34.984, type: 'landmark' },
+];
+
+// כפרים ערביים מחוץ לגזרה
+const ARAB_OUTSIDE = [
+    { name: "Bir Nabala", he: "ביר נבאלה", lat: 31.860, lng: 35.198 },
+    { name: "Al-Ram", he: "א-ראם", lat: 31.853, lng: 35.225 },
+    { name: "Kafr Aqab", he: "כפר עקב", lat: 31.867, lng: 35.228 },
+    { name: "Beitunia", he: "ביתוניא", lat: 31.900, lng: 35.170 },
+    { name: "Surda", he: "סורדא", lat: 31.915, lng: 35.195 },
+    { name: "Abu Qash", he: "אבו קש", lat: 31.925, lng: 35.190 },
+    { name: "Beit Ur al-Fauqa South", he: "א-טירה", lat: 31.860, lng: 35.210 },
+    { name: "Hizma", he: "חיזמא", lat: 31.835, lng: 35.225 },
+    { name: "Jib", he: "ג'יב", lat: 31.851, lng: 35.182 },
+    { name: "Beit Hanina", he: "בית חנינא", lat: 31.822, lng: 35.214 },
 ];
 
 const מקורות = [
@@ -2803,63 +2912,174 @@ function initMap() {
         attributionControl: false
     });
 
-    L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', {
+    L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', {
         maxZoom: 19
     }).addTo(map);
 
-    L.circle([SECTOR_CENTER.lat, SECTOR_CENTER.lng], {
-        radius: 15000, color: '#00d4ff', fillColor: '#00d4ff',
-        fillOpacity: 0.03, weight: 1, dashArray: '8, 8', opacity: 0.3
+    // Roads overlay - transparent road names on top of satellite
+    L.tileLayer('https://stamen-tiles.a.ssl.fastly.net/toner-labels/{z}/{x}/{y}{r}.png', {
+        maxZoom: 19,
+        opacity: 0.5,
+        pane: 'overlayPane'
     }).addTo(map);
 
+    // ═══════ ROUTE POLYLINES ═══════
+    const ROUTE_443 = [
+        [31.839, 35.197], [31.842, 35.185], [31.845, 35.175],
+        [31.848, 35.162], [31.852, 35.155], [31.858, 35.148],
+        [31.862, 35.140], [31.866, 35.132], [31.870, 35.120],
+        [31.868, 35.108], [31.863, 35.098], [31.858, 35.085],
+        [31.855, 35.072], [31.852, 35.060], [31.850, 35.050],
+        [31.849, 35.040], [31.848, 35.030]
+    ];
+    const ROUTE_446 = [
+        [31.868, 35.108], [31.878, 35.098], [31.888, 35.085],
+        [31.900, 35.072], [31.910, 35.060], [31.920, 35.052],
+        [31.930, 35.048], [31.940, 35.050], [31.950, 35.055],
+        [31.960, 35.060]
+    ];
+    const ROUTE_450 = [
+        [31.862, 35.140], [31.870, 35.148], [31.878, 35.155],
+        [31.888, 35.162], [31.898, 35.170], [31.905, 35.178],
+        [31.910, 35.188], [31.915, 35.198]
+    ];
+
+    L.polyline(ROUTE_443, {
+        color: '#00ff88', weight: 3, opacity: 0.8, dashArray: '10, 6',
+        className: 'route-line'
+    }).bindTooltip('כביש 443', { permanent: false, className: 'dark-tooltip', direction: 'center' }).addTo(map);
+
+    L.polyline(ROUTE_446, {
+        color: '#ffd000', weight: 2.5, opacity: 0.7, dashArray: '8, 6',
+        className: 'route-line'
+    }).bindTooltip('כביש 446', { permanent: false, className: 'dark-tooltip', direction: 'center' }).addTo(map);
+
+    L.polyline(ROUTE_450, {
+        color: '#a855f7', weight: 2.5, opacity: 0.7, dashArray: '8, 6',
+        className: 'route-line'
+    }).bindTooltip('כביש 450', { permanent: false, className: 'dark-tooltip', direction: 'center' }).addTo(map);
+
+    // ═══════ SECTOR CIRCLE - 3D GLOW ═══════
+    // Outer glow ring
     L.circle([SECTOR_CENTER.lat, SECTOR_CENTER.lng], {
-        radius: 200, color: '#00d4ff', fillColor: '#00d4ff',
-        fillOpacity: 0.3, weight: 2
+        radius: 15500, color: '#00d4ff', fillColor: 'transparent',
+        fillOpacity: 0, weight: 1, opacity: 0.15, className: 'sector-outer-glow'
     }).addTo(map);
+    // Main sector boundary
+    L.circle([SECTOR_CENTER.lat, SECTOR_CENTER.lng], {
+        radius: 15000, color: '#00d4ff', fillColor: '#00d4ff',
+        fillOpacity: 0.06, weight: 2.5, dashArray: '12, 6', opacity: 0.7,
+        className: 'sector-ring'
+    }).addTo(map);
+    // Inner glow ring
+    L.circle([SECTOR_CENTER.lat, SECTOR_CENTER.lng], {
+        radius: 14500, color: '#00d4ff', fillColor: 'transparent',
+        fillOpacity: 0, weight: 1, dashArray: '4, 8', opacity: 0.2
+    }).addTo(map);
+    // Mid-range ring for depth
+    L.circle([SECTOR_CENTER.lat, SECTOR_CENTER.lng], {
+        radius: 7500, color: '#00d4ff', fillColor: 'transparent',
+        fillOpacity: 0, weight: 0.5, dashArray: '3, 12', opacity: 0.15
+    }).addTo(map);
+    // Center marker with glow
+    L.circle([SECTOR_CENTER.lat, SECTOR_CENTER.lng], {
+        radius: 400, color: '#00d4ff', fillColor: '#00d4ff',
+        fillOpacity: 0.15, weight: 1.5, className: 'sector-center-glow'
+    }).addTo(map);
+    L.circle([SECTOR_CENTER.lat, SECTOR_CENTER.lng], {
+        radius: 150, color: '#00d4ff', fillColor: '#00d4ff',
+        fillOpacity: 0.5, weight: 2, className: 'sector-center-dot'
+    }).addTo(map);
+
+    // ═══════ OUTSIDE SECTOR - CITIES ═══════
+    CITIES_OUTSIDE.forEach(loc => {
+        const isArab = ['רמאללה', 'אל-בירה', 'בית ג\'אלה'].includes(loc.he);
+        const color = isArab ? '#ff6644' : '#ffffff';
+        L.circleMarker([loc.lat, loc.lng], {
+            radius: 9, color: color, fillColor: color, fillOpacity: 0.2, weight: 2,
+            className: 'marker-3d marker-city'
+        }).bindTooltip(loc.he, { className: 'dark-tooltip', permanent: true, direction: 'top', offset: [0, -8] })
+          .addTo(map);
+    });
+
+    // ═══════ OUTSIDE SECTOR - ARAB VILLAGES ═══════
+    ARAB_OUTSIDE.forEach(loc => {
+        L.circleMarker([loc.lat, loc.lng], {
+            radius: 5, color: '#ff6644', fillColor: '#ff6644', fillOpacity: 0.25, weight: 1,
+            className: 'marker-3d marker-outside'
+        }).bindTooltip(loc.he, { className: 'dark-tooltip label-outside-arab', permanent: true, direction: 'right', offset: [8, 0] })
+          .bindPopup(buildLocationPopup(loc, 'כפר (מחוץ לגזרה)', '#ff6644'), { className: 'dark-tooltip', maxWidth: 280 })
+          .addTo(map);
+    });
 
     // Collect all KEY_VILLAGE coords to avoid duplicates from P1/P2
     const keyVillageCoords = new Set(KEY_VILLAGES.map(v => `${v.lat},${v.lng}`));
 
-    // Arab villages from P1/P2 that are NOT already in KEY_VILLAGES - orange, same size
+    // ═══════ IN-SECTOR ARAB VILLAGES (P1/P2) - orange with 3D ═══════
     [...P1_LOCATIONS, ...P2_LOCATIONS].forEach(loc => {
-        if (keyVillageCoords.has(`${loc.lat},${loc.lng}`)) return; // skip duplicates
+        if (keyVillageCoords.has(`${loc.lat},${loc.lng}`)) return;
+        // Outer glow ring
         L.circleMarker([loc.lat, loc.lng], {
-            radius: 6, color: '#ff8800', fillColor: '#ff8800', fillOpacity: 0.4, weight: 1.5
-        }).bindTooltip(loc.he, { className: 'dark-tooltip' })
+            radius: 10, color: '#ff8800', fillColor: '#ff8800', fillOpacity: 0.08, weight: 0,
+            className: 'marker-glow-ring', interactive: false
+        }).addTo(map);
+        L.circleMarker([loc.lat, loc.lng], {
+            radius: 6, color: '#ff8800', fillColor: '#ff8800', fillOpacity: 0.5, weight: 2,
+            className: 'marker-3d'
+        }).bindTooltip(loc.he, { className: 'dark-tooltip', direction: 'right', offset: [8, 0] })
           .bindPopup(buildLocationPopup(loc, 'כפר', '#ff8800'), { className: 'dark-tooltip', maxWidth: 280 })
           .addTo(map);
     });
 
-    // Routes & checkpoints - green
+    // ═══════ ROUTES & CHECKPOINTS - green with 3D ═══════
     P3_LOCATIONS.forEach(loc => {
         L.circleMarker([loc.lat, loc.lng], {
-            radius: 4, color: '#00ff88', fillColor: '#00ff88', fillOpacity: 0.3, weight: 1
-        }).bindTooltip(loc.he, { className: 'dark-tooltip' })
+            radius: 5, color: '#00ff88', fillColor: '#00ff88', fillOpacity: 0.4, weight: 1.5,
+            className: 'marker-3d'
+        }).bindTooltip(loc.he, { className: 'dark-tooltip', direction: 'right', offset: [8, 0] })
           .bindPopup(buildLocationPopup(loc, 'ציר', '#00ff88'), { className: 'dark-tooltip', maxWidth: 280 })
           .addTo(map);
     });
 
-    // Israeli settlements - blue, same size as villages
+    // ═══════ ISRAELI SETTLEMENTS - blue with 3D ═══════
     ISRAELI_LOCATIONS.forEach(loc => {
+        const isOutside = loc.outside;
+        const opacity = isOutside ? 0.25 : 0.5;
+        const radius = isOutside ? 5 : 6;
+        const weight = isOutside ? 1 : 2;
+        // Glow ring for in-sector
+        if (!isOutside) {
+            L.circleMarker([loc.lat, loc.lng], {
+                radius: 10, color: '#4488ff', fillColor: '#4488ff', fillOpacity: 0.08, weight: 0,
+                className: 'marker-glow-ring', interactive: false
+            }).addTo(map);
+        }
         L.circleMarker([loc.lat, loc.lng], {
-            radius: 6, color: '#4488ff', fillColor: '#4488ff', fillOpacity: 0.4, weight: 1.5
-        }).bindTooltip(loc.he, { className: 'dark-tooltip' })
-          .bindPopup(buildLocationPopup(loc, 'ישוב', '#4488ff'), { className: 'dark-tooltip', maxWidth: 280 })
+            radius: radius, color: '#4488ff', fillColor: '#4488ff', fillOpacity: opacity, weight: weight,
+            className: isOutside ? 'marker-3d marker-outside' : 'marker-3d'
+        }).bindTooltip(loc.he, { className: 'dark-tooltip', direction: 'right', offset: [8, 0] })
+          .bindPopup(buildLocationPopup(loc, isOutside ? 'ישוב (מחוץ לגזרה)' : 'ישוב', '#4488ff'), { className: 'dark-tooltip', maxWidth: 280 })
           .addTo(map);
     });
 
-    // KEY VILLAGES - orange, same size, with rich popups on click
+    // KEY VILLAGES - orange with 3D glow, rich popups on click
     KEY_VILLAGES.forEach(loc => {
         const pColor = '#ff8800';
+        // Outer glow ring
+        L.circleMarker([loc.lat, loc.lng], {
+            radius: 12, color: pColor, fillColor: pColor, fillOpacity: 0.1, weight: 0,
+            className: 'marker-glow-ring', interactive: false
+        }).addTo(map);
         const marker = L.circleMarker([loc.lat, loc.lng], {
-            radius: 6,
+            radius: 7,
             color: pColor,
             fillColor: pColor,
-            fillOpacity: 0.4,
-            weight: 1.5
+            fillOpacity: 0.55,
+            weight: 2,
+            className: 'marker-3d marker-key'
         }).addTo(map);
 
-        marker.bindTooltip(loc.he, { className: 'dark-tooltip' });
+        marker.bindTooltip(loc.he, { className: 'dark-tooltip', direction: 'right', offset: [8, 0] });
 
         // Rich popup on click with sector history + live data
         marker.on('click', function() {
@@ -2903,15 +3123,6 @@ function initMap() {
 
     });
 
-    const route443 = [
-        [31.840, 35.040], [31.845, 35.055], [31.850, 35.070],
-        [31.855, 35.085], [31.860, 35.095], [31.865, 35.108],
-        [31.870, 35.120], [31.875, 35.135], [31.878, 35.148],
-        [31.880, 35.160], [31.882, 35.175]
-    ];
-    L.polyline(route443, {
-        color: '#00d4ff', weight: 2, opacity: 0.5, dashArray: '10, 6'
-    }).addTo(map);
 
     // ═══════ RADAR SONAR SWEEP (vertical scan) ═══════
     const mapContainer = document.getElementById('map');
@@ -3048,15 +3259,26 @@ function updateMapMarkers(news) {
 async function fetchData() {
     if (isDemoMode) return; // Don't overwrite demo data
     try {
-        const [newsRes, summaryRes, metaRes] = await Promise.all([
+        const [newsRes, summaryRes, metaRes, weatherRes, calendarRes, sentimentRes, trendsRes] = await Promise.all([
             fetch(`${FIREBASE_URL}/auto-news.json`),
             fetch(`${FIREBASE_URL}/world-news-summary/current.json`),
-            fetch(`${FIREBASE_URL}/metadata.json`)
+            fetch(`${FIREBASE_URL}/metadata.json`),
+            fetch(`${FIREBASE_URL}/weather/current.json`).catch(() => ({ json: () => null })),
+            fetch(`${FIREBASE_URL}/calendar/current.json`).catch(() => ({ json: () => null })),
+            fetch(`${FIREBASE_URL}/sentiment/current.json`).catch(() => ({ json: () => null })),
+            fetch(`${FIREBASE_URL}/trends/current.json`).catch(() => ({ json: () => null })),
         ]);
 
         const news = await newsRes.json();
         const summary = await summaryRes.json();
         const meta = await metaRes.json();
+        const weather = await weatherRes.json();
+        const calendar = await calendarRes.json();
+        const sentimentData = await sentimentRes.json();
+        const trendsData = await trendsRes.json();
+
+        // Update intel layers
+        updateIntelLayers(weather, calendar, sentimentData, trendsData);
 
         // Skip Firebase error responses
         if (news && !news.error) {
@@ -3227,7 +3449,7 @@ function renderAlerts() {
         const isDisliked = vote && vote.vote === 'dislike';
         const isLiked = vote && vote.vote === 'like';
         return `
-        <div class="alert-item${isChecked ? ' alert-checked' : ''}${isDisliked ? ' alert-false' : ''}" onclick="toggleAlertExpand(this)">
+        <div class="alert-item${isChecked ? ' alert-checked' : ''}${isDisliked ? ' alert-false' : ''}${item.keywordHit ? ' keyword-hit' : ''}" onclick="toggleAlertExpand(this)">
             <div class="alert-row">
                 <div class="alert-check${isChecked ? ' checked' : ''}" onclick="toggleAlertCheck(this,'${alertId}',event)" title="סמן כנקרא">
                     ${isChecked ? '✓' : ''}
@@ -3458,6 +3680,78 @@ function renderSources() {
 function renderMeta() {
     if (metaData && metaData.lastRun) {
         document.getElementById('lastScan').textContent = formatTime(metaData.lastRun);
+    }
+}
+
+// ═══════ INTEL LAYERS ═══════
+async function fetchWeatherDirect() {
+    try {
+        const url = `https://api.openweathermap.org/data/2.5/weather?lat=${SECTOR_CENTER.lat}&lon=${SECTOR_CENTER.lng}&appid=4a4f2b3c8e9d4f6a8b2c1d0e3f5a7b9c&units=metric&lang=he`;
+        const res = await fetch(url);
+        const data = await res.json();
+        if (data.main) {
+            const wEl = document.getElementById('weatherVal');
+            if (wEl) wEl.textContent = `${Math.round(data.main.temp)}°C ${data.weather?.[0]?.description || ''}`;
+        }
+    } catch (e) { /* silent */ }
+}
+
+function checkCalendarLocal() {
+    const now = new Date();
+    const m = now.getMonth() + 1, d = now.getDate();
+    const md = `${m}-${d}`;
+    const dates = { '1-1': 'יום פתח', '3-30': 'יום האדמה', '4-17': 'יום האסיר', '5-15': 'יום הנכבה', '6-5': 'יום הנכסה', '11-15': 'יום עצמאות פלסטיני', '11-29': 'יום סולידריות' };
+    const isFriday = now.getDay() === 5;
+    const cEl = document.getElementById('calendarVal');
+    if (!cEl) return;
+    const parts = [];
+    if (dates[md]) parts.push(dates[md]);
+    if (isFriday) parts.push('יום שישי');
+    if (parts.length > 0) {
+        cEl.textContent = parts.join(' | ');
+        cEl.style.color = dates[md] ? 'var(--orange)' : 'var(--yellow)';
+    }
+}
+
+function updateIntelLayers(weather, calendar, sentiment, trends) {
+    // Weather - from Firebase (backend), fallback handled by fetchWeatherDirect
+    const wEl = document.getElementById('weatherVal');
+    if (wEl && weather && !weather.error && weather.temp) {
+        wEl.textContent = `${weather.temp}°C ${weather.description}`;
+    }
+
+    // Calendar
+    const cEl = document.getElementById('calendarVal');
+    if (cEl && calendar && !calendar.error) {
+        if (calendar.urgencyBoost > 0) {
+            const parts = [];
+            if (calendar.specificEvent) parts.push(calendar.specificEvent.name);
+            if (calendar.isRamadan) parts.push('רמדאן');
+            if (calendar.isFriday) parts.push('יום שישי');
+            cEl.textContent = parts.join(' | ') + ` (+${calendar.urgencyBoost})`;
+            cEl.style.color = calendar.urgencyBoost >= 3 ? 'var(--red)' : calendar.urgencyBoost >= 2 ? 'var(--orange)' : 'var(--yellow)';
+        } else {
+            cEl.textContent = 'רגיל';
+            cEl.style.color = 'var(--green)';
+        }
+    }
+
+    // Sentiment
+    const sEl = document.getElementById('sentimentVal');
+    if (sEl && sentiment && !sentiment.error && sentiment.level) {
+        const colors = { low: 'var(--green)', moderate: 'var(--yellow)', high: 'var(--orange)', critical: 'var(--red)' };
+        const labels = { low: 'נמוך', moderate: 'בינוני', high: 'גבוה', critical: 'קריטי' };
+        sEl.textContent = `${labels[sentiment.level] || sentiment.level} (${sentiment.score}/10)`;
+        sEl.style.color = colors[sentiment.level] || 'var(--cyan)';
+    }
+
+    // Trends
+    const tEl = document.getElementById('trendsVal');
+    if (tEl && trends && !trends.error) {
+        const count = Array.isArray(trends) ? trends.length : 0;
+        tEl.textContent = count > 0 ? `${count} פעילות` : '0';
+        tEl.style.color = count > 0 ? 'var(--orange)' : 'var(--green)';
+        if (count > 0) tEl.title = trends.map(t => `${t.location}: ${t.reportCount} דיווחים`).join('\n');
     }
 }
 
@@ -4202,6 +4496,9 @@ function loadDemoData() {
 
     renderAll();
 
+    // Start telegram feed simulation in demo mode
+    simulateTelegramFeed();
+
     // Start 60s countdown
     demoCountdown = 60;
     updateDemoButton();
@@ -4226,6 +4523,7 @@ function exitDemoMode() {
     const btn = document.querySelector('[onclick="loadDemoData()"]');
     isDemoMode = false;
     if (demoTimer) { clearInterval(demoTimer); demoTimer = null; }
+    if (tgFeedTimer) { clearInterval(tgFeedTimer); tgFeedTimer = null; }
     newsData = realNewsData;
     allNewsData = realAllNewsData;
     summaryData = realSummaryData;
@@ -4235,6 +4533,127 @@ function exitDemoMode() {
         btn.style.color = 'var(--yellow)';
         btn.style.borderColor = 'var(--yellow-dim)';
         btn.innerHTML = '<span class="btn-icon">&#9881;</span><span>הדגמה</span>';
+    }
+}
+
+// ═══════ TELEGRAM FEED SIMULATION ═══════
+const mockTelegramChannels = [
+    { name: 'דיר איביע - חדשות', messages: [
+        { text: 'כוחות צבאיים נצפו ליד הכניסה המזרחית לכפר', location: 'דיר איביע', urgency: 4 },
+        { text: 'שיירה צבאית עברה בציר 443 לכיוון צפון', location: 'בית עור א-תחתא', urgency: 3 },
+        { text: 'חסימה בכניסה הראשית, צמיגים בוערים', location: 'דיר איביע', urgency: 4 },
+        { text: 'תנועה רגילה בכפר, שקט יחסי', location: 'דיר איביע', urgency: 1 },
+    ]},
+    { name: 'בית ליקיא עכשיו', messages: [
+        { text: 'פשיטה של כוחות מיוחדים, 3 מעצרים', location: 'בית ליקיא', urgency: 5 },
+        { text: 'השלכת אבנים לעבר כלי רכב ליד המחסום', location: 'בית ליקיא', urgency: 4 },
+        { text: 'רכב חשוד עצר ליד בית הספר', location: 'בית ליקיא', urgency: 3 },
+        { text: 'עבודות תשתית בכביש הראשי', location: 'בית ליקיא', urgency: 1 },
+    ]},
+    { name: 'רמאללה ניוז', messages: [
+        { text: 'הפגנה ליד מחסום מכבים, עשרות משתתפים', location: 'בית סירא', urgency: 4 },
+        { text: 'שיירה של כוחות בטחון בציר 446', location: 'מודיעין עילית', urgency: 3 },
+        { text: 'פצועים בעימותים ליד הגדר', location: 'בילעין', urgency: 5 },
+        { text: 'שוק שבועי פתוח כרגיל', location: 'רמאללה', urgency: 1 },
+    ]},
+    { name: 'קודס - ערוץ חדשות', messages: [
+        { text: 'דיווח על ירי לעבר ציר 443, אין נפגעים', location: 'בית עור א-תחתא', urgency: 5 },
+        { text: 'חסימה בכביש 443 סמוך לבית עור', location: 'בית עור אל-פוקא', urgency: 4 },
+        { text: 'כוחות פורשים ליד מידיה, סריקות בשטח', location: 'מידיה', urgency: 4 },
+        { text: 'תנועה שגרתית בצירים המרכזיים', location: null, urgency: 1 },
+    ]},
+    { name: 'ISM Palestine', messages: [
+        { text: 'פעילי ISM תיעדו מעצר ליד קיבא', location: 'קיבא', urgency: 3 },
+        { text: 'אנרכיסטים בינלאומיים הגיעו להפגנה בבילעין', location: 'בילעין', urgency: 3 },
+        { text: 'תיעוד נגד צה"ל ליד רנתיס, צוותי בצלם', location: 'רנתיס', urgency: 3 },
+        { text: 'סיור שגרתי של כוחות ביטחון באזור', location: null, urgency: 2 },
+    ]},
+];
+
+const TG_KEYWORDS = ['שיירה', 'חסימה', 'כוחות', 'ירי', 'פשיטה', 'מעצר', 'אבנים', 'פצועים', 'עימותים', 'חשוד', 'אנרכיסטים', 'בצלם', 'ISM'];
+
+let tgFeedTimer = null;
+
+function findLocationCoords(locationName) {
+    if (!locationName) return null;
+    const allLocs = [...KEY_VILLAGES, ...P1_LOCATIONS, ...P2_LOCATIONS, ...ISRAELI_LOCATIONS];
+    const match = allLocs.find(l => l.he === locationName || l.name === locationName);
+    return match ? { lat: match.lat, lng: match.lng } : null;
+}
+
+function pulseMapMarker(lat, lng) {
+    if (!map) return;
+    const pulse = L.circleMarker([lat, lng], {
+        radius: 25, color: '#ffd000', fillColor: '#ffd000',
+        fillOpacity: 0.4, weight: 3, className: 'tg-pulse-marker'
+    }).addTo(map);
+    let r = 25;
+    const anim = setInterval(() => {
+        r += 2;
+        pulse.setRadius(r);
+        pulse.setStyle({ fillOpacity: Math.max(0, 0.4 - (r - 25) * 0.02), opacity: Math.max(0, 1 - (r - 25) * 0.03) });
+        if (r > 50) { clearInterval(anim); map.removeLayer(pulse); }
+    }, 50);
+}
+
+function flashSidebar() {
+    const leftPanel = document.querySelector('.left-panel');
+    if (!leftPanel) return;
+    leftPanel.style.transition = 'box-shadow 0.3s ease';
+    leftPanel.style.boxShadow = '0 0 20px rgba(255,208,0,0.4), inset 0 0 10px rgba(255,208,0,0.1)';
+    setTimeout(() => { leftPanel.style.boxShadow = ''; }, 1500);
+}
+
+function addTelegramLog(msg, channelName) {
+    const hasKeyword = TG_KEYWORDS.some(kw => msg.text.includes(kw));
+    const coords = findLocationCoords(msg.location);
+    const id = 'tg-' + Date.now() + '-' + Math.random().toString(36).substr(2, 5);
+
+    const report = {
+        title: msg.text,
+        fullText: msg.text,
+        snippet: msg.text,
+        source: channelName,
+        sourceUrl: '',
+        urgencyScore: msg.urgency,
+        urgency: msg.urgency,
+        locationHe: msg.location || '',
+        coordinates: coords,
+        publishedAt: Date.now(),
+        fetchedAt: Date.now(),
+        timestamp: Date.now(),
+        isAnarchist: msg.text.includes('אנרכיסט') || msg.text.includes('ISM') || msg.text.includes('בצלם'),
+        isTelegram: true,
+        keywordHit: hasKeyword,
+    };
+
+    newsData[id] = report;
+    allNewsData[id] = report;
+    renderAll();
+
+    if (hasKeyword) flashSidebar();
+    if (coords) pulseMapMarker(coords.lat, coords.lng);
+}
+
+function simulateTelegramFeed() {
+    if (tgFeedTimer) { clearInterval(tgFeedTimer); tgFeedTimer = null; return; }
+    tgFeedTimer = setInterval(() => {
+        const ch = mockTelegramChannels[Math.floor(Math.random() * mockTelegramChannels.length)];
+        const msg = ch.messages[Math.floor(Math.random() * ch.messages.length)];
+        addTelegramLog(msg, ch.name);
+    }, 5000 + Math.random() * 5000);
+}
+
+function toggleTgFeed() {
+    const btn = document.getElementById('tgFeedBtn');
+    if (tgFeedTimer) {
+        clearInterval(tgFeedTimer); tgFeedTimer = null;
+        btn.style.color = 'var(--cyan)'; btn.style.borderColor = 'var(--cyan)';
+        btn.innerHTML = '<span class="btn-icon">&#9889;</span><span>פיד טלגרם</span>';
+    } else {
+        simulateTelegramFeed();
+        btn.style.color = 'var(--green)'; btn.style.borderColor = 'var(--green)';
+        btn.innerHTML = '<span class="btn-icon">&#9889;</span><span>פיד פעיל...</span>';
     }
 }
 
@@ -4261,6 +4680,8 @@ document.addEventListener('DOMContentLoaded', () => {
     try { loadAlertVotes(); } catch(e) { console.error('Votes init error:', e); }
     try { loadPublisherProfiles(); } catch(e) { console.error('Profiles init error:', e); }
     try { startRefreshCycle(); } catch(e) { console.error('Refresh init error:', e); }
+    try { fetchWeatherDirect(); } catch(e) {}
+    try { checkCalendarLocal(); } catch(e) {}
 });
 </script>
 </body>
