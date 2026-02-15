@@ -2990,7 +2990,7 @@ function initMap() {
         L.circleMarker([loc.lat, loc.lng], {
             radius: 9, color: color, fillColor: color, fillOpacity: 0.2, weight: 2,
             className: 'marker-3d marker-city'
-        }).bindTooltip(loc.he, { className: 'dark-tooltip', permanent: true, direction: 'top', offset: [0, -8] })
+        }).bindTooltip(loc.he, { className: 'dark-tooltip', direction: 'right', offset: [8, 0] })
           .addTo(map);
     });
 
@@ -2999,7 +2999,7 @@ function initMap() {
         L.circleMarker([loc.lat, loc.lng], {
             radius: 5, color: '#ff6644', fillColor: '#ff6644', fillOpacity: 0.25, weight: 1,
             className: 'marker-3d marker-outside'
-        }).bindTooltip(loc.he, { className: 'dark-tooltip label-outside-arab', permanent: true, direction: 'right', offset: [8, 0] })
+        }).bindTooltip(loc.he, { className: 'dark-tooltip', direction: 'right', offset: [8, 0] })
           .bindPopup(buildLocationPopup(loc, 'כפר (מחוץ לגזרה)', '#ff6644'), { className: 'dark-tooltip', maxWidth: 280 })
           .addTo(map);
     });
