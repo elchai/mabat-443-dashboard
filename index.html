@@ -1824,6 +1824,14 @@ body {
     filter: drop-shadow(0 0 4px currentColor);
 }
 
+/* ═══════ SEPARATION BARRIER ═══════ */
+.barrier-line {
+    filter: drop-shadow(0 0 4px rgba(255, 0, 64, 0.6));
+}
+.barrier-glow {
+    filter: drop-shadow(0 0 8px rgba(255, 0, 64, 0.3));
+}
+
 /* ═══════ 3D SECTOR CIRCLE ═══════ */
 .sector-ring {
     filter: drop-shadow(0 0 8px rgba(0, 212, 255, 0.5)) drop-shadow(0 0 20px rgba(0, 212, 255, 0.2));
@@ -2958,6 +2966,42 @@ function initMap() {
         color: '#a855f7', weight: 2.5, opacity: 0.7, dashArray: '8, 6',
         className: 'route-line'
     }).bindTooltip('כביש 450', { permanent: false, className: 'dark-tooltip', direction: 'center' }).addTo(map);
+
+    // ═══════ SEPARATION BARRIER (גדר ההפרדה) ═══════
+    // Western section - south to north along Green Line with Modi'in Illit salient
+    const BARRIER_WEST = [
+        [31.790, 35.020], [31.800, 35.025], [31.810, 35.028],
+        [31.825, 35.033], [31.838, 35.036], [31.848, 35.040],
+        [31.860, 35.035], [31.875, 35.025], [31.890, 35.020],
+        [31.905, 35.015], [31.918, 35.012], [31.925, 35.015],
+        [31.930, 35.025], [31.935, 35.038], [31.938, 35.048],
+        [31.942, 35.055], [31.948, 35.060], [31.955, 35.065],
+        [31.962, 35.068], [31.970, 35.072], [31.980, 35.080]
+    ];
+    // Eastern section - Jerusalem envelope near Givat Ze'ev southward
+    const BARRIER_EAST = [
+        [31.875, 35.188], [31.868, 35.193], [31.858, 35.197],
+        [31.850, 35.198], [31.842, 35.196], [31.835, 35.190],
+        [31.828, 35.180], [31.822, 35.170], [31.818, 35.160],
+        [31.812, 35.150], [31.805, 35.142], [31.798, 35.138]
+    ];
+
+    // Barrier glow background
+    L.polyline(BARRIER_WEST, {
+        color: '#ff0040', weight: 6, opacity: 0.15, className: 'barrier-glow'
+    }).addTo(map);
+    L.polyline(BARRIER_EAST, {
+        color: '#ff0040', weight: 6, opacity: 0.15, className: 'barrier-glow'
+    }).addTo(map);
+    // Barrier main line
+    L.polyline(BARRIER_WEST, {
+        color: '#ff0040', weight: 2.5, opacity: 0.8, dashArray: '6, 4',
+        className: 'barrier-line'
+    }).bindTooltip('גדר ההפרדה', { permanent: false, className: 'dark-tooltip', direction: 'center' }).addTo(map);
+    L.polyline(BARRIER_EAST, {
+        color: '#ff0040', weight: 2.5, opacity: 0.8, dashArray: '6, 4',
+        className: 'barrier-line'
+    }).bindTooltip('גדר ההפרדה', { permanent: false, className: 'dark-tooltip', direction: 'center' }).addTo(map);
 
     // ═══════ SECTOR CIRCLE - 3D GLOW ═══════
     // Outer glow ring
