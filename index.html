@@ -2422,9 +2422,6 @@ document.getElementById('loginInput').addEventListener('keydown', function(e) {
         <button class="map-btn" onclick="toggleMapFullscreen()" id="mapBtn" title="F = Fullscreen">&#x26F6; הרחב</button>
         <button class="map-btn" onclick="toggleArrestPlanner()" id="arrestBtn" title="תכנון מעצר" style="left:calc(1.5rem + 120px);right:auto;">🎯 תכנן מעצר</button>
         <button class="map-btn" onclick="toggleMapillarySearch()" id="mlyBtn" title="חפש צילומי רחוב Mapillary" style="left:calc(1.5rem + 240px);right:auto;">📷 Mapillary</button>
-        <button class="map-btn" onclick="document.getElementById('fenceFileInput').click()" id="fenceImportBtn" title="ייבוא קובץ גדר (GeoJSON/KML)" style="left:calc(1.5rem + 360px);right:auto;">🛡️ ייבוא גדר</button>
-        <input type="file" id="fenceFileInput" accept=".json,.geojson,.kml" style="display:none;" onchange="handleFenceFile(event)">
-        <button class="map-btn" id="fenceClearBtn" onclick="clearFenceCustom()" title="מחק גדר מותאמת וחזור ל-OSM" style="left:calc(1.5rem + 480px);right:auto;display:none;">🗑️ נקה</button>
         <!-- Arrest Planner Panel -->
         <div id="arrestPanel" class="arrest-panel" style="display:none;">
             <div class="arrest-header">
