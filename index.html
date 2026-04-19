@@ -2043,19 +2043,19 @@ body {
 .map-legend {
     position: absolute;
     bottom: 10px;
-    right: 10px;
+    left: 10px;
+    right: auto;
     z-index: 1001;
-    background: rgba(4, 8, 16, 0.95);
+    background: rgba(4, 8, 16, 0.92);
     border: 1px solid var(--cyan-dim);
-    border-radius: 6px;
-    padding: 10px 14px;
+    padding: 8px 12px;
     font-family: var(--font-he);
-    font-size: 12px;
+    font-size: 11px;
     direction: rtl;
     pointer-events: auto;
-    max-width: 160px;
+    max-width: 150px;
     backdrop-filter: blur(8px);
-    box-shadow: 0 0 15px rgba(0,0,0,0.5);
+    box-shadow: 0 0 12px rgba(0,0,0,0.55);
 }
 .legend-title {
     font-family: var(--font-he);
@@ -2839,7 +2839,7 @@ const KEY_VILLAGES = [
     { he: "בית סירא", lat: 31.8478, lng: 35.0721, priority: 'P2', pop: '~4,500',
       history: 'מערבית לציר. עימותים עם כוחות ביטחון בכניסה לכפר. בקת"ב ואבנים.',
       threats: ['עימותים', 'בקת"ב', 'אבנים'] },
-    { he: "בית ליקיא", lat: 31.8336, lng: 35.0787, priority: 'P2', pop: '~7,000',
+    { he: "בית ליקיא", lat: 31.8694, lng: 35.0662, priority: 'P2', pop: '~7,000',
       history: 'כפר גדול מערבית-דרומית. פשיטות ומעצרים תכופים. ערוץ טלגרם מקומי פעיל.',
       threats: ['מעצרים', 'פשיטות'] },
     { he: "בדרוס", lat: 31.8228, lng: 35.0935, priority: 'P1', pop: '~2,000',
@@ -2916,7 +2916,7 @@ const ISRAELI_LOCATIONS = [
     { name: "Lapid", he: "לפיד", lat: 31.9181, lng: 35.0360 },
     { name: "Na'ale", he: "נעלה", lat: 31.9547, lng: 35.0593 },
     { name: "Nili", he: "נילי", lat: 31.9431, lng: 35.0413 },
-    { name: "Mevo Horon", he: "מבוא חורון", lat: 31.8697, lng: 35.0497 },
+    { name: "Mevo Horon", he: "מבוא חורון", lat: 31.8502, lng: 35.0355 },
     { name: "Shilat", he: "שילת", lat: 31.9216, lng: 35.0149 },
     { name: "Kfar Ruth", he: "כפר רות", lat: 31.9100, lng: 35.0200 },
     { name: "Givon HaHadasha", he: "גבעון החדשה", lat: 31.8533, lng: 35.1667 },
@@ -3965,46 +3965,20 @@ function arrestUpdateStep() {
 async function arrestFinish() {
     if (!arrestState.target || !arrestState.startPoint) return;
     const step = document.getElementById('arrestStep');
-    step.innerHTML = '⏳ מחשב ציר...';
 
-    // OSRM expects lng,lat order. Route: start → waypoints → target (house)
+    // ציר ניווט = קווים ישרים בין הנקודות שסומנו (מוצא → נ״ד → יעד)
+    // אין OSRM — המשתמש שולט בציר על ידי מיקום נ״ד.
     const pts = [arrestState.startPoint, ...arrestState.waypoints, arrestState.target];
-    const coordsStr = pts.map(p => `${p.lng},${p.lat}`).join(';');
-    const url = `https://router.project-osrm.org/route/v1/driving/${coordsStr}?overview=full&geometries=geojson&steps=false`;
-
-    let routeCoords = null;
+    const routeCoords = pts.map(p => [p.lat, p.lng]);
     let distanceM = 0;
-    let durationS = 0;
-    try {
-        const res = await fetch(url, { signal: AbortSignal.timeout(12000) });
-        if (!res.ok) throw new Error('OSRM ' + res.status);
-        const data = await res.json();
-        if (data.routes && data.routes[0]) {
-            routeCoords = data.routes[0].geometry.coordinates.map(c => [c[1], c[0]]);
-            distanceM = data.routes[0].distance;
-            durationS = data.routes[0].duration;
-        }
-    } catch (e) {
-        console.warn('OSRM failed, falling back to straight-line:', e.message);
-    }
+    for (let i = 1; i < pts.length; i++) distanceM += haversineMeters(pts[i - 1], pts[i]);
+    const durationS = distanceM / (30 * 1000 / 3600); // ~30 km/h ממוצע שטח
 
-    // fallback: straight line
-    if (!routeCoords) {
-        routeCoords = pts.map(p => [p.lat, p.lng]);
-        for (let i = 1; i < pts.length; i++) {
-            distanceM += haversineMeters(pts[i - 1], pts[i]);
-        }
-        durationS = distanceM / (50 * 1000 / 3600); // 50 km/h avg
-    }
-
-    // draw route — קו סגול דק שנמתח בין נקודות הניווט
-    const routeOuter = L.polyline(routeCoords, {
-        color: '#1a0a2e', weight: 4, opacity: 0.55
-    }).addTo(map);
+    // קו סגול דק יחיד בלבד
     const routeInner = L.polyline(routeCoords, {
-        color: '#a855f7', weight: 2, opacity: 1, lineCap: 'round'
+        color: '#a855f7', weight: 2.5, opacity: 0.95, lineCap: 'round'
     }).bindTooltip('ציר ניווט', { sticky: true, className: 'dark-tooltip' }).addTo(map);
-    arrestState.routeLayers.push(routeOuter, routeInner);
+    arrestState.routeLayers.push(routeInner);
     arrestState.routeCoords = routeCoords;
     arrestState.routeMeta = { distanceM, durationS };
 
@@ -4665,10 +4639,17 @@ function renderAlerts() {
 // Normalize text for similarity compare (dedup title vs summary vs fullText)
 function normText(s) {
     return (s || '').trim()
-        .replace(/#?\bvideo\b|#?\bphoto\b/gi, '')
+        .replace(/#?\b(video|photo|image|pic)\b/gi, '')
         .replace(/https?:\/\/\S+/g, '')
-        .replace(/[\-–—|·]+\s*x\.com/gi, '')
+        .replace(/\S*x\.com\S*/gi, '')       // any x.com fragment
+        .replace(/\S*t\.me\S*/gi, '')
+        .replace(/\S*telegram\.me\S*/gi, '')
+        .replace(/\S*youtu\.?be\S*/gi, '')
+        .replace(/@\w+/g, '')
+        .replace(/[\-–—|·]+/g, ' ')
+        .replace(/[\u200e\u200f\u202a-\u202e]/g, '')  // direction marks
         .replace(/\s+/g, ' ')
+        .trim()
         .toLowerCase();
 }
 function isDistinct(a, b) {
@@ -4676,10 +4657,17 @@ function isDistinct(a, b) {
     const na = normText(a), nb = normText(b);
     if (!na || !nb) return false;
     if (na === nb) return false;
-    // אם אחד מוכל בשני כמעט לגמרי - לא מובחן
+    // אם אחד מוכל בשני (אחרי נורמליזציה) - אותו תוכן
     const shorter = na.length < nb.length ? na : nb;
     const longer  = na.length < nb.length ? nb : na;
-    if (longer.includes(shorter) && (longer.length - shorter.length) < 30) return false;
+    if (longer.includes(shorter)) return false;
+    // סף דמיון: אם 85%+ מהתווים חופפים - אותו תוכן
+    const minLen = Math.min(na.length, nb.length);
+    if (minLen < 30) return na !== nb;
+    // חיתוך גס לפי תחילית
+    let common = 0;
+    for (let i = 0; i < minLen; i++) if (na[i] === nb[i]) common++;
+    if (common / minLen > 0.85) return false;
     return true;
 }
 
