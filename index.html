@@ -3085,6 +3085,24 @@ let metaData = null;
 let activeFilter = 'all';
 let historyFilter = 'all';
 let knownIds = new Set();
+let _unreadSinceHidden = 0;
+let _unreadRed = 0;
+const _originalTitle = document.title;
+function updateTitleCounter() {
+    if (_unreadSinceHidden > 0) {
+        const prefix = _unreadRed > 0 ? '🚨' : '🔶';
+        document.title = `${prefix} (${_unreadSinceHidden}) ${_originalTitle}`;
+    } else {
+        document.title = _originalTitle;
+    }
+}
+document.addEventListener('visibilitychange', () => {
+    if (!document.hidden) {
+        _unreadSinceHidden = 0;
+        _unreadRed = 0;
+        updateTitleCounter();
+    }
+});
 let isFirstLoad = true;
 let mapIsFullscreen = false;
 let showAnarchists = true;
@@ -3387,85 +3405,6 @@ function toggleLayerMenu() {
     const btn = document.getElementById('layersBtn');
     if (btn) btn.classList.toggle('active', !open);
 }
-
-// ═══════ OSM PLACES LOADER (דינמי, ללא hardcoded) ═══════
-// טוען כפרים/ערים/ישובים בגזרה ישירות מ-OSM Overpass API.
-// סיווג לפי שפת השם: עברי = ישוב ישראלי (כחול), ערבי = כפר ערבי (כתום).
-async function loadOsmPlaces() {
-    const CACHE_KEY = 'mabat443-osm-places-v1';
-    const TTL = 14 * 24 * 3600 * 1000;
-    const bbox = `${SECTOR_CENTER.lat - 0.18},${SECTOR_CENTER.lng - 0.22},${SECTOR_CENTER.lat + 0.18},${SECTOR_CENTER.lng + 0.22}`;
-
-    function render(places) {
-        places.forEach(p => {
-            const isHebrew = /[\u0590-\u05FF]/.test(p.name);
-            const isArabic = /[\u0600-\u06FF]/.test(p.name);
-            const isCity = p.place === 'city';
-            // ערים גדולות (רמאללה, ירושלים) — גודל מיוחד
-            let color, radius, tooltipName;
-            if (isHebrew) {
-                color = '#4488ff'; // ישוב ישראלי
-                radius = isCity ? 8 : 4.5;
-            } else if (isArabic) {
-                color = '#ff8800'; // כפר ערבי
-                radius = isCity ? 8 : 4.5;
-            } else {
-                color = '#ccc';
-                radius = 3;
-            }
-            tooltipName = p.nameHe || p.name;
-            L.circleMarker([p.lat, p.lng], {
-                radius: radius,
-                color: '#0a0a0a',
-                weight: 1,
-                fillColor: color,
-                fillOpacity: isCity ? 0.9 : 0.85
-            }).bindTooltip(tooltipName, { className: 'dark-tooltip', direction: 'right', offset: [6, 0] })
-              .addTo(map);
-        });
-        console.log(`📍 OSM places: ${places.length} rendered`);
-    }
-
-    // cache
-    try {
-        const cached = JSON.parse(localStorage.getItem(CACHE_KEY) || 'null');
-        if (cached && (Date.now() - cached.ts) < TTL) {
-            render(cached.places);
-            return;
-        }
-    } catch (e) {}
-
-    const query = `[out:json][timeout:25];
-(
-  node["place"~"^(city|town|village|suburb)$"](${bbox});
-);
-out;`;
-    try {
-        const res = await fetch('https://overpass-api.de/api/interpreter?data=' + encodeURIComponent(query),
-                                { signal: AbortSignal.timeout(20000) });
-        if (!res.ok) throw new Error('Overpass ' + res.status);
-        const data = await res.json();
-        const places = (data.elements || [])
-            .filter(el => el.tags && el.tags.name)
-            .map(el => ({
-                lat: el.lat,
-                lng: el.lon,
-                name: el.tags.name,
-                nameHe: el.tags['name:he'] || null,
-                nameAr: el.tags['name:ar'] || null,
-                place: el.tags.place
-            }));
-        localStorage.setItem(CACHE_KEY, JSON.stringify({ ts: Date.now(), places }));
-        render(places);
-    } catch (e) {
-        console.warn('OSM places load failed:', e.message);
-    }
-}
-
-window.clearOsmCache = function() {
-    localStorage.removeItem('mabat443-osm-places-v1');
-    console.log('✅ OSM cache cleared. Reload to refetch.');
-};
 
 // ═══════ SECURITY FENCE LOADER ═══════
 // 3 שכבות:
@@ -4687,14 +4626,21 @@ async function fetchData() {
                     delete news[id];
                 }
             });
-            // Detect new alerts for flash
+            // Detect new alerts — flash + title counter (נשמר עד שהמשתמש חוזר לטאב)
             if (!isFirstLoad) {
-                const newIds = Object.keys(news);
-                let hasNewRed = false;
+                const newIds = Object.keys(news).filter(id => !knownIds.has(id));
+                let newRed = 0, newOrange = 0;
                 newIds.forEach(id => {
-                    if (!knownIds.has(id) && news[id].urgency >= 5) hasNewRed = true;
+                    const u = news[id].urgency || 0;
+                    if (u >= 5) newRed++;
+                    else if (u >= 4) newOrange++;
                 });
-                if (hasNewRed) triggerRedAlert();
+                if (newRed > 0) triggerRedAlert();
+                if (document.hidden && (newRed + newOrange) > 0) {
+                    _unreadSinceHidden += newRed + newOrange;
+                    _unreadRed += newRed;
+                    updateTitleCounter();
+                }
             }
             newsData = news;
             allNewsData = { ...allNewsData, ...news };
