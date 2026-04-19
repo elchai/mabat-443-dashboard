@@ -1060,6 +1060,7 @@ body {
 .alert-item.alert-false { opacity:0.6; }
 .alert-item.alert-false .alert-title { text-decoration:line-through; text-decoration-color:var(--red); }
 .false-badge { display:inline-block; font-family:var(--font-he); font-size:9px; font-weight:700; color:var(--red); background:var(--red-dim); border:1px solid var(--red); border-radius:3px; padding:0px 5px; margin-left:6px; }
+.alert-conf-badge { display:inline-block; font-family:var(--font-he); font-size:9px; font-weight:700; border:1px solid; border-radius:3px; padding:0 5px; margin-left:6px; background:rgba(0,0,0,.3); }
 .verified-badge { display:inline-block; font-family:var(--font-he); font-size:9px; font-weight:700; color:var(--green); background:rgba(0,255,136,0.1); border:1px solid var(--green); border-radius:3px; padding:0px 5px; margin-left:6px; }
 
 /* ═══════ PUBLISHER PROFILE OVERLAY ═══════ */
@@ -4812,7 +4813,7 @@ function renderAlerts() {
                 <span class="alert-time">${formatTimeWithDate(item.timestamp)}</span>
                 <div class="alert-urgency ${item.isFieldReport ? 'urgency-field' : item._isAnarchist ? 'urgency-anarchist' : 'urgency-' + (item.urgency || 1)}"></div>
                 <div class="alert-content">
-                    <div class="alert-title">${isDisliked ? '<span class="false-badge">שגוי</span>' : ''}${isLiked ? '<span class="verified-badge">אומת</span>' : ''}${escapeHtml(item.title || 'N/A')}</div>
+                    <div class="alert-title">${isDisliked ? '<span class="false-badge">שגוי</span>' : ''}${isLiked ? '<span class="verified-badge">אומת</span>' : ''}${alertConfidenceBadge(item)}${escapeHtml(item.title || 'N/A')}</div>
                     ${alertUniqueBody(item)}
                     ${locationTag}
                 </div>
@@ -4866,6 +4867,17 @@ function isDistinct(a, b) {
     return true;
 }
 
+// תג ביטחון קטן ליד הכותרת — מוצג רק כשיש ערך וקרובים לגבול (low-conf)
+function alertConfidenceBadge(item) {
+    if (typeof item.confidence !== 'number') return '';
+    const c = item.confidence;
+    // רק חלשים/חשודים מוצגים בכותרת — בטוחים לא זקוקים לתג
+    if (c >= 0.6) return '';
+    const color = c >= 0.45 ? '#ff8800' : '#ff0040';
+    const label = c >= 0.45 ? 'אמינות נמוכה' : 'לא מאומת';
+    return `<span class="alert-conf-badge" style="border-color:${color};color:${color};" title="ביטחון דיווח ${Math.round(c*100)}%">${label}</span>`;
+}
+
 function alertUniqueBody(item) {
     // הצג summary רק אם שונה מ-title
     if (!item.summary || !isDistinct(item.summary, item.title)) return '';
@@ -4885,6 +4897,17 @@ function alertExpandedDetails(item) {
     if (item.language || item.originalLang) rows.push(['שפה', item.language || (item.originalLang === 'ar' ? 'ערבית' : 'עברית')]);
     if (item.protectedTarget) rows.push(['יעד מוגן', `<span style="color:#ff0040;">${escapeHtml(item.protectedTarget)}</span>`]);
     if (item.isHyperLocal) rows.push(['מקור', '<span style="color:#ffd000;">היפר-מקומי</span>']);
+    if (item.sourceReliability) {
+        const r = item.sourceReliability;
+        const color = r >= 8 ? '#00ff88' : r >= 6 ? '#ffd000' : r >= 4 ? '#ff8800' : '#ff0040';
+        rows.push(['אמינות מקור', `<span style="color:${color};font-weight:700;">${r}/10</span>`]);
+    }
+    if (typeof item.confidence === 'number') {
+        const c = item.confidence;
+        const pct = Math.round(c * 100);
+        const color = c >= 0.75 ? '#00ff88' : c >= 0.55 ? '#ffd000' : c >= 0.35 ? '#ff8800' : '#ff0040';
+        rows.push(['ביטחון דיווח', `<span style="color:${color};font-weight:700;">${pct}%</span>`]);
+    }
     const publishedAt = item.publishedAt || item.timestamp;
     if (publishedAt) rows.push(['פורסם', escapeHtml(formatDateTime(publishedAt))]);
     if (item.fetchedAt) rows.push(['נקלט', escapeHtml(formatDateTime(item.fetchedAt))]);
