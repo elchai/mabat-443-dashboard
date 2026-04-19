@@ -3999,7 +3999,7 @@ function arrestAddStart(lat, lng) {
 }
 
 function arrestAddWaypoint(lat, lng) {
-    arrestState.waypoints.push({ lat, lng });
+    arrestState.waypoints.push({ lat, lng, note: '' });
     const wpIdx = arrestState.waypoints.length - 1;
     const m = L.marker([lat, lng], {
         icon: arrestBuildWpIcon(wpIdx + 1),
@@ -4028,6 +4028,17 @@ function arrestAddWaypoint(lat, lng) {
         });
         arrestRefreshRoute();
         arrestUpdateStep();
+    });
+    // קליק רגיל = עריכת הערה
+    m.on('click', (ev) => {
+        const idx = arrestState.waypointMarkers.indexOf(m);
+        if (idx < 0) return;
+        const cur = arrestState.waypoints[idx].note || '';
+        const note = prompt(`הערה לנ״ד ${idx + 1}:`, cur);
+        if (note === null) return; // cancel
+        arrestState.waypoints[idx].note = note;
+        const badge = note ? `נ״ד ${idx + 1} · ${note.substring(0, 30)}` : `נ״ד ${idx + 1}`;
+        m.setTooltipContent(arrestTooltipContent(badge));
     });
     if (m.getElement()) m.getElement().oncontextmenu = (e) => { e.preventDefault(); return false; };
     m.on('add', () => { if (m.getElement()) m.getElement().oncontextmenu = (e) => { e.preventDefault(); return false; }; });
@@ -4142,13 +4153,17 @@ function arrestCopyText() {
     const t = arrestState.target;
     const s = arrestState.startPoint;
     const m = arrestState.routeMeta || { distanceM: 0, durationS: 0 };
+    const wpLines = (arrestState.waypoints || []).map((w, i) => {
+        const note = w.note ? ` — ${w.note}` : '';
+        return `  ${i + 1}. ${w.lat.toFixed(5)}, ${w.lng.toFixed(5)}${note}`;
+    });
     const lines = [
         '🎯 תכנון מעצר - מבט 443',
-        `🏠 יעד (בית המבוקש): ${t.lat.toFixed(5)}, ${t.lng.toFixed(5)}`,
+        `🏠 יעד: ${t.lat.toFixed(5)}, ${t.lng.toFixed(5)} (פתח שעה ${arrestState.targetEntrance || 6})`,
         s ? `🟢 נקודת מוצא: ${s.lat.toFixed(5)}, ${s.lng.toFixed(5)}` : '',
         `📏 מרחק: ${(m.distanceM / 1000).toFixed(2)} ק״מ`,
         `⏱ זמן משוער: ${Math.round(m.durationS / 60)} דק׳`,
-        `📍 נ״ד ביניים: ${arrestState.waypoints.length}`,
+        wpLines.length ? `📍 נ״ד (${wpLines.length}):\n${wpLines.join('\n')}` : '',
         `Google Maps: https://www.google.com/maps?q=${t.lat},${t.lng}`,
     ].filter(Boolean);
     navigator.clipboard.writeText(lines.join('\n')).then(() => {
@@ -4164,6 +4179,7 @@ function arrestSaveLocal() {
     plans.push({
         ts: Date.now(),
         target: arrestState.target,
+        targetEntrance: arrestState.targetEntrance || 6,
         startPoint: arrestState.startPoint,
         waypoints: arrestState.waypoints,
         meta: arrestState.routeMeta,
