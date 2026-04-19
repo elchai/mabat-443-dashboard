@@ -3746,17 +3746,17 @@ function arrestBuildStartIcon() {
     });
 }
 function arrestBuildWpIcon(idx) {
-    // סיכת מפה: טיפה הפוכה עם ראש אדום ומספר
-    const svg = `<svg width="14" height="20" viewBox="0 0 14 20" xmlns="http://www.w3.org/2000/svg" style="filter:drop-shadow(0 1px 2px rgba(0,0,0,.6));">
-        <path d="M7 0.5 C3.4 0.5 0.8 3.1 0.8 6.6 C0.8 10.6 7 19.5 7 19.5 C7 19.5 13.2 10.6 13.2 6.6 C13.2 3.1 10.6 0.5 7 0.5 Z"
-              fill="#ff0040" stroke="#040810" stroke-width="0.8"/>
-        <text x="7" y="9" font-family="Share Tech Mono,monospace" font-size="7" font-weight="700"
-              text-anchor="middle" fill="#fff">${idx}</text>
-    </svg>`;
+    // סיכת מפה: ראש אדום עגול + זנב דק, המספר בראש
+    const html = `
+        <div style="position:relative;width:18px;height:26px;filter:drop-shadow(0 1px 2px rgba(0,0,0,.7));">
+            <div style="position:absolute;top:0;left:0;width:18px;height:18px;background:#ff0040;border:1.5px solid #040810;border-radius:50%;display:flex;align-items:center;justify-content:center;font-family:'Share Tech Mono',monospace;font-size:10px;font-weight:700;color:#fff;line-height:1;">${idx}</div>
+            <div style="position:absolute;top:15px;left:8px;width:2px;height:11px;background:#040810;"></div>
+        </div>
+    `;
     return L.divIcon({
         className: 'arrest-wp-icon',
-        html: svg,
-        iconSize: [14, 20], iconAnchor: [7, 20]
+        html: html,
+        iconSize: [18, 26], iconAnchor: [9, 26]
     });
 }
 
@@ -3780,10 +3780,14 @@ function arrestAddTarget(lat, lng) {
     });
     m.on('dragend', arrestRefreshRoute);
     m.on('dblclick contextmenu', (ev) => {
-        L.DomEvent.stop(ev);
-        if (!confirm('למחוק את היעד?')) return;
+        L.DomEvent.stopPropagation(ev);
+        if (ev.originalEvent) ev.originalEvent.preventDefault();
+        if (!confirm('למחוק את המטרה?')) return;
         arrestClear();
     });
+    // מניעת תפריט דפדפן על האייקון עצמו
+    if (m.getElement()) m.getElement().oncontextmenu = (e) => { e.preventDefault(); return false; };
+    m.on('add', () => { if (m.getElement()) m.getElement().oncontextmenu = (e) => { e.preventDefault(); return false; }; });
     arrestState.targetMarker = m;
 }
 
@@ -3800,7 +3804,8 @@ function arrestAddStart(lat, lng) {
     });
     m.on('dragend', arrestRefreshRoute);
     m.on('dblclick contextmenu', (ev) => {
-        L.DomEvent.stop(ev);
+        L.DomEvent.stopPropagation(ev);
+        if (ev.originalEvent) ev.originalEvent.preventDefault();
         if (!confirm('למחוק את נקודת המוצא?')) return;
         map.removeLayer(m);
         arrestState.startMarker = null;
@@ -3809,6 +3814,8 @@ function arrestAddStart(lat, lng) {
         arrestUpdateStep();
         document.getElementById('arrestFinishBtn').disabled = true;
     });
+    if (m.getElement()) m.getElement().oncontextmenu = (e) => { e.preventDefault(); return false; };
+    m.on('add', () => { if (m.getElement()) m.getElement().oncontextmenu = (e) => { e.preventDefault(); return false; }; });
     arrestState.startMarker = m;
 }
 
@@ -3828,14 +3835,14 @@ function arrestAddWaypoint(lat, lng) {
     });
     m.on('dragend', arrestRefreshRoute);
     m.on('dblclick contextmenu', (ev) => {
-        L.DomEvent.stop(ev);
+        L.DomEvent.stopPropagation(ev);
+        if (ev.originalEvent) ev.originalEvent.preventDefault();
         const idx = arrestState.waypointMarkers.indexOf(m);
         if (idx < 0) return;
         if (!confirm(`למחוק נ״ד ${idx + 1}?`)) return;
         map.removeLayer(m);
         arrestState.waypoints.splice(idx, 1);
         arrestState.waypointMarkers.splice(idx, 1);
-        // עדכן מספור הנותרים
         arrestState.waypointMarkers.forEach((mm, i) => {
             mm.setIcon(arrestBuildWpIcon(i + 1));
             mm.setTooltipContent(arrestTooltipContent(`נ״ד ${i + 1}`));
@@ -3843,6 +3850,8 @@ function arrestAddWaypoint(lat, lng) {
         arrestRefreshRoute();
         arrestUpdateStep();
     });
+    if (m.getElement()) m.getElement().oncontextmenu = (e) => { e.preventDefault(); return false; };
+    m.on('add', () => { if (m.getElement()) m.getElement().oncontextmenu = (e) => { e.preventDefault(); return false; }; });
     arrestState.waypointMarkers.push(m);
 }
 
@@ -3912,13 +3921,13 @@ async function arrestFinish() {
         durationS = distanceM / (50 * 1000 / 3600); // 50 km/h avg
     }
 
-    // draw route — קו דק, מקווקו עדין
+    // draw route — קו סגול דק שנמתח בין נקודות הניווט
     const routeOuter = L.polyline(routeCoords, {
-        color: '#040810', weight: 3.5, opacity: 0.5
+        color: '#1a0a2e', weight: 4, opacity: 0.55
     }).addTo(map);
     const routeInner = L.polyline(routeCoords, {
-        color: '#ff0040', weight: 1.5, opacity: 0.95, dashArray: '6,4', lineCap: 'round'
-    }).bindTooltip('ציר מעצר', { sticky: true, className: 'dark-tooltip' }).addTo(map);
+        color: '#a855f7', weight: 2, opacity: 1, lineCap: 'round'
+    }).bindTooltip('ציר ניווט', { sticky: true, className: 'dark-tooltip' }).addTo(map);
     arrestState.routeLayers.push(routeOuter, routeInner);
     arrestState.routeCoords = routeCoords;
     arrestState.routeMeta = { distanceM, durationS };
@@ -4079,10 +4088,9 @@ function initMap() {
         ]
     });
 
-    // ═══════ Mapillary click-to-view (right-click opens Street View at point) ═══════
+    // מנע תפריט דפדפן על המפה (היה פתוח Mapillary בקליק-ימני, גרם לקונפליקט עם מחיקת נקודות)
     map.on('contextmenu', (e) => {
-        const url = `https://www.mapillary.com/app/?lat=${e.latlng.lat}&lng=${e.latlng.lng}&z=17`;
-        window.open(url, '_blank', 'noopener');
+        if (e.originalEvent) e.originalEvent.preventDefault();
     });
     // Button to open Mapillary at sector center
     const mlyBtn = L.control({ position: 'topright' });
