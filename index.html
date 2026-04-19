@@ -923,15 +923,30 @@ body {
 .alert-title {
     font-family: 'Heebo', var(--font-body);
     font-size: 13px;
-    font-weight: 500;
+    font-weight: 600;
     color: var(--text-primary);
-    margin-bottom: 3px;
+    margin-bottom: 4px;
+    line-height: 1.4;
+    white-space: normal;
+    word-break: break-word;
+}
+.alert-body {
+    font-family: 'Heebo', var(--font-body);
+    font-size: 12px;
+    font-weight: 400;
+    color: var(--text-secondary);
+    margin-bottom: 4px;
+    line-height: 1.55;
+    white-space: pre-wrap;
+    word-break: break-word;
+}
+.alert-item:not(.expanded) .alert-body {
     display: -webkit-box;
-    -webkit-line-clamp: 2;
+    -webkit-line-clamp: 4;
     -webkit-box-orient: vertical;
     overflow: hidden;
-    line-height: 1.4;
 }
+.alert-item.expanded .alert-body { display: block; }
 
 /* ═══════ ALERT CHECKMARK ═══════ */
 .alert-check {
@@ -1742,6 +1757,95 @@ body {
 .leaflet-tooltip-bottom.dark-tooltip::before { border-bottom-color: #0f3460 !important; border-top-color: transparent !important; }
 
 /* ═══════ MAP LEGEND ═══════ */
+/* ═══════ ARREST PLANNER ═══════ */
+.arrest-panel {
+    position: absolute;
+    top: 60px;
+    left: 12px;
+    z-index: 1100;
+    background: rgba(4,8,16,.96);
+    border: 1px solid var(--red-dim);
+    border-radius: 8px;
+    width: 280px;
+    backdrop-filter: blur(10px);
+    box-shadow: 0 0 20px rgba(255,0,64,.25);
+    font-family: var(--font-he);
+    direction: rtl;
+    color: var(--text-primary);
+}
+.arrest-header {
+    display:flex; justify-content:space-between; align-items:center;
+    padding: 8px 12px;
+    background: linear-gradient(90deg, rgba(255,0,64,.15), transparent);
+    border-bottom: 1px solid var(--red-dim);
+    font-weight: 700;
+    color: var(--red);
+    font-size: 13px;
+}
+.arrest-close {
+    background:transparent; color:var(--text-secondary); border:none;
+    font-size:16px; cursor:pointer; padding:0; line-height:1;
+}
+.arrest-close:hover { color: var(--red); }
+.arrest-body { padding: 10px 12px; font-size: 12px; }
+.arrest-step {
+    color: var(--cyan);
+    margin-bottom: 8px;
+    padding: 6px 8px;
+    background: rgba(0,212,255,.08);
+    border-right: 2px solid var(--cyan);
+    border-radius: 3px;
+    font-size: 12px;
+}
+.arrest-info {
+    font-family: var(--font-mono);
+    font-size: 11px;
+    line-height: 1.7;
+    color: var(--text-secondary);
+    margin-bottom: 10px;
+    min-height: 20px;
+}
+.arrest-info b { color: var(--yellow); }
+.arrest-actions {
+    display:flex; flex-wrap:wrap; gap:6px;
+    margin-bottom: 8px;
+}
+.arrest-actions button {
+    flex: 1;
+    min-width: 80px;
+    background: rgba(0,212,255,.1);
+    color: var(--cyan);
+    border: 1px solid var(--cyan-dim);
+    padding: 6px 8px;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 11px;
+    font-family: var(--font-he);
+}
+.arrest-actions button:hover:not(:disabled) { background: rgba(0,212,255,.2); }
+.arrest-actions button:disabled { opacity: .4; cursor: not-allowed; }
+.arrest-exports {
+    display:flex; flex-wrap:wrap; gap:6px;
+    padding-top: 8px;
+    border-top: 1px dashed var(--cyan-dim);
+}
+.arrest-exports a, .arrest-exports button {
+    flex: 1;
+    min-width: 110px;
+    text-align: center;
+    background: rgba(255,208,0,.08);
+    color: var(--yellow);
+    border: 1px solid var(--yellow-dim);
+    padding: 5px 6px;
+    border-radius: 4px;
+    text-decoration: none;
+    font-size: 10px;
+    cursor: pointer;
+    font-family: var(--font-he);
+}
+.arrest-exports a:hover, .arrest-exports button:hover { background: rgba(255,208,0,.18); }
+.map-planning-mode .leaflet-container { cursor: crosshair !important; }
+
 .map-legend {
     position: absolute;
     bottom: 10px;
@@ -2316,6 +2420,33 @@ document.getElementById('loginInput').addEventListener('keydown', function(e) {
         <div class="map-coords">31.870N  35.120E</div>
         <div class="map-label">גזרה 443</div>
         <button class="map-btn" onclick="toggleMapFullscreen()" id="mapBtn" title="F = Fullscreen">&#x26F6; הרחב</button>
+        <button class="map-btn" onclick="toggleArrestPlanner()" id="arrestBtn" title="תכנון מעצר" style="left:calc(1.5rem + 120px);right:auto;">🎯 תכנן מעצר</button>
+        <button class="map-btn" onclick="toggleMapillarySearch()" id="mlyBtn" title="חפש צילומי רחוב Mapillary" style="left:calc(1.5rem + 240px);right:auto;">📷 Mapillary</button>
+        <button class="map-btn" onclick="document.getElementById('fenceFileInput').click()" id="fenceImportBtn" title="ייבוא קובץ גדר (GeoJSON/KML)" style="left:calc(1.5rem + 360px);right:auto;">🛡️ ייבוא גדר</button>
+        <input type="file" id="fenceFileInput" accept=".json,.geojson,.kml" style="display:none;" onchange="handleFenceFile(event)">
+        <button class="map-btn" id="fenceClearBtn" onclick="clearFenceCustom()" title="מחק גדר מותאמת וחזור ל-OSM" style="left:calc(1.5rem + 480px);right:auto;display:none;">🗑️ נקה</button>
+        <!-- Arrest Planner Panel -->
+        <div id="arrestPanel" class="arrest-panel" style="display:none;">
+            <div class="arrest-header">
+                <span>🎯 תכנון מעצר</span>
+                <button onclick="toggleArrestPlanner()" class="arrest-close">✕</button>
+            </div>
+            <div class="arrest-body">
+                <div id="arrestStep" class="arrest-step">לחץ על המפה לסימון <b>יעד</b></div>
+                <div id="arrestInfo" class="arrest-info"></div>
+                <div class="arrest-actions">
+                    <button onclick="arrestFinish()" id="arrestFinishBtn" disabled>חשב ציר ▶</button>
+                    <button onclick="arrestReverse()" id="arrestReverseBtn" disabled>היפוך (פינוי)</button>
+                    <button onclick="arrestClear()">איפוס</button>
+                </div>
+                <div class="arrest-exports" id="arrestExports" style="display:none;">
+                    <a href="#" id="arrestGmaps" target="_blank">📍 Google Maps</a>
+                    <a href="#" id="arrestWaze" target="_blank">🚗 Waze</a>
+                    <button onclick="arrestCopyText()">📋 העתק תקציר</button>
+                    <button onclick="arrestSaveLocal()">💾 שמור מקומי</button>
+                </div>
+            </div>
+        </div>
         <div class="map-legend" id="mapLegend">
             <div class="legend-title">מקרא</div>
             <div class="legend-item"><span class="legend-circle" style="background:#ff8800;"></span> כפר ערבי</div>
@@ -2497,82 +2628,85 @@ const SECTOR_CENTER = { lat: 31.870, lng: 35.120 };
 const REFRESH_INTERVAL = 30000;
 
 // KEY VILLAGES - highlighted on map with larger markers + sector history
+// קואורדינטות מדויקות מ-OSM (מרכז הכפר)
 const KEY_VILLAGES = [
-    { he: "בית עור א-תחתא", lat: 31.870, lng: 35.120, priority: 'P1', pop: '~5,000',
+    { he: "בית עור א-תחתא", lat: 31.8704, lng: 35.1214, priority: 'P1', pop: '~5,000',
       history: 'צמוד לציר 443. מוקד עימותים קבוע, ירי ואבנים לעבר כלי רכב. נקודת חנק מרכזית.',
       threats: ['ירי', 'אבנים', 'חסימות'] },
-    { he: "בית עור אל-פוקא", lat: 31.878, lng: 35.130, priority: 'P1', pop: '~3,500',
+    { he: "בית עור אל-פוקא", lat: 31.8766, lng: 35.1293, priority: 'P1', pop: '~3,500',
       history: 'כפר מעל ציר 443. היסטוריה של השלכת אבנים לעבר מתנחלים ורכבים צבאיים.',
       threats: ['אבנים', 'בקת"ב'] },
-    { he: "ח'רבת אל-מיסבאח", lat: 31.852, lng: 35.098, priority: 'P1', pop: '~1,200',
+    { he: "ח'רבת אל-מיסבאח", lat: 31.8523, lng: 35.0980, priority: 'P1', pop: '~1,200',
       history: 'יישוב קטן על הציר. חיכוכי קרקעות עם מתנחלים. מבנים לא חוקיים.',
       threats: ['קרקעות', 'מבנים'] },
-    { he: "ספא", lat: 31.878, lng: 35.087, priority: 'P2', pop: '~3,000',
+    { he: "ספא", lat: 31.8968, lng: 35.0665, priority: 'P2', pop: '~3,000',
       history: 'כפר צפונית לציר. חסימות כביש חוזרות בצמיגים בוערים. מוקד הפגנות.',
       threats: ['חסימות', 'הפגנות', 'צמיגים'] },
-    { he: "מידיה", lat: 31.838, lng: 35.110, priority: 'P1', pop: '~3,200',
+    { he: "מידיה", lat: 31.8405, lng: 35.1043, priority: 'P1', pop: '~3,200',
       history: 'צמוד לציר 443 דרומית. פעילות חשודה ליד הגדר. סריקות תכופות.',
       threats: ['פעילות חשודה', 'גדר'] },
-    { he: "בית סירא", lat: 31.848, lng: 35.075, priority: 'P2', pop: '~4,500',
+    { he: "בית סירא", lat: 31.8478, lng: 35.0721, priority: 'P2', pop: '~4,500',
       history: 'מערבית לציר. עימותים עם כוחות ביטחון בכניסה לכפר. בקת"ב ואבנים.',
       threats: ['עימותים', 'בקת"ב', 'אבנים'] },
-    { he: "בית ליקיא", lat: 31.833, lng: 35.080, priority: 'P2', pop: '~7,000',
+    { he: "בית ליקיא", lat: 31.8336, lng: 35.0787, priority: 'P2', pop: '~7,000',
       history: 'כפר גדול מערבית-דרומית. פשיטות ומעצרים תכופים. ערוץ טלגרם מקומי פעיל.',
       threats: ['מעצרים', 'פשיטות'] },
-    { he: "בית דורס (בן דרוס)", lat: 31.825, lng: 35.095, priority: 'P1', pop: '~2,000',
+    { he: "בדרוס", lat: 31.8228, lng: 35.0935, priority: 'P1', pop: '~2,000',
       history: 'על הציר. נקודת חיכוך עם מתנחלים. הפגנות שבועיות נגד ההתנחלויות.',
       threats: ['מתנחלים', 'הפגנות'] },
-    { he: "קיבא", lat: 31.810, lng: 35.090, priority: 'P1', pop: '~4,000',
+    { he: "קיביה", lat: 31.8096, lng: 35.0895, priority: 'P1', pop: '~4,000',
       history: 'ליד גדר ההפרדה. ניסיונות חדירה. היסטוריה ביטחונית עמוסה.',
       threats: ['חדירות', 'גדר'] },
-    { he: "רנתיס", lat: 31.815, lng: 35.060, priority: 'P1', pop: '~2,500',
+    { he: "רנתיס", lat: 31.8134, lng: 35.0588, priority: 'P1', pop: '~2,500',
       history: 'כפר דרום-מערבי. פעילות אנרכיסטים ובצלם. תיעוד נגד צה"ל.',
       threats: ['אנרכיסטים', 'תיעוד'] },
-    { he: "דיר איביע", lat: 31.893, lng: 35.155, priority: 'P2', pop: '~4,000',
+    { he: "דיר איביע", lat: 31.8937, lng: 35.1492, priority: 'P2', pop: '~4,000',
       history: 'צפונית לציר. ערוץ טלגרם מקומי. פשיטות צבאיות תכופות.',
       threats: ['פשיטות', 'מעצרים'] },
-    { he: "כפר ניעמה", lat: 31.905, lng: 35.120, priority: 'P2', pop: '~2,800',
+    { he: "כפר ניעמה", lat: 31.9021, lng: 35.1195, priority: 'P2', pop: '~2,800',
       history: 'צפונית. מוקד השלכת אבנים ועימותים עם כוחות.',
       threats: ['אבנים', 'עימותים'] },
-    { he: "בילעין", lat: 31.900, lng: 35.080, priority: 'P2', pop: '~2,000',
+    { he: "בילעין", lat: 31.8975, lng: 35.0935, priority: 'P2', pop: '~2,000',
       history: 'מוכר בינלאומית מהפגנות שבועיות נגד הגדר. מוקד ISM ואנרכיסטים.',
       threats: ['הפגנות', 'אנרכיסטים', 'ISM'] },
 ];
 
+// קואורדינטות מדויקות מ-OSM (מרכז הכפר)
 const P1_LOCATIONS = [
-    { name: "Beit Ur al-Tahta", he: "בית עור א-תחתא", lat: 31.870, lng: 35.120 },
-    { name: "Beit Ur al-Fauqa", he: "בית עור אל-פוקא", lat: 31.878, lng: 35.130 },
-    { name: "Khirbet al-Misbah", he: "ח'רבת אל-מיסבאח", lat: 31.852, lng: 35.098 },
-    { name: "Midya", he: "מידיה", lat: 31.838, lng: 35.110 },
-    { name: "Budrus", he: "בית דורס (בן דרוס)", lat: 31.825, lng: 35.095 },
-    { name: "Qibya", he: "קיבא", lat: 31.810, lng: 35.090 },
-    { name: "Rantis", he: "רנתיס", lat: 31.815, lng: 35.060 },
+    { name: "Beit Ur al-Tahta", he: "בית עור א-תחתא", lat: 31.8704, lng: 35.1214 },
+    { name: "Beit Ur al-Fauqa", he: "בית עור אל-פוקא", lat: 31.8766, lng: 35.1293 },
+    { name: "Khirbet al-Misbah", he: "ח'רבת אל-מיסבאח", lat: 31.8523, lng: 35.0980 },
+    { name: "Midya", he: "מידיה", lat: 31.8405, lng: 35.1043 },
+    { name: "Budrus", he: "בדרוס", lat: 31.8228, lng: 35.0935 },
+    { name: "Qibya", he: "קיביה", lat: 31.8096, lng: 35.0895 },
+    { name: "Rantis", he: "רנתיס", lat: 31.8134, lng: 35.0588 },
 ];
 
 const P2_LOCATIONS = [
-    { name: "Deir Ibzia", he: "דיר איביע", lat: 31.893, lng: 35.155 },
-    { name: "Kafr Nimah", he: "כפר ניעמה", lat: 31.905, lng: 35.120 },
-    { name: "Safa", he: "ספא", lat: 31.878, lng: 35.087 },
-    { name: "Bilin", he: "בילעין", lat: 31.900, lng: 35.080 },
-    { name: "Beit Sira", he: "בית סירא", lat: 31.848, lng: 35.075 },
-    { name: "Beit Liqya", he: "בית ליקיא", lat: 31.833, lng: 35.080 },
-    { name: "Ein Arik", he: "עין עריכ", lat: 31.895, lng: 35.175 },
-    { name: "Ein Qiniya", he: "עין קיניא", lat: 31.905, lng: 35.195 },
-    { name: "Tira", he: "טירה", lat: 31.845, lng: 35.155 },
-    { name: "Ni'lin", he: "נעלין", lat: 31.946, lng: 35.022 },
-    { name: "Deir Qaddis", he: "דיר קדיס", lat: 31.949, lng: 35.046 },
-    { name: "Shabtin", he: "שבתין", lat: 31.973, lng: 35.050 },
-    { name: "Kharbatha al-Misbah", he: "חרבתא אל-מסבאח", lat: 31.886, lng: 35.072 },
-    { name: "Kharbatha Bani Harith", he: "חרבתא בני חארית", lat: 31.945, lng: 35.073 },
-    { name: "Beit Anan", he: "בית ענאן", lat: 31.851, lng: 35.112 },
-    { name: "Al-Jib", he: "אל-ג'יב", lat: 31.851, lng: 35.182 },
-    { name: "Beit Ijza", he: "בית איג'זא", lat: 31.848, lng: 35.152 },
-    { name: "Biddu", he: "בידו", lat: 31.833, lng: 35.140 },
-    { name: "Beit Surik", he: "בית סוריכ", lat: 31.823, lng: 35.150 },
-    { name: "Qatanna", he: "קטנה", lat: 31.837, lng: 35.125 },
-    { name: "Beit Duqqu", he: "בית דוקו", lat: 31.859, lng: 35.131 },
-    { name: "Beit Iksa", he: "בית אכסא", lat: 31.818, lng: 35.180 },
-    { name: "Nabi Samwil", he: "נבי סמואל", lat: 31.834, lng: 35.184 },
+    { name: "Deir Ibzia", he: "דיר איביע", lat: 31.8937, lng: 35.1492 },
+    { name: "Kafr Nimah", he: "כפר ניעמה", lat: 31.9021, lng: 35.1195 },
+    { name: "Safa", he: "ספא", lat: 31.8968, lng: 35.0665 },
+    { name: "Bilin", he: "בילעין", lat: 31.8975, lng: 35.0935 },
+    { name: "Beit Sira", he: "בית סירא", lat: 31.8478, lng: 35.0721 },
+    { name: "Beit Liqya", he: "בית ליקיא", lat: 31.8336, lng: 35.0787 },
+    { name: "Ein Arik", he: "עין עריכ", lat: 31.9057, lng: 35.1627 },
+    { name: "Ein Qiniya", he: "עין קיניא", lat: 31.9200, lng: 35.1785 },
+    { name: "A-Tira (Ramallah)", he: "א-טירה (רמאללה)", lat: 31.8944, lng: 35.1845 },
+    { name: "Ni'lin", he: "נעלין", lat: 31.9279, lng: 35.0451 },
+    { name: "Deir Qaddis", he: "דיר קדיס", lat: 31.9017, lng: 35.0588 },
+    { name: "Shibtin", he: "שבתין", lat: 31.9265, lng: 35.0852 },
+    { name: "Shuqba", he: "שוקבא", lat: 31.9379, lng: 35.0712 },
+    { name: "Kharbatha Bani Harith", he: "חרבתא בני חארית", lat: 31.8964, lng: 35.0933 },
+    { name: "Beit Anan", he: "בית ענאן", lat: 31.8457, lng: 35.1207 },
+    { name: "Al-Jib", he: "אל-ג'יב", lat: 31.8538, lng: 35.1866 },
+    { name: "Beit Ijza", he: "בית איג'זא", lat: 31.8522, lng: 35.1829 },
+    { name: "Al-Qubeiba", he: "אל-קוביבה", lat: 31.8403, lng: 35.1414 },
+    { name: "Biddu", he: "בידו", lat: 31.8357, lng: 35.1588 },
+    { name: "Beit Surik", he: "בית סוריכ", lat: 31.8298, lng: 35.1586 },
+    { name: "Qatanna", he: "קטנה", lat: 31.8276, lng: 35.1536 },
+    { name: "Beit Duqqu", he: "בית דוקו", lat: 31.8405, lng: 35.1669 },
+    { name: "Beit Iksa", he: "בית אכסא", lat: 31.8068, lng: 35.2054 },
+    { name: "Nabi Samwil", he: "נבי סמואל", lat: 31.8336, lng: 35.1831 },
 ];
 
 const P3_LOCATIONS = [
@@ -2582,21 +2716,23 @@ const P3_LOCATIONS = [
 ];
 
 const ISRAELI_LOCATIONS = [
-    // בתוך הגזרה
-    { name: "Modi'in Illit", he: "מודיעין עילית", lat: 31.930, lng: 35.050 },
-    { name: "Givat Zeev", he: "גבעת זאב", lat: 31.860, lng: 35.170 },
-    { name: "Beit Horon", he: "בית חורון", lat: 31.860, lng: 35.148 },
-    { name: "Hashmonaim", he: "חשמונאים", lat: 31.931, lng: 35.022 },
-    { name: "Kfar HaOranim", he: "כפר האורנים", lat: 31.920, lng: 35.037 },
-    { name: "Lapid", he: "לפיד", lat: 31.917, lng: 35.033 },
-    { name: "Na'ale", he: "נעלה", lat: 31.963, lng: 35.065 },
-    { name: "Nili", he: "נילי", lat: 31.964, lng: 35.047 },
-    { name: "Mevo Horon", he: "מבוא חורון", lat: 31.850, lng: 35.035 },
-    { name: "Shilat", he: "שילת", lat: 31.921, lng: 35.017 },
-    { name: "Givon HaHadasha", he: "גבעון החדשה", lat: 31.848, lng: 35.158 },
-    { name: "Har Adar", he: "הר אדר", lat: 31.826, lng: 35.130 },
-    { name: "Beit Arye-Ofarim", he: "בית אריה-עופרים", lat: 31.960, lng: 35.050 },
-    { name: "Matityahu", he: "מתתיהו", lat: 31.925, lng: 35.034 },
+    // בתוך הגזרה — קואורדינטות מדויקות מ-OSM
+    { name: "Modi'in Illit", he: "מודיעין עילית", lat: 31.9339, lng: 35.0452 },
+    { name: "Givat Zeev", he: "גבעת זאב", lat: 31.8611, lng: 35.1672 },
+    { name: "Beit Horon", he: "בית חורון", lat: 31.8836, lng: 35.1260 },
+    { name: "Hashmonaim", he: "חשמונאים", lat: 31.9275, lng: 35.0244 },
+    { name: "Kfar HaOranim", he: "כפר האורנים", lat: 31.9246, lng: 35.0537 },
+    { name: "Lapid", he: "לפיד", lat: 31.9181, lng: 35.0360 },
+    { name: "Na'ale", he: "נעלה", lat: 31.9547, lng: 35.0593 },
+    { name: "Nili", he: "נילי", lat: 31.9431, lng: 35.0413 },
+    { name: "Mevo Horon", he: "מבוא חורון", lat: 31.8708, lng: 35.0342 },
+    { name: "Shilat", he: "שילת", lat: 31.9216, lng: 35.0149 },
+    { name: "Kfar Ruth", he: "כפר רות", lat: 31.9094, lng: 35.0018 },
+    { name: "Givon HaHadasha", he: "גבעון החדשה", lat: 31.8532, lng: 35.1726 },
+    { name: "Har Adar", he: "הר אדר", lat: 31.8267, lng: 35.1302 },
+    { name: "Beit Arye-Ofarim", he: "בית אריה-עופרים", lat: 31.9559, lng: 35.0550 },
+    { name: "Matityahu", he: "מתתיהו", lat: 31.9291, lng: 35.0365 },
+    { name: "Dolev", he: "דולב", lat: 31.9259, lng: 35.1355 },
     // מחוץ לגזרה
     { name: "Modi'in", he: "מודיעין", lat: 31.897, lng: 34.968, outside: true },
     { name: "Maccabim-Reut", he: "מכבים-רעות", lat: 31.908, lng: 35.010, outside: true },
@@ -2903,6 +3039,637 @@ function buildLocationPopup(loc, priority, color) {
     `</div>`;
 }
 
+// ═══════ SECURITY FENCE LOADER ═══════
+// 3 שכבות:
+// 1) override ידני (GeoJSON ב-localStorage תחת mabat443-fence-custom)
+// 2) OSM relation 1412281 (Israeli West Bank barrier) — חותך לגזרה
+// 3) fallback: query רחב של barrier=wall/fence
+async function loadSecurityFence(targetLayerGroup) {
+    const CACHE_KEY = 'mabat443-fence-v2';
+    const CACHE_TTL = 7 * 24 * 60 * 60 * 1000;
+
+    function render(geojsonFeatures, source) {
+        if (!geojsonFeatures || !geojsonFeatures.length) {
+            console.warn('🛡️ No fence geometry loaded from', source);
+            return;
+        }
+        // סינון לתוך תיבת גזרה להגבלת רעש
+        const sMin = SECTOR_CENTER.lat - 0.2, sMax = SECTOR_CENTER.lat + 0.2;
+        const lMin = SECTOR_CENTER.lng - 0.25, lMax = SECTOR_CENTER.lng + 0.25;
+        let rendered = 0;
+        geojsonFeatures.forEach(feat => {
+            const coords = feat.geometry.coordinates
+                .map(c => [c[1], c[0]])
+                .filter(([lat, lng]) => lat >= sMin && lat <= sMax && lng >= lMin && lng <= lMax);
+            if (coords.length < 2) return;
+            // הילה חיצונית (אדום כהה)
+            L.polyline(coords, {
+                color: '#600', weight: 7, opacity: 0.35, lineCap: 'round'
+            }).addTo(targetLayerGroup);
+            // קו אמצעי (צהוב עבה)
+            L.polyline(coords, {
+                color: '#ffd000', weight: 3.5, opacity: 0.9, lineCap: 'round'
+            }).addTo(targetLayerGroup);
+            // פסים שחורים (סכנה) מעליו
+            L.polyline(coords, {
+                color: '#000', weight: 3.5, opacity: 0.85, dashArray: '6,10', lineCap: 'butt'
+            }).bindTooltip('גדר המערכת', { sticky: true, className: 'dark-tooltip' })
+              .addTo(targetLayerGroup);
+            rendered++;
+        });
+        console.log(`🛡️ Security fence rendered: ${rendered} segments from ${source}`);
+    }
+
+    // 1) Custom override (user upload)
+    try {
+        const custom = JSON.parse(localStorage.getItem('mabat443-fence-custom') || 'null');
+        if (custom && custom.features && custom.features.length) {
+            render(custom.features, 'custom GeoJSON');
+            return;
+        }
+    } catch (e) { /* ignore */ }
+
+    // 2) Bundled OCHA GeoJSON (January 2018, sector-filtered, Constructed only)
+    try {
+        const res = await fetch('fence-sector443.geojson', { signal: AbortSignal.timeout(5000) });
+        if (res.ok) {
+            const gj = await res.json();
+            const features = (gj.features || [])
+                .filter(f => f.geometry && f.geometry.type === 'LineString')
+                .map(f => ({ geometry: { coordinates: f.geometry.coordinates } }));
+            if (features.length) {
+                render(features, 'OCHA Jan 2018 (bundled)');
+                return;
+            }
+        }
+    } catch (e) { /* fallback */ }
+
+    // 3) cache
+    try {
+        const cached = JSON.parse(localStorage.getItem(CACHE_KEY) || 'null');
+        if (cached && (Date.now() - cached.ts) < CACHE_TTL) {
+            render(cached.features, 'cache');
+            return;
+        }
+    } catch (e) { /* ignore */ }
+
+    // 4) OSM relation 1412281 (Israeli West Bank barrier)
+    const relQuery = `[out:json][timeout:40];
+relation(1412281);
+way(r)["barrier"];
+out geom;`;
+    try {
+        const url = 'https://overpass-api.de/api/interpreter?data=' + encodeURIComponent(relQuery);
+        const res = await fetch(url, { signal: AbortSignal.timeout(30000) });
+        if (!res.ok) throw new Error('Overpass HTTP ' + res.status);
+        const data = await res.json();
+        const features = (data.elements || [])
+            .filter(el => el.type === 'way' && el.geometry && el.geometry.length > 1)
+            .map(el => ({
+                geometry: { coordinates: el.geometry.map(g => [g.lon, g.lat]) },
+                id: el.id
+            }));
+        if (features.length) {
+            localStorage.setItem(CACHE_KEY, JSON.stringify({ ts: Date.now(), features }));
+            render(features, 'OSM relation 1412281');
+            return;
+        }
+    } catch (e) {
+        console.warn('Fence relation load failed:', e.message);
+    }
+
+    // 4) fallback — barrier=wall/fence in sector bbox
+    const bbox = `${SECTOR_CENTER.lat - 0.18},${SECTOR_CENTER.lng - 0.22},${SECTOR_CENTER.lat + 0.18},${SECTOR_CENTER.lng + 0.22}`;
+    const fallbackQuery = `[out:json][timeout:25];
+(
+  way["barrier"="wall"](${bbox});
+  way["barrier"="fence"](${bbox});
+);
+out geom;`;
+    try {
+        const url = 'https://overpass-api.de/api/interpreter?data=' + encodeURIComponent(fallbackQuery);
+        const res = await fetch(url, { signal: AbortSignal.timeout(25000) });
+        if (!res.ok) throw new Error('Overpass HTTP ' + res.status);
+        const data = await res.json();
+        const features = (data.elements || [])
+            .filter(el => el.geometry && el.geometry.length > 1)
+            .map(el => ({
+                geometry: { coordinates: el.geometry.map(g => [g.lon, g.lat]) },
+                id: el.id
+            }));
+        localStorage.setItem(CACHE_KEY, JSON.stringify({ ts: Date.now(), features }));
+        render(features, 'OSM barrier fallback');
+    } catch (e) {
+        console.warn('Fence fallback load failed:', e.message);
+    }
+}
+
+// כלי עזר: טעינת GeoJSON/KML פרטי של הגדר ב-console
+// window.uploadCustomFence(geojsonObj) — שומר ב-localStorage
+window.uploadCustomFence = function(geojson) {
+    if (!geojson || !geojson.features) {
+        console.error('Expected GeoJSON FeatureCollection');
+        return;
+    }
+    const simplified = geojson.features
+        .filter(f => f.geometry && (f.geometry.type === 'LineString' || f.geometry.type === 'MultiLineString'))
+        .flatMap(f => {
+            if (f.geometry.type === 'LineString') {
+                return [{ geometry: { coordinates: f.geometry.coordinates } }];
+            }
+            return f.geometry.coordinates.map(line => ({ geometry: { coordinates: line } }));
+        });
+    localStorage.setItem('mabat443-fence-custom', JSON.stringify({ features: simplified, ts: Date.now() }));
+    console.log(`✅ Custom fence saved: ${simplified.length} segments. Reload page to see.`);
+};
+window.clearCustomFence = function() {
+    localStorage.removeItem('mabat443-fence-custom');
+    localStorage.removeItem('mabat443-fence-v2');
+    console.log('✅ Custom fence cleared. Reload page.');
+};
+
+// ═══════ OCHA CLOSURES LOADER ═══════
+// טוען מחסומים/סוללות/שערים/חסימות מה-GeoJSON המקומי
+async function loadClosures(targetLayer) {
+    const CLOSURE_STYLES = {
+        'checkpoint':         { icon: '🛑', color: '#ff0040', label: 'מחסום', size: 22 },
+        'partial checkpoint': { icon: '⚠️', color: '#ff8800', label: 'מחסום חלקי', size: 18 },
+        'road gate':          { icon: '🚧', color: '#ffd000', label: 'שער דרך', size: 16 },
+        'earthmound':         { icon: '⛰️', color: '#a0522d', label: 'סוללת עפר', size: 16 },
+        'roadblock':          { icon: '🪨', color: '#888',    label: 'חסימה', size: 16 },
+        'trench':             { icon: '🕳️', color: '#555',    label: 'תעלה', size: 16 },
+    };
+
+    try {
+        const res = await fetch('closures-sector443.geojson', { signal: AbortSignal.timeout(5000) });
+        if (!res.ok) throw new Error('closures HTTP ' + res.status);
+        const gj = await res.json();
+        let pts = 0, lines = 0;
+        (gj.features || []).forEach(f => {
+            if (!f.geometry) return;
+            if (f.geometry.type === 'Point') {
+                const [lng, lat] = f.geometry.coordinates;
+                const p = f.properties || {};
+                const type = (p.ClosureType || '').toLowerCase();
+                const style = CLOSURE_STYLES[type] || { icon: '❓', color: '#aaa', label: type || 'לא ידוע', size: 14 };
+                const isOpen = (p.Open_Close || '').toLowerCase().includes('open');
+                const opacity = isOpen ? 0.5 : 1;
+                const marker = L.marker([lat, lng], {
+                    icon: L.divIcon({
+                        className: 'closure-icon',
+                        html: `<div style="font-size:${style.size}px;line-height:1;filter:drop-shadow(0 0 3px ${style.color});opacity:${opacity};text-align:center;">${style.icon}</div>`,
+                        iconSize: [style.size + 4, style.size + 4],
+                        iconAnchor: [(style.size + 4) / 2, (style.size + 4) / 2]
+                    })
+                });
+                marker.bindTooltip(`${style.label}: ${p.Name || ''}`, { direction: 'top', className: 'dark-tooltip' });
+                marker.bindPopup(`
+                    <div style="font-family:Heebo,sans-serif;direction:rtl;">
+                        <b style="color:${style.color};">${style.label}</b><br>
+                        <span style="font-size:11px;color:#9ab0c8;">${p.Name || ''}</span><br>
+                        <span style="font-size:10px;">מצב: ${p.Open_Close || '?'} | ${p.ClosureStatus || ''}</span>
+                    </div>
+                `, { className: 'dark-tooltip' });
+                marker.addTo(targetLayer);
+                pts++;
+            } else if (f.geometry.type === 'LineString') {
+                const coords = f.geometry.coordinates.map(c => [c[1], c[0]]);
+                const p = f.properties || {};
+                L.polyline(coords, {
+                    color: '#ff8800', weight: 4, opacity: 0.7, dashArray: '3,6', lineCap: 'round'
+                }).bindTooltip(`חסימה לינארית: ${p.Name || ''}`, { sticky: true, className: 'dark-tooltip' })
+                  .addTo(targetLayer);
+                lines++;
+            }
+        });
+        console.log(`🚧 Closures: ${pts} נקודות, ${lines} קווים`);
+    } catch (e) {
+        console.warn('Closures load failed:', e.message);
+    }
+}
+
+// ═══════ FENCE FILE IMPORT (GeoJSON/KML) ═══════
+function handleFenceFile(event) {
+    const file = event.target.files[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = (e) => {
+        const content = e.target.result;
+        let features = [];
+        try {
+            if (file.name.toLowerCase().endsWith('.kml')) {
+                features = parseKMLToLineStrings(content);
+            } else {
+                const gj = JSON.parse(content);
+                // פילטר: רק מקטעים שכבר נבנו (status=Constructed ב-OCHA)
+                // אם אין שדה status — מקבל הכל (OSM, KML פשוט)
+                const isBuilt = (props) => {
+                    if (!props) return true;
+                    const status = String(props.Status || props.status || props.STATUS || '').toLowerCase();
+                    if (!status) return true;
+                    return /construct|built|exist|existing|complete/.test(status)
+                        && !/plan|propose|under/.test(status);
+                };
+                const extract = (feats) => feats
+                    .filter(f => f.geometry && (f.geometry.type === 'LineString' || f.geometry.type === 'MultiLineString'))
+                    .filter(f => isBuilt(f.properties))
+                    .flatMap(f => f.geometry.type === 'LineString'
+                        ? [{ geometry: { coordinates: f.geometry.coordinates } }]
+                        : f.geometry.coordinates.map(line => ({ geometry: { coordinates: line } })));
+                if (gj.type === 'FeatureCollection') {
+                    features = extract(gj.features);
+                } else if (gj.type === 'LineString') {
+                    features = [{ geometry: { coordinates: gj.coordinates } }];
+                } else if (gj.type === 'Feature') {
+                    features = extract([gj]);
+                }
+            }
+        } catch (err) {
+            showToast('⚠️ שגיאה בפענוח הקובץ: ' + err.message);
+            return;
+        }
+        if (!features.length) {
+            showToast('⚠️ לא נמצאו קווים בקובץ');
+            return;
+        }
+        localStorage.setItem('mabat443-fence-custom', JSON.stringify({ features, ts: Date.now() }));
+        showToast(`✅ נטען ${features.length} מקטעי גדר. טוען מחדש...`);
+        setTimeout(() => location.reload(), 1200);
+    };
+    reader.readAsText(file, 'UTF-8');
+}
+
+function parseKMLToLineStrings(kmlText) {
+    const parser = new DOMParser();
+    const doc = parser.parseFromString(kmlText, 'text/xml');
+    const lineStrings = doc.getElementsByTagName('LineString');
+    const out = [];
+    for (const ls of lineStrings) {
+        const coordsEl = ls.getElementsByTagName('coordinates')[0];
+        if (!coordsEl) continue;
+        const txt = coordsEl.textContent.trim();
+        const coords = txt.split(/\s+/)
+            .map(triple => triple.split(',').map(Number))
+            .filter(c => c.length >= 2 && !isNaN(c[0]) && !isNaN(c[1]))
+            .map(c => [c[0], c[1]]); // lng,lat
+        if (coords.length > 1) out.push({ geometry: { coordinates: coords } });
+    }
+    return out;
+}
+
+function clearFenceCustom() {
+    if (!confirm('למחוק את הגדר המותאמת ולחזור ל-OSM?')) return;
+    localStorage.removeItem('mabat443-fence-custom');
+    localStorage.removeItem('mabat443-fence-v2');
+    location.reload();
+}
+
+// Show "clear" button if custom fence exists
+document.addEventListener('DOMContentLoaded', () => {
+    if (localStorage.getItem('mabat443-fence-custom')) {
+        const btn = document.getElementById('fenceClearBtn');
+        if (btn) btn.style.display = 'block';
+    }
+});
+
+// ═══════ MAPILLARY GRAPH API ═══════
+// בגלל מגבלת bbox (0.01 sq-deg), קוראים לפי נקודה+רדיוס
+const MAPILLARY_TOKEN_CLIENT = 'MLY|26636963299290715|555a2cc2563d0e534e9b49896c447f93';
+const MAPILLARY_CREATORS = [
+    // יוצרים שיש להם כיסוי מוכר בגזרה — יקבלו צבע ייחודי
+    { id: '110481147852897', username: '360ms', color: '#a855f7' },
+];
+const mlyState = { active: false, layer: null, lastClickHandler: null };
+
+function toggleMapillarySearch() {
+    const btn = document.getElementById('mlyBtn');
+    if (!mlyState.active) {
+        mlyState.active = true;
+        if (!mlyState.layer) {
+            mlyState.layer = L.layerGroup().addTo(map);
+        }
+        mlyState.lastClickHandler = (e) => loadMapillaryAt(e.latlng.lat, e.latlng.lng, 600);
+        map.on('click', mlyState.lastClickHandler);
+        if (btn) { btn.style.background = 'rgba(168,85,247,.25)'; btn.style.borderColor = '#a855f7'; }
+        document.getElementById('mapPanel').classList.add('map-planning-mode');
+        showToast('📷 לחץ על המפה לחיפוש תמונות Mapillary ברדיוס 600מ׳');
+    } else {
+        mlyState.active = false;
+        if (mlyState.lastClickHandler) map.off('click', mlyState.lastClickHandler);
+        if (btn) { btn.style.background = ''; btn.style.borderColor = ''; }
+        document.getElementById('mapPanel').classList.remove('map-planning-mode');
+    }
+}
+
+function clearMapillaryPins() {
+    if (mlyState.layer) mlyState.layer.clearLayers();
+}
+
+async function loadMapillaryAt(lat, lng, radiusM = 500) {
+    if (!mlyState.layer) mlyState.layer = L.layerGroup().addTo(map);
+    // חישוב bbox מהרדיוס (approx)
+    const dLat = radiusM / 111000;
+    const dLng = radiusM / (111000 * Math.cos(lat * Math.PI / 180));
+    const bbox = `${lng - dLng},${lat - dLat},${lng + dLng},${lat + dLat}`;
+
+    const url = `https://graph.mapillary.com/images?bbox=${bbox}&limit=200&fields=id,computed_geometry,creator,captured_at,is_pano&access_token=${MAPILLARY_TOKEN_CLIENT}`;
+    showToast('⏳ טוען תמונות Mapillary...');
+    try {
+        const res = await fetch(url, { signal: AbortSignal.timeout(12000) });
+        if (!res.ok) throw new Error('Mapillary ' + res.status);
+        const data = await res.json();
+        const imgs = data.data || [];
+        if (!imgs.length) {
+            showToast('❌ לא נמצאו תמונות בטווח');
+            return;
+        }
+        let plotted = 0;
+        imgs.forEach(img => {
+            if (!img.computed_geometry || !img.computed_geometry.coordinates) return;
+            const [clng, clat] = img.computed_geometry.coordinates;
+            const creator = img.creator || {};
+            const known = MAPILLARY_CREATORS.find(c => c.id === creator.id);
+            const color = known ? known.color : '#00d4ff';
+            const when = img.captured_at ? new Date(img.captured_at).toISOString().slice(0, 10) : '';
+            const marker = L.circleMarker([clat, clng], {
+                radius: img.is_pano ? 5 : 3.5,
+                color: color, fillColor: color, fillOpacity: 0.85, weight: 1.5,
+                className: 'mly-pin'
+            });
+            marker.bindTooltip(`${creator.username || '?'} • ${when}${img.is_pano ? ' • 360°' : ''}`, {
+                direction: 'top', className: 'dark-tooltip'
+            });
+            marker.on('click', () => {
+                const viewerUrl = `https://www.mapillary.com/app/?pKey=${img.id}&focus=photo`;
+                window.open(viewerUrl, '_blank', 'noopener');
+            });
+            marker.addTo(mlyState.layer);
+            plotted++;
+        });
+        showToast(`✅ ${plotted} תמונות נטענו. לחץ על נקודה לצפייה.`);
+    } catch (e) {
+        console.warn('Mapillary load failed:', e.message);
+        showToast('⚠️ טעינה נכשלה: ' + e.message);
+    }
+}
+
+// Toast helper
+function showToast(msg) {
+    let toast = document.getElementById('mabat-toast');
+    if (!toast) {
+        toast = document.createElement('div');
+        toast.id = 'mabat-toast';
+        toast.style.cssText = 'position:fixed;top:20px;left:50%;transform:translateX(-50%);background:rgba(4,8,16,.95);color:#00d4ff;border:1px solid #00d4ff44;padding:10px 20px;border-radius:6px;z-index:9999;font-family:Heebo,sans-serif;font-size:13px;direction:rtl;box-shadow:0 0 15px rgba(0,212,255,.3);';
+        document.body.appendChild(toast);
+    }
+    toast.textContent = msg;
+    toast.style.display = 'block';
+    clearTimeout(toast._timer);
+    toast._timer = setTimeout(() => { toast.style.display = 'none'; }, 3500);
+}
+
+// ═══════ ARREST PLANNER ═══════
+const arrestState = {
+    active: false,
+    target: null,
+    waypoints: [],
+    layers: [],
+    routeCoords: null,
+    routeMeta: null,
+};
+
+function toggleArrestPlanner() {
+    const panel = document.getElementById('arrestPanel');
+    const btn = document.getElementById('arrestBtn');
+    if (!arrestState.active) {
+        arrestState.active = true;
+        panel.style.display = 'block';
+        btn.style.background = 'rgba(255,0,64,.25)';
+        btn.style.borderColor = 'var(--red)';
+        document.getElementById('mapPanel').classList.add('map-planning-mode');
+        if (map) map.on('click', arrestOnMapClick);
+        arrestUpdateStep();
+    } else {
+        arrestState.active = false;
+        panel.style.display = 'none';
+        btn.style.background = '';
+        btn.style.borderColor = '';
+        document.getElementById('mapPanel').classList.remove('map-planning-mode');
+        if (map) map.off('click', arrestOnMapClick);
+    }
+}
+
+function arrestOnMapClick(e) {
+    if (!arrestState.active) return;
+    const { lat, lng } = e.latlng;
+    if (!arrestState.target) {
+        arrestState.target = { lat, lng };
+        const m = L.marker([lat, lng], {
+            icon: L.divIcon({
+                className: 'arrest-target-icon',
+                html: '<div style="font-size:24px;line-height:1;filter:drop-shadow(0 0 6px #ff0040);">🎯</div>',
+                iconSize: [32, 32], iconAnchor: [16, 16]
+            })
+        }).bindTooltip('יעד', { permanent: true, direction: 'top', className: 'dark-tooltip' }).addTo(map);
+        // מעגל טווח 100/300/500 מטר
+        [100, 300, 500].forEach((r, i) => {
+            const ring = L.circle([lat, lng], {
+                radius: r, color: '#ff0040', fillColor: '#ff0040',
+                fillOpacity: 0.04 - i * 0.01, weight: 1, opacity: 0.4 - i * 0.1, dashArray: '3,4'
+            }).addTo(map);
+            arrestState.layers.push(ring);
+        });
+        arrestState.layers.push(m);
+    } else {
+        // נקודות דרך / נקודת זינוק
+        arrestState.waypoints.push({ lat, lng });
+        const idx = arrestState.waypoints.length;
+        const label = idx === 1 ? 'נקודת זינוק' : `נ״ד ${idx - 1}`;
+        const m = L.marker([lat, lng], {
+            icon: L.divIcon({
+                className: 'arrest-wp-icon',
+                html: `<div style="background:#00d4ff;color:#040810;font-weight:700;width:22px;height:22px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:11px;border:2px solid #040810;box-shadow:0 0 6px #00d4ff;">${idx}</div>`,
+                iconSize: [22, 22], iconAnchor: [11, 11]
+            })
+        }).bindTooltip(label, { direction: 'top', className: 'dark-tooltip' }).addTo(map);
+        arrestState.layers.push(m);
+    }
+    arrestUpdateStep();
+    document.getElementById('arrestFinishBtn').disabled = !(arrestState.target && arrestState.waypoints.length > 0);
+}
+
+function arrestUpdateStep() {
+    const step = document.getElementById('arrestStep');
+    const info = document.getElementById('arrestInfo');
+    if (!arrestState.target) {
+        step.innerHTML = 'לחץ על המפה לסימון <b>יעד</b>';
+        info.innerHTML = '';
+    } else if (arrestState.waypoints.length === 0) {
+        step.innerHTML = 'לחץ לסימון <b>נקודת זינוק</b> (והוסף נ״ד בהמשך)';
+        info.innerHTML = `🎯 יעד: <b>${arrestState.target.lat.toFixed(5)}, ${arrestState.target.lng.toFixed(5)}</b>`;
+    } else {
+        step.innerHTML = 'לחץ להוספת נ״ד או <b>"חשב ציר"</b> לסיום';
+        const wpsCount = arrestState.waypoints.length;
+        info.innerHTML = `🎯 יעד מוגדר<br>📍 ${wpsCount} נקודות בציר`;
+    }
+}
+
+async function arrestFinish() {
+    if (!arrestState.target || arrestState.waypoints.length === 0) return;
+    const step = document.getElementById('arrestStep');
+    step.innerHTML = '⏳ מחשב ציר...';
+
+    // OSRM expects lng,lat order. Route: jump-off → waypoints → target
+    const pts = [...arrestState.waypoints, arrestState.target];
+    const coordsStr = pts.map(p => `${p.lng},${p.lat}`).join(';');
+    const url = `https://router.project-osrm.org/route/v1/driving/${coordsStr}?overview=full&geometries=geojson&steps=false`;
+
+    let routeCoords = null;
+    let distanceM = 0;
+    let durationS = 0;
+    try {
+        const res = await fetch(url, { signal: AbortSignal.timeout(12000) });
+        if (!res.ok) throw new Error('OSRM ' + res.status);
+        const data = await res.json();
+        if (data.routes && data.routes[0]) {
+            routeCoords = data.routes[0].geometry.coordinates.map(c => [c[1], c[0]]);
+            distanceM = data.routes[0].distance;
+            durationS = data.routes[0].duration;
+        }
+    } catch (e) {
+        console.warn('OSRM failed, falling back to straight-line:', e.message);
+    }
+
+    // fallback: straight line
+    if (!routeCoords) {
+        routeCoords = pts.map(p => [p.lat, p.lng]);
+        for (let i = 1; i < pts.length; i++) {
+            distanceM += haversineMeters(pts[i - 1], pts[i]);
+        }
+        durationS = distanceM / (50 * 1000 / 3600); // 50 km/h avg
+    }
+
+    // draw route
+    const routeOuter = L.polyline(routeCoords, {
+        color: '#040810', weight: 8, opacity: 0.6
+    }).addTo(map);
+    const routeInner = L.polyline(routeCoords, {
+        color: '#ff0040', weight: 4, opacity: 0.95, dashArray: '14,6', lineCap: 'round'
+    }).bindTooltip('ציר מעצר', { sticky: true, className: 'dark-tooltip' }).addTo(map);
+    arrestState.layers.push(routeOuter, routeInner);
+    arrestState.routeCoords = routeCoords;
+    arrestState.routeMeta = { distanceM, durationS };
+
+    // fit
+    const bounds = L.latLngBounds(routeCoords);
+    map.fitBounds(bounds.pad(0.2));
+
+    // update UI
+    step.innerHTML = '✅ ציר מחושב. בדוק ואשר.';
+    document.getElementById('arrestInfo').innerHTML = `
+        🎯 יעד: <b>${arrestState.target.lat.toFixed(5)}, ${arrestState.target.lng.toFixed(5)}</b><br>
+        📏 מרחק: <b>${(distanceM / 1000).toFixed(2)} ק״מ</b><br>
+        ⏱ זמן משוער: <b>${Math.round(durationS / 60)} דק׳</b><br>
+        📍 נקודות: <b>${arrestState.waypoints.length}</b>
+    `;
+    document.getElementById('arrestReverseBtn').disabled = false;
+    document.getElementById('arrestFinishBtn').disabled = true;
+    const exports = document.getElementById('arrestExports');
+    exports.style.display = 'flex';
+    const tgt = arrestState.target;
+    const jumpOff = arrestState.waypoints[0];
+    document.getElementById('arrestGmaps').href = `https://www.google.com/maps/dir/${jumpOff.lat},${jumpOff.lng}/${tgt.lat},${tgt.lng}`;
+    document.getElementById('arrestWaze').href = `https://waze.com/ul?ll=${tgt.lat},${tgt.lng}&navigate=yes`;
+}
+
+function arrestReverse() {
+    // החלף יעד עם נקודת זינוק → ציר חילוץ/פינוי
+    if (!arrestState.target || !arrestState.waypoints.length) return;
+    const newTarget = arrestState.waypoints[0];
+    const newWps = [arrestState.target, ...arrestState.waypoints.slice(1).reverse()];
+    arrestClear(false);
+    arrestState.target = newTarget;
+    // re-draw
+    const tm = L.marker([newTarget.lat, newTarget.lng], {
+        icon: L.divIcon({
+            className: 'arrest-target-icon',
+            html: '<div style="font-size:24px;line-height:1;filter:drop-shadow(0 0 6px #00ff88);">🏁</div>',
+            iconSize: [32, 32], iconAnchor: [16, 16]
+        })
+    }).bindTooltip('נקודת פינוי', { permanent: true, direction: 'top', className: 'dark-tooltip' }).addTo(map);
+    arrestState.layers.push(tm);
+    newWps.forEach((wp, i) => {
+        arrestState.waypoints.push(wp);
+        const m = L.marker([wp.lat, wp.lng], {
+            icon: L.divIcon({
+                className: 'arrest-wp-icon',
+                html: `<div style="background:#00ff88;color:#040810;font-weight:700;width:22px;height:22px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:11px;border:2px solid #040810;">${i + 1}</div>`,
+                iconSize: [22, 22], iconAnchor: [11, 11]
+            })
+        }).addTo(map);
+        arrestState.layers.push(m);
+    });
+    arrestFinish();
+}
+
+function arrestClear(resetUI = true) {
+    arrestState.layers.forEach(l => map.removeLayer(l));
+    arrestState.layers = [];
+    arrestState.target = null;
+    arrestState.waypoints = [];
+    arrestState.routeCoords = null;
+    arrestState.routeMeta = null;
+    if (resetUI) {
+        document.getElementById('arrestFinishBtn').disabled = true;
+        document.getElementById('arrestReverseBtn').disabled = true;
+        document.getElementById('arrestExports').style.display = 'none';
+        arrestUpdateStep();
+    }
+}
+
+function arrestCopyText() {
+    if (!arrestState.target) return;
+    const t = arrestState.target;
+    const m = arrestState.routeMeta || { distanceM: 0, durationS: 0 };
+    const lines = [
+        '🎯 תכנון מעצר - מבט 443',
+        `יעד: ${t.lat.toFixed(5)}, ${t.lng.toFixed(5)}`,
+        `מרחק: ${(m.distanceM / 1000).toFixed(2)} ק״מ`,
+        `זמן משוער: ${Math.round(m.durationS / 60)} דק׳`,
+        `נקודות בציר: ${arrestState.waypoints.length}`,
+        `Google Maps: https://www.google.com/maps?q=${t.lat},${t.lng}`,
+        `Waze: https://waze.com/ul?ll=${t.lat},${t.lng}&navigate=yes`,
+    ];
+    navigator.clipboard.writeText(lines.join('\n')).then(() => {
+        const step = document.getElementById('arrestStep');
+        step.innerHTML = '📋 הועתק ללוח';
+        setTimeout(arrestUpdateStep, 1500);
+    });
+}
+
+function arrestSaveLocal() {
+    if (!arrestState.target) return;
+    const plans = JSON.parse(localStorage.getItem('mabat443-arrest-plans') || '[]');
+    plans.push({
+        ts: Date.now(),
+        target: arrestState.target,
+        waypoints: arrestState.waypoints,
+        meta: arrestState.routeMeta,
+    });
+    localStorage.setItem('mabat443-arrest-plans', JSON.stringify(plans.slice(-20)));
+    const step = document.getElementById('arrestStep');
+    step.innerHTML = `💾 נשמר (סה״כ ${plans.length})`;
+    setTimeout(arrestUpdateStep, 1500);
+}
+
+function haversineMeters(a, b) {
+    const R = 6371000;
+    const dLat = (b.lat - a.lat) * Math.PI / 180;
+    const dLng = (b.lng - a.lng) * Math.PI / 180;
+    const s = Math.sin(dLat/2)**2 + Math.cos(a.lat*Math.PI/180)*Math.cos(b.lat*Math.PI/180)*Math.sin(dLng/2)**2;
+    return 2 * R * Math.atan2(Math.sqrt(s), Math.sqrt(1-s));
+}
+
 // ═══════ MAP ═══════
 function initMap() {
     map = L.map('map', {
@@ -2912,16 +3679,79 @@ function initMap() {
         attributionControl: false
     });
 
-    L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', {
-        maxZoom: 19
-    }).addTo(map);
+    // ═══════ BASE LAYERS (map type switcher) ═══════
+    const satLayer = L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', {
+        maxZoom: 19, attribution: 'Esri'
+    });
+    const topoLayer = L.tileLayer('https://{s}.tile.opentopomap.org/{z}/{x}/{y}.png', {
+        maxZoom: 17, attribution: 'OpenTopoMap'
+    });
+    const streetLayer = L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+        maxZoom: 19, attribution: 'OSM'
+    });
+    const urbanLayer = L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', {
+        maxZoom: 19, attribution: 'Carto'
+    });
+    satLayer.addTo(map);
 
-    // Roads overlay - transparent road names on top of satellite
-    L.tileLayer('https://stamen-tiles.a.ssl.fastly.net/toner-labels/{z}/{x}/{y}{r}.png', {
-        maxZoom: 19,
-        opacity: 0.5,
-        pane: 'overlayPane'
-    }).addTo(map);
+    // ═══════ OVERLAYS ═══════
+    const labelsOverlay = L.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/voyager_only_labels/{z}/{x}/{y}{r}.png', {
+        maxZoom: 19, opacity: 0.7, pane: 'overlayPane', attribution: 'Carto'
+    });
+    labelsOverlay.addTo(map);
+
+    // Mapillary street-level coverage (vector tiles rendered as raster via mapillary tile service)
+    const MAPILLARY_TOKEN = 'MLY|26636963299290715|555a2cc2563d0e534e9b49896c447f93';
+    const mapillaryCoverage = L.tileLayer(
+        `https://tiles.mapillary.com/maps/vtp/mly1_public/2/{z}/{x}/{y}?access_token=${MAPILLARY_TOKEN}`,
+        { maxZoom: 17, opacity: 0.6, attribution: 'Mapillary' }
+    );
+
+    // Security Fence layer — נטען מ-OCHA (bundled) עם fallback ל-OSM
+    const fenceLayer = L.layerGroup();
+    fenceLayer.addTo(map);
+    loadSecurityFence(fenceLayer);
+
+    // Closures layer (checkpoints, road gates, earthmounds, roadblocks)
+    const closuresLayer = L.layerGroup();
+    closuresLayer.addTo(map);
+    loadClosures(closuresLayer);
+
+    L.control.layers(
+        {
+            'תצ"א (לוויין)': satLayer,
+            'מפה טופוגרפית 1:50,000': topoLayer,
+            'מפת רחובות': streetLayer,
+            'מפה עירונית (כהה)': urbanLayer,
+        },
+        {
+            'שמות ישובים': labelsOverlay,
+            'גדר המערכת': fenceLayer,
+            'מחסומים וחסימות': closuresLayer,
+            'כיסוי Mapillary': mapillaryCoverage,
+        },
+        { position: 'topright', collapsed: true }
+    ).addTo(map);
+
+    // ═══════ Mapillary click-to-view (right-click opens Street View at point) ═══════
+    map.on('contextmenu', (e) => {
+        const url = `https://www.mapillary.com/app/?lat=${e.latlng.lat}&lng=${e.latlng.lng}&z=17`;
+        window.open(url, '_blank', 'noopener');
+    });
+    // Button to open Mapillary at sector center
+    const mlyBtn = L.control({ position: 'topright' });
+    mlyBtn.onAdd = function() {
+        const div = L.DomUtil.create('div', 'leaflet-bar');
+        div.innerHTML = `<a href="#" title="Mapillary במרכז הגזרה" style="width:32px;height:32px;display:flex;align-items:center;justify-content:center;font-size:14px;color:#00d4ff;background:rgba(8,16,35,.95);text-decoration:none;">MLY</a>`;
+        div.onclick = (ev) => {
+            ev.preventDefault();
+            const c = map.getCenter();
+            window.open(`https://www.mapillary.com/app/?lat=${c.lat}&lng=${c.lng}&z=${map.getZoom()}`, '_blank', 'noopener');
+            return false;
+        };
+        return div;
+    };
+    mlyBtn.addTo(map);
 
     // ═══════ ROUTE 443 POLYLINE (OpenStreetMap data) ═══════
     const ROUTE_443 = [
@@ -3255,10 +4085,10 @@ async function fetchData() {
             fetch(`${FIREBASE_URL}/auto-news.json`),
             fetch(`${FIREBASE_URL}/world-news-summary/current.json`),
             fetch(`${FIREBASE_URL}/metadata.json`),
-            fetch(`${FIREBASE_URL}/weather/current.json`).catch(() => ({ json: () => null })),
-            fetch(`${FIREBASE_URL}/calendar/current.json`).catch(() => ({ json: () => null })),
-            fetch(`${FIREBASE_URL}/sentiment/current.json`).catch(() => ({ json: () => null })),
-            fetch(`${FIREBASE_URL}/trends/current.json`).catch(() => ({ json: () => null })),
+            fetch(`${FIREBASE_URL}/weather/current.json`).catch(() => new Response('null')),
+            fetch(`${FIREBASE_URL}/calendar/current.json`).catch(() => new Response('null')),
+            fetch(`${FIREBASE_URL}/sentiment/current.json`).catch(() => new Response('null')),
+            fetch(`${FIREBASE_URL}/trends/current.json`).catch(() => new Response('null')),
         ]);
 
         const news = await newsRes.json();
@@ -3284,6 +4114,17 @@ async function fetchData() {
                 }
                 if (item.timestamp && item.timestamp < 1000000000000) item.timestamp = item.timestamp * 1000;
                 if (!item.locationHe && item.matchedLocations) item.locationHe = item.matchedLocations.join(', ');
+            });
+
+            // סינון כפול בצד הלקוח: הסר כל חדשות שאינן בגזרת 443
+            // חוסם עזה, צפון/דרום הגדה, חדשות בינלאומיות
+            const BLOCKED_CONTENT = /غزة|قطاع غزة|עזה|רצועת עזה|gaza|جنين|ג'נין|נאבלוס|שכם|نابلس|الخليל|חברון|طولكرم|טול כרם|أوكرانيا|אוקראינה|לבנון|لبنان|سوريا|סוריה/i;
+            Object.keys(news).forEach(id => {
+                const it = news[id];
+                const txt = `${it.title || ''} ${it.summary || ''} ${it.originalText || ''} ${it.locationHe || ''}`;
+                if (BLOCKED_CONTENT.test(txt)) {
+                    delete news[id];
+                }
             });
             // Detect new alerts for flash
             if (!isFirstLoad) {
@@ -3332,7 +4173,7 @@ function triggerRedAlert() {
         osc.start();
         gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.5);
         osc.stop(ctx.currentTime + 0.5);
-    } catch (e) {}
+    } catch (e) { console.warn('Audio alert error:', e.message); }
 }
 
 // ═══════ RENDER ALL ═══════
@@ -3450,10 +4291,11 @@ function renderAlerts() {
                 <div class="alert-urgency ${item.isFieldReport ? 'urgency-field' : item._isAnarchist ? 'urgency-anarchist' : 'urgency-' + (item.urgency || 1)}"></div>
                 <div class="alert-content">
                     <div class="alert-title">${isDisliked ? '<span class="false-badge">שגוי</span>' : ''}${isLiked ? '<span class="verified-badge">אומת</span>' : ''}${escapeHtml(item.title || 'N/A')}</div>
+                    ${(item.summary && item.summary !== item.title) ? `<div class="alert-body">${escapeHtml(item.summary)}</div>` : ''}
                     ${locationTag}
                 </div>
             </div>
-            ${(item.fullText || item.snippet) ? '<div class="alert-full-text" style="display:none;">' + escapeHtml(item.fullText || item.snippet) + '</div>' : ''}
+            ${(item.fullText || item.originalText || item.snippet) ? '<div class="alert-full-text" style="display:none;">' + escapeHtml(item.fullText || item.originalText || item.snippet) + '</div>' : ''}
             <div class="alert-meta-row" style="display:none;">
                 <a href="javascript:void(0)" onclick="openPublisherProfile('${escapeHtml(srcIdForProfile)}',event)" class="source-link-clickable" style="color:#00d4ff;font-size:10px;text-decoration:none;">&#128225; ${escapeHtml(item.source || 'N/A')}</a>
                 ${sourceUrl ? '<a href="' + escapeHtml(sourceUrl) + '" target="_blank" onclick="event.stopPropagation();" style="color:var(--text-dim);font-size:10px;text-decoration:none;">&#128279; מקור</a>' : ''}
@@ -3566,17 +4408,44 @@ function renderTimeline() {
 }
 
 // ═══════ RENDER SUMMARY ═══════
+// סקירה גזרתית בלבד — מתבסס על newsData (כבר מסונן לגזרה).
+// חסום: עזה / גדה רחוקה / בינלאומי.
 function renderSummary() {
     const body = document.getElementById('summaryBody');
-    if (!summaryData || !summaryData.summary) {
-        body.innerHTML = '<div class="empty-state">ממתין לניתוח AI<br><small>מתעדכן כל שעה</small></div>';
+    const items = Object.values(newsData || {}).filter(it => it.timestamp && Date.now() - it.timestamp < 24 * 3600 * 1000);
+    if (!items.length) {
+        body.innerHTML = '<div class="empty-state">אין אירועים רלוונטיים ב-24 שעות<br><small>הסקירה מתעדכנת אוטומטית</small></div>';
         return;
     }
+    // Sort by urgency then recency
+    items.sort((a, b) => (b.urgency || 0) - (a.urgency || 0) || (b.timestamp - a.timestamp));
+    const byLocation = {};
+    const byCategory = {};
+    let highest = items[0];
+    items.forEach(it => {
+        const loc = it.locationHe || 'לא ידוע';
+        byLocation[loc] = (byLocation[loc] || 0) + 1;
+        const cat = it.eventCategory || 'כללי';
+        byCategory[cat] = (byCategory[cat] || 0) + 1;
+    });
+    const topLocs = Object.entries(byLocation).sort((a, b) => b[1] - a[1]).slice(0, 4);
+    const topCats = Object.entries(byCategory).sort((a, b) => b[1] - a[1]).slice(0, 4);
+    const reds = items.filter(it => (it.urgency || 0) >= 5).length;
+    const oranges = items.filter(it => (it.urgency || 0) === 4).length;
+
     body.innerHTML = `
-        <div class="summary-text">${escapeHtml(summaryData.summary)}</div>
+        <div class="summary-text">
+            <div style="margin-bottom:10px;font-weight:700;color:var(--cyan);">סקירת גזרה 443 · 24 שעות אחרונות</div>
+            <div style="margin-bottom:8px;">סה"כ <b style="color:var(--yellow);">${items.length}</b> אירועים | קריטי: <b style="color:var(--red);">${reds}</b> | חזק: <b style="color:var(--orange);">${oranges}</b></div>
+            ${highest ? `<div style="margin-bottom:10px;padding:6px 8px;background:rgba(255,0,64,.08);border-right:3px solid var(--red);font-size:11px;">
+                <b>אירוע בולט:</b> ${escapeHtml((highest.title || '').substring(0, 140))}
+            </div>` : ''}
+            <div style="margin-bottom:8px;"><b>מוקדים פעילים:</b> ${topLocs.map(([l, c]) => `${escapeHtml(l)} (${c})`).join(' · ')}</div>
+            <div><b>קטגוריות:</b> ${topCats.map(([c, n]) => `${escapeHtml(c)} (${n})`).join(' · ')}</div>
+        </div>
         <div class="summary-meta">
-            <span>${summaryData.aiProvider || 'Gemini'} AI</span>
-            <span>${formatDateTime(summaryData.generatedAt)}</span>
+            <span>סקירה מקומית</span>
+            <span>${formatDateTime(Date.now())}</span>
         </div>
     `;
 }
@@ -3678,14 +4547,13 @@ function renderMeta() {
 // ═══════ INTEL LAYERS ═══════
 async function fetchWeatherDirect() {
     try {
-        const url = `https://api.openweathermap.org/data/2.5/weather?lat=${SECTOR_CENTER.lat}&lon=${SECTOR_CENTER.lng}&appid=4a4f2b3c8e9d4f6a8b2c1d0e3f5a7b9c&units=metric&lang=he`;
-        const res = await fetch(url);
+        const res = await fetch(`${FIREBASE_URL}/weather/current.json`);
         const data = await res.json();
-        if (data.main) {
+        if (data && data.temp) {
             const wEl = document.getElementById('weatherVal');
-            if (wEl) wEl.textContent = `${Math.round(data.main.temp)}°C ${data.weather?.[0]?.description || ''}`;
+            if (wEl) wEl.textContent = `${Math.round(data.temp)}°C ${data.description || ''}`;
         }
-    } catch (e) { /* silent */ }
+    } catch (e) { console.error('Weather fetch error:', e.message); }
 }
 
 function checkCalendarLocal() {
@@ -4053,20 +4921,31 @@ function openPublisherProfile(sourceId, event) {
         ${topLocations.length > 0 ? `<div style="margin-bottom:12px;"><span style="font-family:var(--font-he);font-size:10px;color:var(--text-dim);">מיקומים עיקריים:</span> <span style="font-family:var(--font-he);font-size:11px;color:var(--cyan);">${topLocations.map(l => escapeHtml(l)).join(' | ')}</span></div>` : ''}
         <div class="publisher-info-grid" id="publisherInfoGrid">
             <span class="publisher-info-label">מיקום</span><span class="publisher-info-value">${escapeHtml(profile.location || '--')}</span>
+            ${tgLink ? `
+            <span class="publisher-info-label">קישור</span><span class="publisher-info-value"><a href="${escapeHtml(tgLink)}" target="_blank" style="color:var(--cyan);text-decoration:none;">${escapeHtml('t.me/' + (srcObj.tg || ''))}</a></span>
+            <span class="publisher-info-label">שפה</span><span class="publisher-info-value">${escapeHtml(profile.language || 'ערבית')}</span>
+            <span class="publisher-info-label">סוג ערוץ</span><span class="publisher-info-value">${escapeHtml(profile.channelType || srcType || '--')}</span>
+            ` : `
             <span class="publisher-info-label">גיל</span><span class="publisher-info-value">${escapeHtml(profile.age || '--')}</span>
             <span class="publisher-info-label">עיסוק</span><span class="publisher-info-value">${escapeHtml(profile.occupation || '--')}</span>
             <span class="publisher-info-label">בן/בת זוג</span><span class="publisher-info-value">${escapeHtml(profile.partner || '--')}</span>
             <span class="publisher-info-label">תחביבים</span><span class="publisher-info-value">${escapeHtml(profile.hobbies || '--')}</span>
+            `}
             <span class="publisher-info-label">הערות</span><span class="publisher-info-value">${escapeHtml(profile.notes || '--')}</span>
         </div>
         <div id="publisherEditForm" style="display:none;">
             <div class="publisher-edit-field"><label>שם</label><input id="pe_name" value="${escapeHtml(profile.name || srcName)}"></div>
             <div class="publisher-edit-field"><label>תמונה</label><div style="display:flex;gap:6px;align-items:center;"><input id="pe_photo" value="${escapeHtml(profile.photo || '')}" placeholder="URL תמונה" style="flex:1;"><label style="cursor:pointer;padding:5px 10px;border:1px solid var(--cyan);border-radius:3px;color:var(--cyan);font-size:10px;white-space:nowrap;">📷 העלה<input type="file" id="pe_photo_file" accept="image/*" style="display:none;" onchange="handlePhotoUpload(this)"></label></div></div>
             <div class="publisher-edit-field"><label>מיקום</label><input id="pe_location" value="${escapeHtml(profile.location || '')}"></div>
+            ${tgLink ? `
+            <div class="publisher-edit-field"><label>שפה</label><input id="pe_language" value="${escapeHtml(profile.language || 'ערבית')}"></div>
+            <div class="publisher-edit-field"><label>סוג ערוץ</label><input id="pe_channelType" value="${escapeHtml(profile.channelType || '')}" placeholder="חדשות מקומיות / אזוריות / ארציות..."></div>
+            ` : `
             <div class="publisher-edit-field"><label>גיל</label><input id="pe_age" value="${escapeHtml(profile.age || '')}"></div>
             <div class="publisher-edit-field"><label>עיסוק</label><input id="pe_occupation" value="${escapeHtml(profile.occupation || '')}"></div>
             <div class="publisher-edit-field"><label>בן/בת זוג</label><input id="pe_partner" value="${escapeHtml(profile.partner || '')}"></div>
             <div class="publisher-edit-field"><label>תחביבים</label><input id="pe_hobbies" value="${escapeHtml(profile.hobbies || '')}"></div>
+            `}
             <div class="publisher-edit-field"><label>מנויים</label><input id="pe_subscribers" value="${escapeHtml(profile.subscribers || '')}"></div>
             <div class="publisher-edit-field"><label>הערות</label><textarea id="pe_notes">${escapeHtml(profile.notes || '')}</textarea></div>
         </div>
@@ -4094,16 +4973,19 @@ function togglePublisherEdit() {
 
 async function savePublisherProfile() {
     if (!currentPublisherId) return;
+    const getVal = (id) => { const el = document.getElementById(id); return el ? el.value.trim() : ''; };
     const profileData = {
-        name: document.getElementById('pe_name').value.trim(),
-        photo: document.getElementById('pe_photo').value.trim(),
-        location: document.getElementById('pe_location').value.trim(),
-        age: document.getElementById('pe_age').value.trim(),
-        occupation: document.getElementById('pe_occupation').value.trim(),
-        partner: document.getElementById('pe_partner').value.trim(),
-        hobbies: document.getElementById('pe_hobbies').value.trim(),
-        subscribers: document.getElementById('pe_subscribers').value.trim(),
-        notes: document.getElementById('pe_notes').value.trim(),
+        name: getVal('pe_name'),
+        photo: getVal('pe_photo'),
+        location: getVal('pe_location'),
+        age: getVal('pe_age'),
+        occupation: getVal('pe_occupation'),
+        partner: getVal('pe_partner'),
+        hobbies: getVal('pe_hobbies'),
+        language: getVal('pe_language'),
+        channelType: getVal('pe_channelType'),
+        subscribers: getVal('pe_subscribers'),
+        notes: getVal('pe_notes'),
         lastUpdated: Date.now()
     };
     publisherProfiles[currentPublisherId] = profileData;
@@ -4652,7 +5534,7 @@ function toggleTgFeed() {
 // ═══════ INIT ═══════
 document.addEventListener('DOMContentLoaded', () => {
     try { updateClock(); } catch(e) { console.error('Clock init error:', e); }
-    setInterval(() => { try { updateClock(); } catch(e) {} }, 1000);
+    setInterval(() => { try { updateClock(); } catch(e) { console.warn('Clock error:', e.message); } }, 1000);
 
     try {
         if (typeof L !== 'undefined') {
@@ -4672,8 +5554,8 @@ document.addEventListener('DOMContentLoaded', () => {
     try { loadAlertVotes(); } catch(e) { console.error('Votes init error:', e); }
     try { loadPublisherProfiles(); } catch(e) { console.error('Profiles init error:', e); }
     try { startRefreshCycle(); } catch(e) { console.error('Refresh init error:', e); }
-    try { fetchWeatherDirect(); } catch(e) {}
-    try { checkCalendarLocal(); } catch(e) {}
+    try { fetchWeatherDirect(); } catch(e) { console.error('Weather init error:', e); }
+    try { checkCalendarLocal(); } catch(e) { console.error('Calendar init error:', e); }
 });
 </script>
 </body>
