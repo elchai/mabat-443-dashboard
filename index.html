@@ -2433,7 +2433,6 @@ document.getElementById('loginInput').addEventListener('keydown', function(e) {
                 <div id="arrestInfo" class="arrest-info"></div>
                 <div class="arrest-actions">
                     <button onclick="arrestFinish()" id="arrestFinishBtn" disabled>חשב ציר ▶</button>
-                    <button onclick="arrestReverse()" id="arrestReverseBtn" disabled>היפוך (פינוי)</button>
                     <button onclick="arrestClear()">איפוס</button>
                 </div>
                 <div class="arrest-exports" id="arrestExports" style="display:none;">
@@ -3343,6 +3342,7 @@ function toggleMapillarySearch() {
         if (mlyState.lastClickHandler) map.off('click', mlyState.lastClickHandler);
         if (btn) { btn.style.background = ''; btn.style.borderColor = ''; }
         document.getElementById('mapPanel').classList.remove('map-planning-mode');
+        clearMapillaryPins(); // הסר סימונים כשכיבוי המצב
     }
 }
 
@@ -3415,10 +3415,15 @@ function showToast(msg) {
 // ═══════ ARREST PLANNER ═══════
 const arrestState = {
     active: false,
-    target: null,       // בית המבוקש (יעד סופי)
-    startPoint: null,   // נקודת מוצא (יציאת הכוח)
-    waypoints: [],      // נ״ד ביניים לניווט
-    layers: [],
+    target: null,          // בית המבוקש (יעד סופי)
+    startPoint: null,      // נקודת מוצא (יציאת הכוח)
+    waypoints: [],         // נ״ד ביניים לניווט
+    layers: [],            // שכבות עזר (טבעות טווח, ציר)
+    targetMarker: null,    // marker של היעד
+    startMarker: null,     // marker של המוצא
+    waypointMarkers: [],   // markers של נ״ד
+    targetRings: [],       // 3 טבעות הטווח סביב הבית
+    routeLayers: [],       // שכבות הציר עצמו
     routeCoords: null,
     routeMeta: null,
 };
@@ -3448,50 +3453,144 @@ function arrestOnMapClick(e) {
     if (!arrestState.active) return;
     const { lat, lng } = e.latlng;
     if (!arrestState.target) {
-        // שלב 1: יעד / בית המבוקש
-        arrestState.target = { lat, lng };
-        const m = L.marker([lat, lng], {
-            icon: L.divIcon({
-                className: 'arrest-target-icon',
-                html: '<div style="font-size:26px;line-height:1;filter:drop-shadow(0 0 6px #ff0040);">🏠</div>',
-                iconSize: [32, 32], iconAnchor: [16, 28]
-            })
-        }).bindTooltip('בית המבוקש (יעד)', { permanent: true, direction: 'top', className: 'dark-tooltip' }).addTo(map);
-        // מעגלי טווח סביב הבית (100/300/500 מטר)
-        [100, 300, 500].forEach((r, i) => {
-            const ring = L.circle([lat, lng], {
-                radius: r, color: '#ff0040', fillColor: '#ff0040',
-                fillOpacity: 0.04 - i * 0.01, weight: 1, opacity: 0.4 - i * 0.1, dashArray: '3,4'
-            }).addTo(map);
-            arrestState.layers.push(ring);
-        });
-        arrestState.layers.push(m);
+        arrestAddTarget(lat, lng);
     } else if (!arrestState.startPoint) {
-        // שלב 2: נקודת מוצא
-        arrestState.startPoint = { lat, lng };
-        const m = L.marker([lat, lng], {
-            icon: L.divIcon({
-                className: 'arrest-start-icon',
-                html: '<div style="background:#00ff88;color:#040810;font-weight:900;width:28px;height:28px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:11px;border:2px solid #040810;box-shadow:0 0 10px #00ff88;">מוצא</div>',
-                iconSize: [28, 28], iconAnchor: [14, 14]
-            })
-        }).bindTooltip('נקודת מוצא', { direction: 'top', className: 'dark-tooltip' }).addTo(map);
-        arrestState.layers.push(m);
+        arrestAddStart(lat, lng);
     } else {
-        // שלב 3: נקודות ניווט בין המוצא ליעד
-        arrestState.waypoints.push({ lat, lng });
-        const idx = arrestState.waypoints.length;
-        const m = L.marker([lat, lng], {
-            icon: L.divIcon({
-                className: 'arrest-wp-icon',
-                html: `<div style="background:#00d4ff;color:#040810;font-weight:700;width:22px;height:22px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:11px;border:2px solid #040810;box-shadow:0 0 6px #00d4ff;">${idx}</div>`,
-                iconSize: [22, 22], iconAnchor: [11, 11]
-            })
-        }).bindTooltip(`נ״ד ${idx}`, { direction: 'top', className: 'dark-tooltip' }).addTo(map);
-        arrestState.layers.push(m);
+        arrestAddWaypoint(lat, lng);
     }
     arrestUpdateStep();
     document.getElementById('arrestFinishBtn').disabled = !(arrestState.target && arrestState.startPoint);
+}
+
+function arrestBuildTargetIcon() {
+    return L.divIcon({
+        className: 'arrest-target-icon',
+        html: '<div style="font-size:26px;line-height:1;filter:drop-shadow(0 0 6px #ff0040);">🏠</div>',
+        iconSize: [32, 32], iconAnchor: [16, 28]
+    });
+}
+function arrestBuildStartIcon() {
+    return L.divIcon({
+        className: 'arrest-start-icon',
+        html: '<div style="background:#00ff88;color:#040810;font-weight:900;width:28px;height:28px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:11px;border:2px solid #040810;box-shadow:0 0 10px #00ff88;">מוצא</div>',
+        iconSize: [28, 28], iconAnchor: [14, 14]
+    });
+}
+function arrestBuildWpIcon(idx) {
+    return L.divIcon({
+        className: 'arrest-wp-icon',
+        html: `<div style="background:#00d4ff;color:#040810;font-weight:700;width:22px;height:22px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:11px;border:2px solid #040810;box-shadow:0 0 6px #00d4ff;">${idx}</div>`,
+        iconSize: [22, 22], iconAnchor: [11, 11]
+    });
+}
+
+// Tooltip עם הוראה למחיקה + רמז לגרירה
+function arrestTooltipContent(label, deletable = true) {
+    return `<b>${label}</b>${deletable ? '<br><span style="font-size:9px;color:#9ab0c8;">גרור להזזה · ימני/דבל-קליק למחיקה</span>' : '<br><span style="font-size:9px;color:#9ab0c8;">גרור להזזה</span>'}`;
+}
+
+function arrestAddTarget(lat, lng) {
+    arrestState.target = { lat, lng };
+    const m = L.marker([lat, lng], {
+        icon: arrestBuildTargetIcon(),
+        draggable: true,
+        autoPan: true
+    }).bindTooltip(arrestTooltipContent('בית המבוקש (יעד)', false), { direction: 'top', className: 'dark-tooltip' }).addTo(map);
+
+    // Rings 100/300/500 מ׳
+    arrestState.targetRings = [100, 300, 500].map((r, i) =>
+        L.circle([lat, lng], {
+            radius: r, color: '#ff0040', fillColor: '#ff0040',
+            fillOpacity: 0.04 - i * 0.01, weight: 1, opacity: 0.4 - i * 0.1, dashArray: '3,4'
+        }).addTo(map)
+    );
+    m.on('drag', (ev) => {
+        const ll = ev.target.getLatLng();
+        arrestState.target = { lat: ll.lat, lng: ll.lng };
+        arrestState.targetRings.forEach(r => r.setLatLng(ll));
+    });
+    m.on('dragend', arrestRefreshRoute);
+    m.on('dblclick contextmenu', (ev) => {
+        L.DomEvent.stop(ev);
+        if (!confirm('למחוק את היעד?')) return;
+        arrestClear();
+    });
+    arrestState.targetMarker = m;
+}
+
+function arrestAddStart(lat, lng) {
+    arrestState.startPoint = { lat, lng };
+    const m = L.marker([lat, lng], {
+        icon: arrestBuildStartIcon(),
+        draggable: true,
+        autoPan: true
+    }).bindTooltip(arrestTooltipContent('נקודת מוצא'), { direction: 'top', className: 'dark-tooltip' }).addTo(map);
+    m.on('drag', (ev) => {
+        const ll = ev.target.getLatLng();
+        arrestState.startPoint = { lat: ll.lat, lng: ll.lng };
+    });
+    m.on('dragend', arrestRefreshRoute);
+    m.on('dblclick contextmenu', (ev) => {
+        L.DomEvent.stop(ev);
+        if (!confirm('למחוק את נקודת המוצא?')) return;
+        map.removeLayer(m);
+        arrestState.startMarker = null;
+        arrestState.startPoint = null;
+        arrestClearRouteOnly();
+        arrestUpdateStep();
+        document.getElementById('arrestFinishBtn').disabled = true;
+    });
+    arrestState.startMarker = m;
+}
+
+function arrestAddWaypoint(lat, lng) {
+    arrestState.waypoints.push({ lat, lng });
+    const wpIdx = arrestState.waypoints.length - 1;
+    const m = L.marker([lat, lng], {
+        icon: arrestBuildWpIcon(wpIdx + 1),
+        draggable: true,
+        autoPan: true
+    }).bindTooltip(arrestTooltipContent(`נ״ד ${wpIdx + 1}`), { direction: 'top', className: 'dark-tooltip' }).addTo(map);
+    m.on('drag', (ev) => {
+        const ll = ev.target.getLatLng();
+        // מצא את ה-index הנוכחי לפי ה-marker (ייתכן והשתנה בעקבות מחיקה של אחר)
+        const idx = arrestState.waypointMarkers.indexOf(m);
+        if (idx >= 0) arrestState.waypoints[idx] = { lat: ll.lat, lng: ll.lng };
+    });
+    m.on('dragend', arrestRefreshRoute);
+    m.on('dblclick contextmenu', (ev) => {
+        L.DomEvent.stop(ev);
+        const idx = arrestState.waypointMarkers.indexOf(m);
+        if (idx < 0) return;
+        if (!confirm(`למחוק נ״ד ${idx + 1}?`)) return;
+        map.removeLayer(m);
+        arrestState.waypoints.splice(idx, 1);
+        arrestState.waypointMarkers.splice(idx, 1);
+        // עדכן מספור הנותרים
+        arrestState.waypointMarkers.forEach((mm, i) => {
+            mm.setIcon(arrestBuildWpIcon(i + 1));
+            mm.setTooltipContent(arrestTooltipContent(`נ״ד ${i + 1}`));
+        });
+        arrestRefreshRoute();
+        arrestUpdateStep();
+    });
+    arrestState.waypointMarkers.push(m);
+}
+
+// חישוב מחדש של הציר (נקרא אחרי drag/delete)
+function arrestRefreshRoute() {
+    if (!arrestState.target || !arrestState.startPoint) return;
+    arrestClearRouteOnly();
+    arrestFinish();
+}
+
+function arrestClearRouteOnly() {
+    arrestState.routeLayers.forEach(l => map.removeLayer(l));
+    arrestState.routeLayers = [];
+    arrestState.routeCoords = null;
+    arrestState.routeMeta = null;
+    document.getElementById('arrestExports').style.display = 'none';
 }
 
 function arrestUpdateStep() {
@@ -3552,7 +3651,7 @@ async function arrestFinish() {
     const routeInner = L.polyline(routeCoords, {
         color: '#ff0040', weight: 4, opacity: 0.95, dashArray: '14,6', lineCap: 'round'
     }).bindTooltip('ציר מעצר', { sticky: true, className: 'dark-tooltip' }).addTo(map);
-    arrestState.layers.push(routeOuter, routeInner);
+    arrestState.routeLayers.push(routeOuter, routeInner);
     arrestState.routeCoords = routeCoords;
     arrestState.routeMeta = { distanceM, durationS };
 
@@ -3569,8 +3668,7 @@ async function arrestFinish() {
         ⏱ זמן משוער: <b>${Math.round(durationS / 60)} דק׳</b><br>
         📍 נ״ד ביניים: <b>${arrestState.waypoints.length}</b>
     `;
-    document.getElementById('arrestReverseBtn').disabled = false;
-    document.getElementById('arrestFinishBtn').disabled = true;
+    document.getElementById('arrestFinishBtn').disabled = false;
     const exports = document.getElementById('arrestExports');
     exports.style.display = 'flex';
     const tgt = arrestState.target;
@@ -3579,50 +3677,20 @@ async function arrestFinish() {
     document.getElementById('arrestGmaps').href = `https://www.google.com/maps/dir/${start.lat},${start.lng}${wpStr}/${tgt.lat},${tgt.lng}`;
 }
 
-function arrestReverse() {
-    // ציר פינוי: מוצא ⇄ יעד (נ״ד הפוכים), כולל כל הנתונים
-    if (!arrestState.target || !arrestState.startPoint) return;
-    const oldTarget = arrestState.target;
-    const oldStart = arrestState.startPoint;
-    const oldWps = [...arrestState.waypoints].reverse();
-    arrestClear(false);
-    arrestState.target = oldStart; // מוצא הופך ליעד
-    arrestState.startPoint = oldTarget; // בית המבוקש הופך למוצא פינוי
-    arrestState.waypoints = oldWps;
-    // יעד (נקודת פינוי)
-    const tm = L.marker([oldStart.lat, oldStart.lng], {
-        icon: L.divIcon({
-            className: 'arrest-target-icon',
-            html: '<div style="font-size:26px;line-height:1;filter:drop-shadow(0 0 6px #00ff88);">🏁</div>',
-            iconSize: [32, 32], iconAnchor: [16, 28]
-        })
-    }).bindTooltip('נקודת פינוי', { permanent: true, direction: 'top', className: 'dark-tooltip' }).addTo(map);
-    arrestState.layers.push(tm);
-    // מוצא (הבית)
-    const sm = L.marker([oldTarget.lat, oldTarget.lng], {
-        icon: L.divIcon({
-            className: 'arrest-start-icon',
-            html: '<div style="background:#ff0040;color:#fff;font-weight:900;width:28px;height:28px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:10px;border:2px solid #040810;box-shadow:0 0 10px #ff0040;">בית</div>',
-            iconSize: [28, 28], iconAnchor: [14, 14]
-        })
-    }).bindTooltip('יציאה מהבית', { direction: 'top', className: 'dark-tooltip' }).addTo(map);
-    arrestState.layers.push(sm);
-    oldWps.forEach((wp, i) => {
-        const m = L.marker([wp.lat, wp.lng], {
-            icon: L.divIcon({
-                className: 'arrest-wp-icon',
-                html: `<div style="background:#00ff88;color:#040810;font-weight:700;width:22px;height:22px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:11px;border:2px solid #040810;">${i + 1}</div>`,
-                iconSize: [22, 22], iconAnchor: [11, 11]
-            })
-        }).addTo(map);
-        arrestState.layers.push(m);
-    });
-    arrestFinish();
-}
-
 function arrestClear(resetUI = true) {
+    // הסר כל שכבה/marker מהמפה
     arrestState.layers.forEach(l => map.removeLayer(l));
+    arrestState.routeLayers.forEach(l => map.removeLayer(l));
+    arrestState.targetRings.forEach(r => map.removeLayer(r));
+    if (arrestState.targetMarker) map.removeLayer(arrestState.targetMarker);
+    if (arrestState.startMarker) map.removeLayer(arrestState.startMarker);
+    arrestState.waypointMarkers.forEach(m => map.removeLayer(m));
     arrestState.layers = [];
+    arrestState.routeLayers = [];
+    arrestState.targetRings = [];
+    arrestState.targetMarker = null;
+    arrestState.startMarker = null;
+    arrestState.waypointMarkers = [];
     arrestState.target = null;
     arrestState.startPoint = null;
     arrestState.waypoints = [];
@@ -3630,7 +3698,6 @@ function arrestClear(resetUI = true) {
     arrestState.routeMeta = null;
     if (resetUI) {
         document.getElementById('arrestFinishBtn').disabled = true;
-        document.getElementById('arrestReverseBtn').disabled = true;
         document.getElementById('arrestExports').style.display = 'none';
         arrestUpdateStep();
     }
