@@ -3322,7 +3322,7 @@ document.addEventListener('DOMContentLoaded', () => {
 const MAPILLARY_TOKEN_CLIENT = 'MLY|26636963299290715|555a2cc2563d0e534e9b49896c447f93';
 const MAPILLARY_CREATORS = [
     // יוצרים שיש להם כיסוי מוכר בגזרה — יקבלו צבע ייחודי
-    { id: '110481147852897', username: '360ms', color: '#a855f7' },
+    { id: '110481147852897', username: '360ms', color: '#05CB63' },
 ];
 const mlyState = { active: false, layer: null, lastClickHandler: null };
 
@@ -3373,12 +3373,11 @@ async function loadMapillaryAt(lat, lng, radiusM = 500) {
             if (!img.computed_geometry || !img.computed_geometry.coordinates) return;
             const [clng, clat] = img.computed_geometry.coordinates;
             const creator = img.creator || {};
-            const known = MAPILLARY_CREATORS.find(c => c.id === creator.id);
-            const color = known ? known.color : '#00d4ff';
+            const color = '#05CB63'; // ירוק של Mapillary המקורי
             const when = img.captured_at ? new Date(img.captured_at).toISOString().slice(0, 10) : '';
             const marker = L.circleMarker([clat, clng], {
-                radius: img.is_pano ? 5 : 3.5,
-                color: color, fillColor: color, fillOpacity: 0.85, weight: 1.5,
+                radius: img.is_pano ? 2.5 : 1.8,
+                color: color, fillColor: color, fillOpacity: 0.9, weight: 0,
                 className: 'mly-pin'
             });
             marker.bindTooltip(`${creator.username || '?'} • ${when}${img.is_pano ? ' • 360°' : ''}`, {
