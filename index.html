@@ -2441,7 +2441,6 @@ document.getElementById('loginInput').addEventListener('keydown', function(e) {
                 </div>
                 <div class="arrest-exports" id="arrestExports" style="display:none;">
                     <a href="#" id="arrestGmaps" target="_blank">📍 Google Maps</a>
-                    <a href="#" id="arrestWaze" target="_blank">🚗 Waze</a>
                     <button onclick="arrestCopyText()">📋 העתק תקציר</button>
                     <button onclick="arrestSaveLocal()">💾 שמור מקומי</button>
                 </div>
@@ -2526,7 +2525,7 @@ document.getElementById('loginInput').addEventListener('keydown', function(e) {
                 <div class="config-item" id="calendarRow"><span class="config-key">לוח תאריכים</span><span class="config-val" id="calendarVal" style="color:var(--green);">רגיל</span></div>
                 <div class="config-item" id="sentimentRow"><span class="config-key">סנטימנט</span><span class="config-val" id="sentimentVal">--</span></div>
                 <div class="config-item" id="trendsRow"><span class="config-key">מגמות</span><span class="config-val" id="trendsVal" style="color:var(--green);">0</span></div>
-                <div class="config-item"><span class="config-key">מקורות</span><span class="config-val" style="font-size:9px;">TG+RSS+ACLED+OCHA+Waze</span></div>
+                <div class="config-item"><span class="config-key">מקורות</span><span class="config-val" style="font-size:9px;">TG+RSS+ACLED+OCHA</span></div>
             </div>
         </div>
     </div>
@@ -3582,7 +3581,6 @@ async function arrestFinish() {
     const start = arrestState.startPoint;
     const wpStr = arrestState.waypoints.map(w => `/${w.lat},${w.lng}`).join('');
     document.getElementById('arrestGmaps').href = `https://www.google.com/maps/dir/${start.lat},${start.lng}${wpStr}/${tgt.lat},${tgt.lng}`;
-    document.getElementById('arrestWaze').href = `https://waze.com/ul?ll=${tgt.lat},${tgt.lng}&navigate=yes`;
 }
 
 function arrestReverse() {
@@ -3655,7 +3653,6 @@ function arrestCopyText() {
         `⏱ זמן משוער: ${Math.round(m.durationS / 60)} דק׳`,
         `📍 נ״ד ביניים: ${arrestState.waypoints.length}`,
         `Google Maps: https://www.google.com/maps?q=${t.lat},${t.lng}`,
-        `Waze: https://waze.com/ul?ll=${t.lat},${t.lng}&navigate=yes`,
     ].filter(Boolean);
     navigator.clipboard.writeText(lines.join('\n')).then(() => {
         const step = document.getElementById('arrestStep');
