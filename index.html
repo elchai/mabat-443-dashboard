@@ -984,16 +984,61 @@ body {
 
 .alert-full-text {
     font-family: var(--font-he);
-    font-size: 13px;
-    font-weight: 300;
-    line-height: 1.6;
+    font-size: 12px;
+    font-weight: 400;
+    line-height: 1.5;
     color: var(--text-secondary);
-    padding: 8px 12px;
+    padding: 8px 10px;
     border: 1px solid var(--border-primary);
     border-radius: 4px;
-    background: rgba(0, 0, 0, 0.2);
-    white-space: pre-wrap;
+    background: rgba(0, 0, 0, 0.25);
     direction: rtl;
+}
+.alert-metagrid {
+    display: grid;
+    grid-template-columns: auto 1fr;
+    gap: 3px 10px;
+    align-items: baseline;
+}
+.alert-metak {
+    color: var(--text-dim);
+    font-size: 10px;
+    font-family: var(--font-mono);
+    letter-spacing: 0.5px;
+    white-space: nowrap;
+}
+.alert-metav {
+    color: var(--text-primary);
+    font-size: 12px;
+    word-break: break-word;
+}
+.alert-kw {
+    display: inline-block;
+    padding: 1px 5px;
+    margin: 1px 2px;
+    background: rgba(0, 212, 255, 0.08);
+    border: 1px solid var(--cyan-dim);
+    border-radius: 3px;
+    font-size: 10px;
+    color: var(--cyan);
+    font-family: var(--font-mono);
+}
+.alert-origtext {
+    margin-top: 8px;
+    padding-top: 8px;
+    border-top: 1px dashed var(--border-primary);
+    white-space: pre-wrap;
+    color: var(--text-secondary);
+    font-size: 11.5px;
+    line-height: 1.5;
+}
+.alert-origtext-title {
+    font-size: 9px;
+    font-family: var(--font-mono);
+    color: var(--text-dim);
+    letter-spacing: 1px;
+    margin-bottom: 4px;
+    text-transform: uppercase;
 }
 
 .alert-meta-row {
@@ -4625,16 +4670,15 @@ function renderAlerts() {
                 <div class="alert-urgency ${item.isFieldReport ? 'urgency-field' : item._isAnarchist ? 'urgency-anarchist' : 'urgency-' + (item.urgency || 1)}"></div>
                 <div class="alert-content">
                     <div class="alert-title">${isDisliked ? '<span class="false-badge">שגוי</span>' : ''}${isLiked ? '<span class="verified-badge">אומת</span>' : ''}${escapeHtml(item.title || 'N/A')}</div>
-                    ${(item.summary && item.summary !== item.title) ? `<div class="alert-body">${escapeHtml(item.summary)}</div>` : ''}
+                    ${alertUniqueBody(item)}
                     ${locationTag}
                 </div>
             </div>
-            ${(item.fullText || item.originalText || item.snippet) ? '<div class="alert-full-text" style="display:none;">' + escapeHtml(item.fullText || item.originalText || item.snippet) + '</div>' : ''}
+            ${alertExpandedDetails(item)}
             <div class="alert-meta-row" style="display:none;">
                 <a href="javascript:void(0)" onclick="openPublisherProfile('${escapeHtml(srcIdForProfile)}',event)" class="source-link-clickable" style="color:#00d4ff;font-size:10px;text-decoration:none;">&#128225; ${escapeHtml(item.source || 'N/A')}</a>
                 ${tgLinkFull ? '<a href="' + escapeHtml(tgLinkFull) + '" target="_blank" onclick="event.stopPropagation();" style="color:#00d4ff;font-size:10px;text-decoration:none;">✈️ טלגרם</a>' : ''}
                 ${sourceUrl && sourceUrl !== tgLinkFull ? '<a href="' + escapeHtml(sourceUrl) + '" target="_blank" onclick="event.stopPropagation();" style="color:var(--text-dim);font-size:10px;text-decoration:none;">&#128279; מקור</a>' : ''}
-                ${item.matchedKeywords ? '<span>KW: ' + escapeHtml(item.matchedKeywords.join(', ')) + '</span>' : ''}
                 <div class="vote-buttons">
                     <button class="vote-btn vote-like${isLiked ? ' active' : ''}" onclick="toggleVote('${alertId}','like',event)" title="אמין" style="opacity:${isLiked ? '1' : '0.4'};">&#128077;</button>
                     <button class="vote-btn vote-dislike${isDisliked ? ' active' : ''}" onclick="toggleVote('${alertId}','dislike',event)" title="שגוי" style="opacity:${isDisliked ? '1' : '0.4'};">&#128078;</button>
@@ -4642,6 +4686,62 @@ function renderAlerts() {
             </div>
         </div>
     `}).join('');
+}
+
+// Normalize text for similarity compare (dedup title vs summary vs fullText)
+function normText(s) {
+    return (s || '').trim()
+        .replace(/#?\bvideo\b|#?\bphoto\b/gi, '')
+        .replace(/https?:\/\/\S+/g, '')
+        .replace(/[\-–—|·]+\s*x\.com/gi, '')
+        .replace(/\s+/g, ' ')
+        .toLowerCase();
+}
+function isDistinct(a, b) {
+    if (!a || !b) return false;
+    const na = normText(a), nb = normText(b);
+    if (!na || !nb) return false;
+    if (na === nb) return false;
+    // אם אחד מוכל בשני כמעט לגמרי - לא מובחן
+    const shorter = na.length < nb.length ? na : nb;
+    const longer  = na.length < nb.length ? nb : na;
+    if (longer.includes(shorter) && (longer.length - shorter.length) < 30) return false;
+    return true;
+}
+
+function alertUniqueBody(item) {
+    // הצג summary רק אם שונה מ-title
+    if (!item.summary || !isDistinct(item.summary, item.title)) return '';
+    return `<div class="alert-body">${escapeHtml(item.summary)}</div>`;
+}
+
+function alertExpandedDetails(item) {
+    // טקסט מקור — רק אם באמת שונה
+    const origText = item.originalText || item.fullText || item.snippet;
+    const showOrig = origText && isDistinct(origText, item.title) && isDistinct(origText, item.summary);
+
+    const rows = [];
+    if (item.eventCategory) rows.push(['קטגוריה', escapeHtml(item.eventCategory)]);
+    if (item.locationHe) rows.push(['מיקום', escapeHtml(item.locationHe)]);
+    if (item.urgency || item.urgencyScore) rows.push(['דחיפות', `${item.urgency || item.urgencyScore}/5`]);
+    if (item.distanceFromCenter != null && item.distanceFromCenter > 0) rows.push(['מרחק ממרכז', `${(+item.distanceFromCenter).toFixed(1)} ק״מ`]);
+    if (item.language || item.originalLang) rows.push(['שפה', item.language || (item.originalLang === 'ar' ? 'ערבית' : 'עברית')]);
+    if (item.protectedTarget) rows.push(['יעד מוגן', `<span style="color:#ff0040;">${escapeHtml(item.protectedTarget)}</span>`]);
+    if (item.isHyperLocal) rows.push(['מקור', '<span style="color:#ffd000;">היפר-מקומי</span>']);
+    const publishedAt = item.publishedAt || item.timestamp;
+    if (publishedAt) rows.push(['פורסם', escapeHtml(formatDateTime(publishedAt))]);
+    if (item.fetchedAt) rows.push(['נקלט', escapeHtml(formatDateTime(item.fetchedAt))]);
+    const kws = item.matchedKeywords && item.matchedKeywords.length ? item.matchedKeywords : null;
+    if (kws) rows.push(['מילות מפתח', kws.slice(0, 8).map(k => `<span class="alert-kw">${escapeHtml(k)}</span>`).join(' ')]);
+
+    const meta = rows.length
+        ? `<div class="alert-metagrid">${rows.map(([k, v]) => `<div class="alert-metak">${k}</div><div class="alert-metav">${v}</div>`).join('')}</div>`
+        : '';
+    const orig = showOrig
+        ? `<div class="alert-origtext"><div class="alert-origtext-title">טקסט מקור</div>${escapeHtml(origText)}</div>`
+        : '';
+    if (!meta && !orig) return '';
+    return `<div class="alert-full-text" style="display:none;">${meta}${orig}</div>`;
 }
 
 function toggleAlertExpand(el) {
