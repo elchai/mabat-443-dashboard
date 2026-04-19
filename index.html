@@ -1762,103 +1762,98 @@ body {
     font-family: var(--font-he);
     direction: rtl;
     color: var(--text-primary);
+    z-index: 1200;
+    position: relative;
 }
 .mls-toggle {
-    background: rgba(4, 8, 16, 0.95);
+    background: rgba(4, 8, 16, 0.92);
     border: 1px solid var(--cyan-dim);
-    border-radius: 6px;
-    padding: 7px 12px;
+    padding: 6px 10px;
     cursor: pointer;
-    display: flex;
+    display: inline-flex;
     align-items: center;
-    gap: 8px;
-    font-size: 12px;
+    gap: 6px;
+    font-size: 11px;
     font-weight: 600;
     color: var(--cyan);
-    box-shadow: 0 0 15px rgba(0, 212, 255, 0.2);
-    backdrop-filter: blur(10px);
-    transition: all .15s;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.4);
+    backdrop-filter: blur(6px);
+    transition: background .15s;
     user-select: none;
+    letter-spacing: 0.5px;
 }
 .mls-toggle:hover, .mls-toggle.active {
-    background: rgba(0, 212, 255, 0.12);
+    background: rgba(0, 212, 255, 0.15);
     border-color: var(--cyan);
 }
-.mls-toggle .mls-icon { font-size: 14px; line-height: 1; }
-.mls-toggle .mls-label { letter-spacing: 1px; }
+.mls-toggle .mls-icon { font-size: 13px; line-height: 1; }
 .mls-panel {
-    margin-top: 6px;
-    background: rgba(4, 8, 16, 0.96);
+    margin-top: 4px;
+    background: rgba(4, 8, 16, 0.94);
     border: 1px solid var(--cyan-dim);
-    border-radius: 6px;
-    padding: 10px 12px;
-    min-width: 190px;
-    backdrop-filter: blur(10px);
-    box-shadow: 0 0 20px rgba(0, 212, 255, 0.25);
+    padding: 8px 10px;
+    min-width: 180px;
+    backdrop-filter: blur(8px);
+    box-shadow: 0 4px 14px rgba(0, 0, 0, 0.6);
 }
 .mls-section + .mls-section {
-    margin-top: 10px;
-    padding-top: 10px;
-    border-top: 1px dashed var(--cyan-dim);
+    margin-top: 8px;
+    padding-top: 8px;
+    border-top: 1px solid var(--cyan-dim);
 }
 .mls-section-title {
     font-size: 9px;
     font-weight: 700;
     color: var(--cyan);
-    letter-spacing: 2px;
-    margin-bottom: 6px;
-    opacity: 0.8;
+    letter-spacing: 1.5px;
+    margin-bottom: 5px;
+    opacity: 0.75;
     font-family: var(--font-mono);
+    text-transform: uppercase;
 }
 .mls-row {
     display: flex;
     align-items: center;
-    gap: 8px;
-    padding: 4px 6px;
-    border-radius: 3px;
+    gap: 7px;
+    padding: 3px 4px;
     cursor: pointer;
-    font-size: 12px;
+    font-size: 11.5px;
     color: var(--text-primary);
-    transition: background .15s;
+    transition: color .12s, background .12s;
     user-select: none;
+    line-height: 1.3;
 }
 .mls-row:hover {
     background: rgba(0, 212, 255, 0.08);
     color: var(--cyan);
 }
 .mls-radio, .mls-check {
-    width: 12px;
-    height: 12px;
-    border: 1.5px solid var(--cyan-dim);
+    width: 11px;
+    height: 11px;
+    border: 1.2px solid var(--text-dim);
     flex-shrink: 0;
     position: relative;
-    transition: all .15s;
+    transition: border-color .12s;
 }
 .mls-radio { border-radius: 50%; }
-.mls-check { border-radius: 2px; }
-.mls-radio.checked, .mls-check.checked {
-    border-color: var(--cyan);
-    background: rgba(0, 212, 255, 0.2);
-}
+.mls-radio.checked, .mls-check.checked { border-color: var(--cyan); }
 .mls-radio.checked::after {
     content: '';
     position: absolute;
     inset: 2px;
     background: var(--cyan);
     border-radius: 50%;
-    box-shadow: 0 0 4px var(--cyan);
 }
 .mls-check.checked::after {
-    content: '✓';
+    content: '';
     position: absolute;
-    inset: 0;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 10px;
-    font-weight: 700;
-    color: var(--cyan);
-    line-height: 1;
+    left: 2.5px;
+    top: 0;
+    width: 3px;
+    height: 7px;
+    border-right: 1.5px solid var(--cyan);
+    border-bottom: 1.5px solid var(--cyan);
+    transform: rotate(45deg);
 }
 .mls-text { flex: 1; }
 .leaflet-container a { color: var(--cyan); }
@@ -3158,7 +3153,7 @@ function buildCustomLayerSwitcher(cfg) {
         </div>
     `;
 
-    const ctl = L.control({ position: 'topright' });
+    const ctl = L.control({ position: 'topleft' });
     ctl.onAdd = () => {
         L.DomEvent.disableClickPropagation(container);
         L.DomEvent.disableScrollPropagation(container);
@@ -4166,10 +4161,42 @@ function initMap() {
 
     // CITIES_OUTSIDE + ARAB_OUTSIDE רנדור הוסר — נטענים דינמית מ-OSM.
 
-    // כפרים + ישובים נטענים דינמית מ-OSM (Overpass) — המיקומים
-    // מדויקים 1:1 למה שנראה במפה. P1/P2/ISRAELI_LOCATIONS עדיין
-    // משמשים לסינון newsData בלבד, לא לסימון על המפה.
-    loadOsmPlaces();
+    // Arab villages (orange) — קואורדינטות מאומתות מ-Wikipedia + OSM
+    KEY_VILLAGES.forEach(loc => {
+        L.circleMarker([loc.lat, loc.lng], {
+            radius: 5,
+            color: '#3d1d00',
+            weight: 1,
+            fillColor: '#ff8800',
+            fillOpacity: 0.9
+        }).bindTooltip(loc.he, { className: 'dark-tooltip', direction: 'right', offset: [6, 0] })
+          .bindPopup(buildLocationPopup(loc, 'כפר ערבי', '#ff8800'), { className: 'dark-tooltip', maxWidth: 280 })
+          .addTo(map);
+    });
+    // Israeli settlements (blue)
+    ISRAELI_LOCATIONS.forEach(loc => {
+        const isOutside = loc.outside;
+        L.circleMarker([loc.lat, loc.lng], {
+            radius: isOutside ? 4 : 5,
+            color: '#0a1a40',
+            weight: 1,
+            fillColor: '#4488ff',
+            fillOpacity: isOutside ? 0.55 : 0.9
+        }).bindTooltip(loc.he, { className: 'dark-tooltip', direction: 'right', offset: [6, 0] })
+          .bindPopup(buildLocationPopup(loc, isOutside ? 'ישוב (מחוץ לגזרה)' : 'ישוב ישראלי', '#4488ff'), { className: 'dark-tooltip', maxWidth: 280 })
+          .addTo(map);
+    });
+    // Cities outside (Ramallah, Jerusalem) + Arab villages outside
+    CITIES_OUTSIDE.forEach(loc => {
+        L.circleMarker([loc.lat, loc.lng], {
+            radius: 7, color: '#fff', weight: 1, fillColor: '#fff', fillOpacity: 0.3
+        }).bindTooltip(loc.he, { className: 'dark-tooltip', direction: 'right', offset: [6, 0] }).addTo(map);
+    });
+    ARAB_OUTSIDE.forEach(loc => {
+        L.circleMarker([loc.lat, loc.lng], {
+            radius: 3.5, color: '#3d1d00', weight: 1, fillColor: '#ff8800', fillOpacity: 0.45
+        }).bindTooltip(loc.he, { className: 'dark-tooltip', direction: 'right', offset: [6, 0] }).addTo(map);
+    });
 
     // ISRAELI_LOCATIONS רנדור הוסר — נטען דינמית מ-OSM.
 
