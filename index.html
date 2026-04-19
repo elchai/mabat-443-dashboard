@@ -2451,7 +2451,8 @@ document.getElementById('loginInput').addEventListener('keydown', function(e) {
             <div class="legend-title">מקרא</div>
             <div class="legend-item"><span class="legend-circle" style="background:#ff8800;"></span> כפר ערבי</div>
             <div class="legend-item"><span class="legend-circle" style="background:#4488ff;"></span> ישוב ישראלי</div>
-            <div class="legend-item"><span class="legend-circle" style="background:#00ff88;"></span> ציר / מחסום</div>
+            <div class="legend-item"><span class="legend-circle" style="background:#00ff88;"></span> מחסום / חסימה</div>
+            <div class="legend-item"><span class="legend-line" style="background:#ff0040;display:inline-block;width:14px;height:2px;vertical-align:middle;"></span> גדר המערכת</div>
             <div class="legend-divider"></div>
             <div class="legend-subtitle">טבעת איום:</div>
             <div class="legend-item"><span class="legend-ring" style="border-color:#ff0040;"></span> ודאי</div>
@@ -3059,17 +3060,9 @@ async function loadSecurityFence(targetLayerGroup) {
                 .map(c => [c[1], c[0]])
                 .filter(([lat, lng]) => lat >= sMin && lat <= sMax && lng >= lMin && lng <= lMax);
             if (coords.length < 2) return;
-            // הילה חיצונית (אדום כהה)
+            // קו אדום דק
             L.polyline(coords, {
-                color: '#600', weight: 7, opacity: 0.35, lineCap: 'round'
-            }).addTo(targetLayerGroup);
-            // קו אמצעי (צהוב עבה)
-            L.polyline(coords, {
-                color: '#ffd000', weight: 3.5, opacity: 0.9, lineCap: 'round'
-            }).addTo(targetLayerGroup);
-            // פסים שחורים (סכנה) מעליו
-            L.polyline(coords, {
-                color: '#000', weight: 3.5, opacity: 0.85, dashArray: '6,10', lineCap: 'butt'
+                color: '#ff0040', weight: 1.8, opacity: 0.95, lineCap: 'round'
             }).bindTooltip('גדר המערכת', { sticky: true, className: 'dark-tooltip' })
               .addTo(targetLayerGroup);
             rendered++;
@@ -3188,13 +3181,14 @@ window.clearCustomFence = function() {
 // ═══════ OCHA CLOSURES LOADER ═══════
 // טוען מחסומים/סוללות/שערים/חסימות מה-GeoJSON המקומי
 async function loadClosures(targetLayer) {
+    // כל המחסומים/חסימות — סמלים ירוקים קטנים ונקיים (גוונים שונים לפי סוג)
     const CLOSURE_STYLES = {
-        'checkpoint':         { icon: '🛑', color: '#ff0040', label: 'מחסום', size: 22 },
-        'partial checkpoint': { icon: '⚠️', color: '#ff8800', label: 'מחסום חלקי', size: 18 },
-        'road gate':          { icon: '🚧', color: '#ffd000', label: 'שער דרך', size: 16 },
-        'earthmound':         { icon: '⛰️', color: '#a0522d', label: 'סוללת עפר', size: 16 },
-        'roadblock':          { icon: '🪨', color: '#888',    label: 'חסימה', size: 16 },
-        'trench':             { icon: '🕳️', color: '#555',    label: 'תעלה', size: 16 },
+        'checkpoint':         { color: '#00ff88', radius: 5, label: 'מחסום' },
+        'partial checkpoint': { color: '#00cc66', radius: 4, label: 'מחסום חלקי' },
+        'road gate':          { color: '#66ff99', radius: 3.5, label: 'שער דרך' },
+        'earthmound':         { color: '#4ecb71', radius: 3, label: 'סוללת עפר' },
+        'roadblock':          { color: '#88dd88', radius: 3, label: 'חסימה' },
+        'trench':             { color: '#559955', radius: 3, label: 'תעלה' },
     };
 
     try {
@@ -3208,16 +3202,14 @@ async function loadClosures(targetLayer) {
                 const [lng, lat] = f.geometry.coordinates;
                 const p = f.properties || {};
                 const type = (p.ClosureType || '').toLowerCase();
-                const style = CLOSURE_STYLES[type] || { icon: '❓', color: '#aaa', label: type || 'לא ידוע', size: 14 };
+                const style = CLOSURE_STYLES[type] || { color: '#4ecb71', radius: 3, label: type || 'לא ידוע' };
                 const isOpen = (p.Open_Close || '').toLowerCase().includes('open');
-                const opacity = isOpen ? 0.5 : 1;
-                const marker = L.marker([lat, lng], {
-                    icon: L.divIcon({
-                        className: 'closure-icon',
-                        html: `<div style="font-size:${style.size}px;line-height:1;filter:drop-shadow(0 0 3px ${style.color});opacity:${opacity};text-align:center;">${style.icon}</div>`,
-                        iconSize: [style.size + 4, style.size + 4],
-                        iconAnchor: [(style.size + 4) / 2, (style.size + 4) / 2]
-                    })
+                const marker = L.circleMarker([lat, lng], {
+                    radius: style.radius,
+                    color: '#0a2a18',
+                    weight: 1,
+                    fillColor: style.color,
+                    fillOpacity: isOpen ? 0.4 : 0.9
                 });
                 marker.bindTooltip(`${style.label}: ${p.Name || ''}`, { direction: 'top', className: 'dark-tooltip' });
                 marker.bindPopup(`
@@ -3233,8 +3225,8 @@ async function loadClosures(targetLayer) {
                 const coords = f.geometry.coordinates.map(c => [c[1], c[0]]);
                 const p = f.properties || {};
                 L.polyline(coords, {
-                    color: '#ff8800', weight: 4, opacity: 0.7, dashArray: '3,6', lineCap: 'round'
-                }).bindTooltip(`חסימה לינארית: ${p.Name || ''}`, { sticky: true, className: 'dark-tooltip' })
+                    color: '#00ff88', weight: 1.5, opacity: 0.6, dashArray: '3,4', lineCap: 'round'
+                }).bindTooltip(`חסימה: ${p.Name || ''}`, { sticky: true, className: 'dark-tooltip' })
                   .addTo(targetLayer);
                 lines++;
             }
@@ -3831,71 +3823,35 @@ function initMap() {
           .addTo(map);
     });
 
-    // Collect all KEY_VILLAGE coords to avoid duplicates from P1/P2
-    const keyVillageCoords = new Set(KEY_VILLAGES.map(v => `${v.lat},${v.lng}`));
+    // P1/P2/P3 markers הוסרו — מוצגים רק KEY_VILLAGES (ערבים) +
+    // ISRAELI_LOCATIONS + מחסומי OCHA. P1/P2/P3 עדיין משמשים
+    // לסינון ב-newsData (לא למפה).
 
-    // ═══════ IN-SECTOR ARAB VILLAGES (P1/P2) - orange with 3D ═══════
-    [...P1_LOCATIONS, ...P2_LOCATIONS].forEach(loc => {
-        if (keyVillageCoords.has(`${loc.lat},${loc.lng}`)) return;
-        // Outer glow ring
-        L.circleMarker([loc.lat, loc.lng], {
-            radius: 10, color: '#ff8800', fillColor: '#ff8800', fillOpacity: 0.08, weight: 0,
-            className: 'marker-glow-ring', interactive: false
-        }).addTo(map);
-        L.circleMarker([loc.lat, loc.lng], {
-            radius: 6, color: '#ff8800', fillColor: '#ff8800', fillOpacity: 0.5, weight: 2,
-            className: 'marker-3d'
-        }).bindTooltip(loc.he, { className: 'dark-tooltip', direction: 'right', offset: [8, 0] })
-          .bindPopup(buildLocationPopup(loc, 'כפר', '#ff8800'), { className: 'dark-tooltip', maxWidth: 280 })
-          .addTo(map);
-    });
-
-    // ═══════ ROUTES & CHECKPOINTS - green with 3D ═══════
-    P3_LOCATIONS.forEach(loc => {
-        L.circleMarker([loc.lat, loc.lng], {
-            radius: 5, color: '#00ff88', fillColor: '#00ff88', fillOpacity: 0.4, weight: 1.5,
-            className: 'marker-3d'
-        }).bindTooltip(loc.he, { className: 'dark-tooltip', direction: 'right', offset: [8, 0] })
-          .bindPopup(buildLocationPopup(loc, 'ציר', '#00ff88'), { className: 'dark-tooltip', maxWidth: 280 })
-          .addTo(map);
-    });
-
-    // ═══════ ISRAELI SETTLEMENTS - blue with 3D ═══════
+    // ═══════ ISRAELI SETTLEMENTS - כחול ═══════
     ISRAELI_LOCATIONS.forEach(loc => {
         const isOutside = loc.outside;
-        const opacity = isOutside ? 0.25 : 0.5;
-        const radius = isOutside ? 5 : 6;
-        const weight = isOutside ? 1 : 2;
-        // Glow ring for in-sector
-        if (!isOutside) {
-            L.circleMarker([loc.lat, loc.lng], {
-                radius: 10, color: '#4488ff', fillColor: '#4488ff', fillOpacity: 0.08, weight: 0,
-                className: 'marker-glow-ring', interactive: false
-            }).addTo(map);
-        }
+        const fillOp = isOutside ? 0.45 : 0.8;
+        const r = isOutside ? 4 : 5.5;
         L.circleMarker([loc.lat, loc.lng], {
-            radius: radius, color: '#4488ff', fillColor: '#4488ff', fillOpacity: opacity, weight: weight,
-            className: isOutside ? 'marker-3d marker-outside' : 'marker-3d'
+            radius: r,
+            color: '#0a1a40',
+            weight: 1,
+            fillColor: '#4488ff',
+            fillOpacity: fillOp
         }).bindTooltip(loc.he, { className: 'dark-tooltip', direction: 'right', offset: [8, 0] })
-          .bindPopup(buildLocationPopup(loc, isOutside ? 'ישוב (מחוץ לגזרה)' : 'ישוב', '#4488ff'), { className: 'dark-tooltip', maxWidth: 280 })
+          .bindPopup(buildLocationPopup(loc, isOutside ? 'ישוב (מחוץ לגזרה)' : 'ישוב ישראלי', '#4488ff'), { className: 'dark-tooltip', maxWidth: 280 })
           .addTo(map);
     });
 
     // KEY VILLAGES - orange with 3D glow, rich popups on click
     KEY_VILLAGES.forEach(loc => {
         const pColor = '#ff8800';
-        // Outer glow ring
-        L.circleMarker([loc.lat, loc.lng], {
-            radius: 12, color: pColor, fillColor: pColor, fillOpacity: 0.1, weight: 0,
-            className: 'marker-glow-ring', interactive: false
-        }).addTo(map);
         const marker = L.circleMarker([loc.lat, loc.lng], {
-            radius: 7,
-            color: pColor,
+            radius: 5.5,
+            color: '#3d1d00',
+            weight: 1,
             fillColor: pColor,
-            fillOpacity: 0.55,
-            weight: 2,
-            className: 'marker-3d marker-key'
+            fillOpacity: 0.85
         }).addTo(map);
 
         marker.bindTooltip(loc.he, { className: 'dark-tooltip', direction: 'right', offset: [8, 0] });
