@@ -1803,6 +1803,44 @@ body {
 
 /* ═══════ MAP LEGEND ═══════ */
 /* ═══════ CUSTOM LAYER SWITCHER ═══════ */
+/* ═══════ ARREST ENTRANCE PICKER ═══════ */
+.arrest-ep-ring {
+    position: absolute;
+    inset: 0;
+    border: 1.5px solid var(--yellow);
+    border-radius: 50%;
+    background: radial-gradient(rgba(4,8,16,.75), rgba(4,8,16,.35));
+    box-shadow: 0 0 20px rgba(255,208,0,.35);
+    pointer-events: none;
+}
+.arrest-ep-btn {
+    position: absolute;
+    transform: translate(-50%, -50%);
+    width: 30px;
+    height: 30px;
+    border-radius: 50%;
+    border: 1.5px solid var(--yellow-dim);
+    background: rgba(4,8,16,.9);
+    color: var(--yellow);
+    font-family: 'Share Tech Mono', monospace;
+    font-weight: 700;
+    font-size: 12px;
+    cursor: pointer;
+    z-index: 1;
+    transition: all .12s;
+}
+.arrest-ep-btn:hover { background: rgba(255,208,0,.2); transform: translate(-50%,-50%) scale(1.12); }
+.arrest-ep-btn.active { background: var(--yellow); color: #040810; box-shadow: 0 0 10px var(--yellow); border-color: var(--yellow); }
+.arrest-ep-close {
+    position: absolute;
+    top: 50%; left: 50%; transform: translate(-50%,-50%);
+    width: 22px; height: 22px; border-radius: 50%;
+    background: rgba(4,8,16,.95); color: var(--text-dim);
+    border: 1px solid var(--border-primary);
+    font-size: 11px; cursor: pointer; line-height: 1;
+}
+.arrest-ep-close:hover { color: var(--red); border-color: var(--red); }
+
 /* layer-menu-panel — נפתח דרך הלחצן "שכבות" בסרגל המפה */
 .layer-menu-panel {
     position: absolute;
@@ -3748,15 +3786,17 @@ function showToast(msg) {
 // ═══════ ARREST PLANNER ═══════
 const arrestState = {
     active: false,
-    target: null,          // בית המבוקש (יעד סופי)
-    startPoint: null,      // נקודת מוצא (יציאת הכוח)
-    waypoints: [],         // נ״ד ביניים לניווט
-    layers: [],            // שכבות עזר (טבעות טווח, ציר)
-    targetMarker: null,    // marker של היעד
-    startMarker: null,     // marker של המוצא
-    waypointMarkers: [],   // markers של נ״ד
-    targetRings: [],       // 3 טבעות הטווח סביב הבית
-    routeLayers: [],       // שכבות הציר עצמו
+    target: null,           // בית המבוקש (יעד סופי)
+    targetEntrance: 6,      // כיוון הפתח (12/3/6/9 — 6 = דרום, פתח לכביש)
+    startPoint: null,       // נקודת מוצא (יציאת הכוח)
+    waypoints: [],          // נ״ד ביניים לניווט
+    layers: [],
+    targetMarker: null,
+    targetWedge: null,      // חץ כיוון הפתח
+    startMarker: null,
+    waypointMarkers: [],
+    targetRings: [],
+    routeLayers: [],
     routeCoords: null,
     routeMeta: null,
 };
@@ -3847,24 +3887,87 @@ function arrestAddTarget(lat, lng) {
         icon: arrestBuildTargetIcon(),
         draggable: true,
         autoPan: true
-    }).bindTooltip(arrestTooltipContent('מטרה', false), { direction: 'top', className: 'dark-tooltip' }).addTo(map);
+    }).bindTooltip(arrestTooltipContent('מטרה · לחץ לפתח', false), { direction: 'top', className: 'dark-tooltip' }).addTo(map);
 
     arrestState.targetRings = [];
     m.on('drag', (ev) => {
         const ll = ev.target.getLatLng();
         arrestState.target = { lat: ll.lat, lng: ll.lng };
+        arrestRenderTargetWedge();
     });
     m.on('dragend', arrestRefreshRoute);
+    m.on('click', () => arrestShowEntrancePicker());
     m.on('dblclick contextmenu', (ev) => {
         L.DomEvent.stopPropagation(ev);
         if (ev.originalEvent) ev.originalEvent.preventDefault();
         if (!confirm('למחוק את המטרה?')) return;
         arrestClear();
     });
-    // מניעת תפריט דפדפן על האייקון עצמו
     if (m.getElement()) m.getElement().oncontextmenu = (e) => { e.preventDefault(); return false; };
     m.on('add', () => { if (m.getElement()) m.getElement().oncontextmenu = (e) => { e.preventDefault(); return false; }; });
     arrestState.targetMarker = m;
+    arrestRenderTargetWedge();
+}
+
+// חץ כיוון הפתח - 4 כיוונים (12/3/6/9) סביב המטרה
+function arrestRenderTargetWedge() {
+    if (arrestState.targetWedge) { map.removeLayer(arrestState.targetWedge); arrestState.targetWedge = null; }
+    if (!arrestState.target) return;
+    const { lat, lng } = arrestState.target;
+    const hours = { 12: [1, 0], 3: [0, 1], 6: [-1, 0], 9: [0, -1] };
+    const [dLat, dLng] = hours[arrestState.targetEntrance] || hours[6];
+    const offsetM = 40;
+    const tipLat = lat + (dLat * offsetM / 111000);
+    const tipLng = lng + (dLng * offsetM / (111000 * Math.cos(lat * Math.PI / 180)));
+    // חץ: קו מהמטרה אל נקודה בחוץ
+    const line = L.polyline([[lat, lng], [tipLat, tipLng]], {
+        color: '#ffd000', weight: 3, opacity: 1, lineCap: 'round'
+    }).addTo(map);
+    // ראש-חץ (מעגל צהוב עם מספר השעה)
+    const head = L.marker([tipLat, tipLng], {
+        icon: L.divIcon({
+            className: 'arrest-entrance-icon',
+            html: `<div style="width:18px;height:18px;border-radius:50%;background:#ffd000;color:#040810;font-weight:900;font-family:'Share Tech Mono',monospace;font-size:10px;display:flex;align-items:center;justify-content:center;border:2px solid #040810;box-shadow:0 0 6px #ffd000;">${arrestState.targetEntrance}</div>`,
+            iconSize: [18, 18], iconAnchor: [9, 9]
+        })
+    }).addTo(map);
+    head.on('click', arrestShowEntrancePicker);
+    arrestState.targetWedge = L.layerGroup([line, head]).addTo(map);
+    map.removeLayer(line); map.removeLayer(head);
+    line.addTo(arrestState.targetWedge); head.addTo(arrestState.targetWedge);
+}
+
+// Popup לבחירת כיוון הפתח
+function arrestShowEntrancePicker() {
+    if (!arrestState.target) return;
+    const existing = document.getElementById('arrestEntrancePicker');
+    if (existing) { existing.remove(); return; }
+    const pt = map.latLngToContainerPoint([arrestState.target.lat, arrestState.target.lng]);
+    const div = document.createElement('div');
+    div.id = 'arrestEntrancePicker';
+    div.style.cssText = `position:absolute;left:${pt.x}px;top:${pt.y}px;transform:translate(-50%,-50%);width:110px;height:110px;z-index:1150;pointer-events:auto;`;
+    div.innerHTML = `
+        <div class="arrest-ep-ring"></div>
+        <button class="arrest-ep-btn" data-h="12" style="top:-4px;left:50%;">12</button>
+        <button class="arrest-ep-btn" data-h="3" style="right:-4px;top:50%;">3</button>
+        <button class="arrest-ep-btn" data-h="6" style="bottom:-4px;left:50%;">6</button>
+        <button class="arrest-ep-btn" data-h="9" style="left:-4px;top:50%;">9</button>
+        <button class="arrest-ep-close" title="סגור">✕</button>
+    `;
+    document.getElementById('mapPanel').appendChild(div);
+    div.querySelectorAll('.arrest-ep-btn').forEach(b => {
+        if (Number(b.dataset.h) === arrestState.targetEntrance) b.classList.add('active');
+        b.onclick = (e) => {
+            e.stopPropagation();
+            arrestState.targetEntrance = Number(b.dataset.h);
+            arrestRenderTargetWedge();
+            div.remove();
+        };
+    });
+    div.querySelector('.arrest-ep-close').onclick = (e) => { e.stopPropagation(); div.remove(); };
+    // סגור אם המפה נגררה/זום
+    const closer = () => div.remove();
+    map.once('movestart zoomstart', closer);
 }
 
 function arrestAddStart(lat, lng) {
@@ -4005,20 +4108,24 @@ async function arrestFinish() {
 }
 
 function arrestClear(resetUI = true) {
-    // הסר כל שכבה/marker מהמפה
     arrestState.layers.forEach(l => map.removeLayer(l));
     arrestState.routeLayers.forEach(l => map.removeLayer(l));
     arrestState.targetRings.forEach(r => map.removeLayer(r));
     if (arrestState.targetMarker) map.removeLayer(arrestState.targetMarker);
+    if (arrestState.targetWedge) map.removeLayer(arrestState.targetWedge);
     if (arrestState.startMarker) map.removeLayer(arrestState.startMarker);
     arrestState.waypointMarkers.forEach(m => map.removeLayer(m));
+    const picker = document.getElementById('arrestEntrancePicker');
+    if (picker) picker.remove();
     arrestState.layers = [];
     arrestState.routeLayers = [];
     arrestState.targetRings = [];
     arrestState.targetMarker = null;
+    arrestState.targetWedge = null;
     arrestState.startMarker = null;
     arrestState.waypointMarkers = [];
     arrestState.target = null;
+    arrestState.targetEntrance = 6;
     arrestState.startPoint = null;
     arrestState.waypoints = [];
     arrestState.routeCoords = null;
