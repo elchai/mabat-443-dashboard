@@ -1803,6 +1803,68 @@ body {
 
 /* ═══════ MAP LEGEND ═══════ */
 /* ═══════ CUSTOM LAYER SWITCHER ═══════ */
+/* ═══════ ARREST SAVED PLANS LIST ═══════ */
+.arrest-saved-list {
+    margin-top: 8px;
+    padding-top: 8px;
+    border-top: 1px dashed var(--cyan-dim);
+    max-height: 260px;
+    overflow-y: auto;
+}
+.arrest-saved-title {
+    font-size: 10px;
+    font-family: var(--font-mono);
+    color: var(--cyan);
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    margin-bottom: 6px;
+    opacity: .8;
+}
+.arrest-saved-empty {
+    font-size: 11px;
+    color: var(--text-dim);
+    padding: 6px;
+    text-align: center;
+}
+.arrest-saved-item {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding: 5px 6px;
+    border: 1px solid var(--border-primary);
+    margin-bottom: 4px;
+    background: rgba(0,0,0,.2);
+    font-size: 11px;
+    transition: background .12s;
+}
+.arrest-saved-item:hover { background: rgba(0,212,255,.06); }
+.arrest-saved-main { flex: 1; min-width: 0; }
+.arrest-saved-time {
+    font-family: var(--font-mono);
+    color: var(--yellow);
+    font-weight: 700;
+    font-size: 10px;
+}
+.arrest-saved-meta {
+    color: var(--text-secondary);
+    font-size: 10px;
+    line-height: 1.3;
+    word-break: break-word;
+}
+.arrest-saved-btn {
+    width: 22px; height: 22px;
+    background: transparent;
+    border: 1px solid var(--cyan-dim);
+    color: var(--cyan);
+    cursor: pointer;
+    font-size: 11px;
+    padding: 0;
+    flex-shrink: 0;
+}
+.arrest-saved-btn.del { border-color: var(--red-dim); color: var(--red); }
+.arrest-saved-btn:hover { background: rgba(0,212,255,.1); }
+.arrest-saved-btn.del:hover { background: rgba(255,0,64,.12); }
+
 /* ═══════ ARREST ENTRANCE PICKER ═══════ */
 .arrest-ep-ring {
     position: absolute;
@@ -2666,6 +2728,7 @@ document.getElementById('loginInput').addEventListener('keydown', function(e) {
                 <div id="arrestInfo" class="arrest-info"></div>
                 <div class="arrest-actions">
                     <button onclick="arrestFinish()" id="arrestFinishBtn" disabled>חשב ציר ▶</button>
+                    <button onclick="arrestShowSavedPlans()">📁 תוכניות שמורות</button>
                     <button onclick="arrestClear()">איפוס</button>
                 </div>
                 <div class="arrest-exports" id="arrestExports" style="display:none;">
@@ -2673,6 +2736,7 @@ document.getElementById('loginInput').addEventListener('keydown', function(e) {
                     <button onclick="arrestCopyText()">📋 העתק תקציר</button>
                     <button onclick="arrestSaveLocal()">💾 שמור מקומי</button>
                 </div>
+                <div id="arrestSavedList" class="arrest-saved-list" style="display:none;"></div>
             </div>
         </div>
         <div class="map-legend" id="mapLegend">
@@ -4171,6 +4235,68 @@ function arrestCopyText() {
         step.innerHTML = '📋 הועתק ללוח';
         setTimeout(arrestUpdateStep, 1500);
     });
+}
+
+function arrestShowSavedPlans() {
+    const list = document.getElementById('arrestSavedList');
+    const plans = JSON.parse(localStorage.getItem('mabat443-arrest-plans') || '[]');
+    if (list.style.display === 'block') { list.style.display = 'none'; return; }
+    if (!plans.length) {
+        list.innerHTML = '<div class="arrest-saved-empty">אין תוכניות שמורות</div>';
+    } else {
+        list.innerHTML = '<div class="arrest-saved-title">תוכניות (' + plans.length + ')</div>' +
+            plans.slice().reverse().map((p, revIdx) => {
+                const idx = plans.length - 1 - revIdx;
+                const d = new Date(p.ts);
+                const dStr = `${String(d.getDate()).padStart(2,'0')}/${String(d.getMonth()+1).padStart(2,'0')} ${String(d.getHours()).padStart(2,'0')}:${String(d.getMinutes()).padStart(2,'0')}`;
+                const wpCount = (p.waypoints || []).length;
+                const km = p.meta ? (p.meta.distanceM / 1000).toFixed(1) : '?';
+                const loc = `${p.target.lat.toFixed(4)}, ${p.target.lng.toFixed(4)}`;
+                return `
+                    <div class="arrest-saved-item" data-idx="${idx}">
+                        <div class="arrest-saved-main">
+                            <div class="arrest-saved-time">${dStr}</div>
+                            <div class="arrest-saved-meta">${loc} · ${km} ק״מ · ${wpCount} נ״ד · פתח ${p.targetEntrance || 6}</div>
+                        </div>
+                        <button class="arrest-saved-btn load" onclick="arrestLoadPlan(${idx})" title="טען">↩</button>
+                        <button class="arrest-saved-btn del" onclick="arrestDeletePlan(${idx})" title="מחק">🗑</button>
+                    </div>
+                `;
+            }).join('');
+    }
+    list.style.display = 'block';
+}
+
+function arrestLoadPlan(idx) {
+    const plans = JSON.parse(localStorage.getItem('mabat443-arrest-plans') || '[]');
+    const plan = plans[idx];
+    if (!plan) return;
+    arrestClear(false);
+    arrestState.targetEntrance = plan.targetEntrance || 6;
+    arrestAddTarget(plan.target.lat, plan.target.lng);
+    if (plan.startPoint) arrestAddStart(plan.startPoint.lat, plan.startPoint.lng);
+    (plan.waypoints || []).forEach(w => {
+        arrestAddWaypoint(w.lat, w.lng);
+        if (w.note) arrestState.waypoints[arrestState.waypoints.length - 1].note = w.note;
+    });
+    arrestUpdateStep();
+    document.getElementById('arrestFinishBtn').disabled = !(arrestState.target && arrestState.startPoint);
+    if (arrestState.target && arrestState.startPoint) arrestFinish();
+    document.getElementById('arrestSavedList').style.display = 'none';
+    // zoom
+    const pts = [plan.target];
+    if (plan.startPoint) pts.push(plan.startPoint);
+    pts.push(...(plan.waypoints || []));
+    if (pts.length > 1) map.fitBounds(L.latLngBounds(pts.map(p => [p.lat, p.lng])).pad(0.2));
+    else map.setView([plan.target.lat, plan.target.lng], 16);
+}
+
+function arrestDeletePlan(idx) {
+    if (!confirm('למחוק תוכנית זו?')) return;
+    const plans = JSON.parse(localStorage.getItem('mabat443-arrest-plans') || '[]');
+    plans.splice(idx, 1);
+    localStorage.setItem('mabat443-arrest-plans', JSON.stringify(plans));
+    arrestShowSavedPlans(); arrestShowSavedPlans(); // re-render
 }
 
 function arrestSaveLocal() {
