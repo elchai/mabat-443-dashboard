@@ -2750,27 +2750,24 @@ const ISRAELI_LOCATIONS = [
     { name: "Ofer Camp", he: "מחנה עופר", lat: 31.908, lng: 35.155, outside: true },
 ];
 
-// ערים ומוקדים מחוץ לגזרה (לא ערבי ולא ישראלי - ערים גדולות לקונטקסט)
+// ערים ומוקדים מחוץ לגזרה — קואורדינטות מדויקות מ-OSM
 const CITIES_OUTSIDE = [
-    { name: "Jerusalem", he: "ירושלים", lat: 31.768, lng: 35.213, type: 'city' },
-    { name: "Ramallah", he: "רמאללה", lat: 31.902, lng: 35.204, type: 'city' },
-    { name: "El-Bireh", he: "אל-בירה", lat: 31.906, lng: 35.222, type: 'city' },
-    { name: "Beit Jala", he: "בית ג'אלה", lat: 31.717, lng: 35.188, type: 'city' },
-    { name: "Latrun", he: "לטרון", lat: 31.838, lng: 34.984, type: 'landmark' },
+    { name: "Jerusalem", he: "ירושלים", lat: 31.7683, lng: 35.2137, type: 'city' },
+    { name: "Ramallah", he: "רמאללה", lat: 31.9023, lng: 35.2057, type: 'city' },
+    { name: "El-Bireh", he: "אל-בירה", lat: 31.9056, lng: 35.2144, type: 'city' },
+    { name: "Latrun", he: "לטרון", lat: 31.8358, lng: 35.0022, type: 'landmark' },
 ];
 
 // כפרים ערביים מחוץ לגזרה
 const ARAB_OUTSIDE = [
-    { name: "Bir Nabala", he: "ביר נבאלה", lat: 31.860, lng: 35.198 },
-    { name: "Al-Ram", he: "א-ראם", lat: 31.853, lng: 35.225 },
-    { name: "Kafr Aqab", he: "כפר עקב", lat: 31.867, lng: 35.228 },
-    { name: "Beitunia", he: "ביתוניא", lat: 31.900, lng: 35.170 },
-    { name: "Surda", he: "סורדא", lat: 31.915, lng: 35.195 },
-    { name: "Abu Qash", he: "אבו קש", lat: 31.925, lng: 35.190 },
-    { name: "Beit Ur al-Fauqa South", he: "א-טירה", lat: 31.860, lng: 35.210 },
-    { name: "Hizma", he: "חיזמא", lat: 31.835, lng: 35.225 },
-    { name: "Jib", he: "ג'יב", lat: 31.851, lng: 35.182 },
-    { name: "Beit Hanina", he: "בית חנינא", lat: 31.822, lng: 35.214 },
+    { name: "Bir Nabala", he: "ביר נבאלה", lat: 31.8534, lng: 35.1859 },
+    { name: "Al-Ram", he: "א-ראם", lat: 31.8470, lng: 35.2300 },
+    { name: "Kafr Aqab", he: "כפר עקב", lat: 31.8492, lng: 35.2275 },
+    { name: "Beitunia", he: "ביתוניא", lat: 31.8953, lng: 35.1836 },
+    { name: "Surda", he: "סורדא", lat: 31.9283, lng: 35.1910 },
+    { name: "Abu Qash", he: "אבו קש", lat: 31.9440, lng: 35.2020 },
+    { name: "Hizma", he: "חיזמא", lat: 31.8300, lng: 35.2530 },
+    { name: "Beit Hanina", he: "בית חנינא", lat: 31.8352, lng: 35.2143 },
 ];
 
 const מקורות = [
@@ -4273,8 +4270,23 @@ function renderAlerts() {
                 ? `<a href="javascript:void(0)" onclick="flyToAlertLocation(${coords.lat},${coords.lng},event)" style="color:#00d4ff;font-size:10px;text-decoration:none;display:inline-flex;align-items:center;gap:3px;margin-top:2px;cursor:pointer;">📍 ${escapeHtml(locationName)}</a>`
                 : `<span style="color:#00d4ff;font-size:10px;display:inline-flex;align-items:center;gap:3px;margin-top:2px;">📍 ${escapeHtml(locationName)}</span>`)
             : '';
-        const sourceUrl = item.sourceUrl || getSourceUrl(item.source);
-        const srcObj = מקורות.find(s => s.id === item.source || s.name === item.source);
+        // חילוץ שם ערוץ טלגרם מה-source או מה-sourceUrl
+        let tgUser = null;
+        const srcStr = item.source || '';
+        const mTg = srcStr.match(/telegram[^\w]*([\w\d_]+)/i) || srcStr.match(/t\.me\/([\w\d_]+)/i);
+        if (mTg) tgUser = mTg[1];
+        else if (item.sourceUrl) {
+            const mU = item.sourceUrl.match(/t\.me\/([\w\d_]+)/);
+            if (mU) tgUser = mU[1];
+        }
+        // בניית URL מדויק להודעה אם יש messageId
+        let tgLinkFull = null;
+        if (tgUser) {
+            const msgIdMatch = (item.sourceUrl || '').match(/t\.me\/[\w\d_]+\/(\d+)/);
+            tgLinkFull = msgIdMatch ? `https://t.me/${tgUser}/${msgIdMatch[1]}` : `https://t.me/${tgUser}`;
+        }
+        const sourceUrl = item.sourceUrl || getSourceUrl(item.source) || tgLinkFull;
+        const srcObj = מקורות.find(s => s.id === item.source || s.name === item.source || s.tg === tgUser);
         const srcIdForProfile = srcObj ? srcObj.id : (item.source || '');
         const alertId = item.id || item.timestamp || idx;
         const isChecked = checkedAlerts.has(String(alertId));
@@ -4298,7 +4310,8 @@ function renderAlerts() {
             ${(item.fullText || item.originalText || item.snippet) ? '<div class="alert-full-text" style="display:none;">' + escapeHtml(item.fullText || item.originalText || item.snippet) + '</div>' : ''}
             <div class="alert-meta-row" style="display:none;">
                 <a href="javascript:void(0)" onclick="openPublisherProfile('${escapeHtml(srcIdForProfile)}',event)" class="source-link-clickable" style="color:#00d4ff;font-size:10px;text-decoration:none;">&#128225; ${escapeHtml(item.source || 'N/A')}</a>
-                ${sourceUrl ? '<a href="' + escapeHtml(sourceUrl) + '" target="_blank" onclick="event.stopPropagation();" style="color:var(--text-dim);font-size:10px;text-decoration:none;">&#128279; מקור</a>' : ''}
+                ${tgLinkFull ? '<a href="' + escapeHtml(tgLinkFull) + '" target="_blank" onclick="event.stopPropagation();" style="color:#00d4ff;font-size:10px;text-decoration:none;">✈️ טלגרם</a>' : ''}
+                ${sourceUrl && sourceUrl !== tgLinkFull ? '<a href="' + escapeHtml(sourceUrl) + '" target="_blank" onclick="event.stopPropagation();" style="color:var(--text-dim);font-size:10px;text-decoration:none;">&#128279; מקור</a>' : ''}
                 ${item.matchedKeywords ? '<span>KW: ' + escapeHtml(item.matchedKeywords.join(', ')) + '</span>' : ''}
                 <div class="vote-buttons">
                     <button class="vote-btn vote-like${isLiked ? ' active' : ''}" onclick="toggleVote('${alertId}','like',event)" title="אמין" style="opacity:${isLiked ? '1' : '0.4'};">&#128077;</button>
