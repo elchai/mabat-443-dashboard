@@ -5674,22 +5674,73 @@ function renderKeywords() {
 
 // ═══════ KEYBOARD SHORTCUTS ═══════
 document.addEventListener('keydown', (e) => {
+    const isInput = document.activeElement &&
+        (document.activeElement.tagName === 'INPUT' ||
+         document.activeElement.tagName === 'TEXTAREA' ||
+         document.activeElement.isContentEditable);
+
     if (e.key === 'Escape') {
         if (mapIsFullscreen) toggleMapFullscreen();
         const history = document.getElementById('historyOverlay');
-        if (history.classList.contains('visible')) toggleHistory();
+        if (history && history.classList.contains('visible')) toggleHistory();
         const keywords = document.getElementById('keywordsOverlay');
-        if (keywords.classList.contains('visible')) toggleKeywords();
+        if (keywords && keywords.classList.contains('visible')) toggleKeywords();
         const publisher = document.getElementById('publisherOverlay');
-        if (publisher.classList.contains('visible')) closePublisherProfile();
+        if (publisher && publisher.classList.contains('visible')) closePublisherProfile();
+        // סגור פאנלים במפה
+        if (arrestState && arrestState.active) toggleArrestPlanner();
+        if (mlyState && mlyState.active) toggleMapillarySearch();
+        const lmp = document.getElementById('layerMenuPanel');
+        if (lmp && lmp.style.display === 'block') toggleLayerMenu();
+        const picker = document.getElementById('arrestEntrancePicker');
+        if (picker) picker.remove();
+        return;
     }
-    if (e.key === 'f' || e.key === 'F') {
-        if (document.activeElement.tagName !== 'INPUT' && document.activeElement.tagName !== 'TEXTAREA') toggleMapFullscreen();
-    }
-    if (e.key === 'h' || e.key === 'H') {
-        if (document.activeElement.tagName !== 'INPUT' && document.activeElement.tagName !== 'TEXTAREA') toggleHistory();
-    }
+
+    if (isInput) return;
+
+    const key = e.key.toLowerCase();
+    const shortcuts = {
+        'f': () => toggleMapFullscreen(),
+        'h': () => toggleHistory(),
+        'a': () => toggleArrestPlanner(),
+        'm': () => toggleMapillarySearch(),
+        'l': () => toggleLayerMenu(),
+        '/': () => {
+            const s = document.getElementById('searchInput');
+            if (s) { e.preventDefault(); s.focus(); }
+        },
+        '?': () => showShortcutsHelp(),
+    };
+    const fn = shortcuts[key];
+    if (fn) { try { fn(); } catch (err) { /* silent */ } }
 });
+
+function showShortcutsHelp() {
+    let el = document.getElementById('shortcutsHelp');
+    if (el) { el.remove(); return; }
+    el = document.createElement('div');
+    el.id = 'shortcutsHelp';
+    el.style.cssText = 'position:fixed;inset:0;z-index:9998;background:rgba(0,0,0,.6);display:flex;align-items:center;justify-content:center;backdrop-filter:blur(4px);';
+    el.innerHTML = `
+        <div style="background:rgba(4,8,16,.98);border:1px solid var(--cyan);padding:20px 28px;min-width:320px;font-family:Heebo,sans-serif;direction:rtl;color:#e0e8f0;box-shadow:0 0 30px rgba(0,212,255,.4);">
+            <div style="font-size:14px;font-weight:700;color:var(--cyan);margin-bottom:14px;letter-spacing:1px;">⌨ קיצורי מקלדת</div>
+            <div style="display:grid;grid-template-columns:auto 1fr;gap:6px 14px;font-size:12px;">
+                <kbd style="font-family:Share Tech Mono,monospace;padding:2px 6px;background:rgba(0,212,255,.1);border:1px solid var(--cyan-dim);border-radius:3px;color:var(--cyan);">F</kbd><div>מסך מלא</div>
+                <kbd style="font-family:Share Tech Mono,monospace;padding:2px 6px;background:rgba(0,212,255,.1);border:1px solid var(--cyan-dim);border-radius:3px;color:var(--cyan);">A</kbd><div>תכנון מעצר</div>
+                <kbd style="font-family:Share Tech Mono,monospace;padding:2px 6px;background:rgba(0,212,255,.1);border:1px solid var(--cyan-dim);border-radius:3px;color:var(--cyan);">M</kbd><div>חיפוש Mapillary</div>
+                <kbd style="font-family:Share Tech Mono,monospace;padding:2px 6px;background:rgba(0,212,255,.1);border:1px solid var(--cyan-dim);border-radius:3px;color:var(--cyan);">L</kbd><div>שכבות מפה</div>
+                <kbd style="font-family:Share Tech Mono,monospace;padding:2px 6px;background:rgba(0,212,255,.1);border:1px solid var(--cyan-dim);border-radius:3px;color:var(--cyan);">H</kbd><div>היסטוריה</div>
+                <kbd style="font-family:Share Tech Mono,monospace;padding:2px 6px;background:rgba(0,212,255,.1);border:1px solid var(--cyan-dim);border-radius:3px;color:var(--cyan);">/</kbd><div>חיפוש בהתראות</div>
+                <kbd style="font-family:Share Tech Mono,monospace;padding:2px 6px;background:rgba(0,212,255,.1);border:1px solid var(--cyan-dim);border-radius:3px;color:var(--cyan);">?</kbd><div>עזרה זו</div>
+                <kbd style="font-family:Share Tech Mono,monospace;padding:2px 6px;background:rgba(0,212,255,.1);border:1px solid var(--cyan-dim);border-radius:3px;color:var(--cyan);">Esc</kbd><div>סגור/חזור</div>
+            </div>
+            <div style="margin-top:14px;text-align:center;font-size:10px;color:#6880a0;">לחץ שוב או Esc לסגירה</div>
+        </div>
+    `;
+    el.onclick = () => el.remove();
+    document.body.appendChild(el);
+}
 
 // ═══════ REFRESH CYCLE ═══════
 function startRefreshCycle() {
