@@ -1882,6 +1882,25 @@ body {
 .arrest-saved-btn:hover { background: rgba(0,212,255,.1); }
 .arrest-saved-btn.del:hover { background: rgba(255,0,64,.12); }
 
+.arrest-seg-label {
+    background: transparent;
+    pointer-events: none;
+}
+.arrest-seg-label span {
+    display: inline-block;
+    transform: translate(-50%, -50%);
+    background: rgba(4, 8, 16, 0.9);
+    border: 1px solid #a855f7;
+    color: #d8b4fe;
+    padding: 1px 5px;
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 10px;
+    font-weight: 700;
+    white-space: nowrap;
+    text-shadow: 0 0 2px rgba(0,0,0,.8);
+    border-radius: 2px;
+}
+
 /* ═══════ ARREST ENTRANCE PICKER ═══════ */
 .arrest-ep-ring {
     position: absolute;
@@ -4127,6 +4146,26 @@ async function arrestFinish() {
         color: '#a855f7', weight: 2.5, opacity: 0.95, lineCap: 'round'
     }).bindTooltip('ציר ניווט', { sticky: true, className: 'dark-tooltip' }).addTo(map);
     arrestState.routeLayers.push(routeInner);
+
+    // תוויות מרחק על כל segment (אמצע הקו בין שתי נקודות)
+    for (let i = 1; i < pts.length; i++) {
+        const a = pts[i - 1], b = pts[i];
+        const segM = haversineMeters(a, b);
+        const midLat = (a.lat + b.lat) / 2;
+        const midLng = (a.lng + b.lng) / 2;
+        const segLabel = segM < 1000 ? `${Math.round(segM)}מ׳` : `${(segM / 1000).toFixed(2)}ק״מ`;
+        const lbl = L.marker([midLat, midLng], {
+            icon: L.divIcon({
+                className: 'arrest-seg-label',
+                html: `<span>${segLabel}</span>`,
+                iconSize: null,
+                iconAnchor: [0, 0]
+            }),
+            interactive: false,
+            keyboard: false
+        }).addTo(map);
+        arrestState.routeLayers.push(lbl);
+    }
     arrestState.routeCoords = routeCoords;
     arrestState.routeMeta = { distanceM, durationS };
 
