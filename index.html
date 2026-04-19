@@ -1757,109 +1757,110 @@ body {
 .leaflet-tooltip-bottom.dark-tooltip::before { border-bottom-color: #0f3460 !important; border-top-color: transparent !important; }
 
 /* ═══════ MAP LEGEND ═══════ */
-/* ═══════ LEAFLET CONTROLS — מותאם לשפת המערכת ═══════ */
-.leaflet-control-layers,
-.leaflet-bar {
-    background: rgba(4, 8, 16, 0.95) !important;
-    border: 1px solid var(--cyan-dim) !important;
-    border-radius: 6px !important;
-    backdrop-filter: blur(10px);
-    box-shadow: 0 0 15px rgba(0, 212, 255, 0.2) !important;
-    color: var(--text-primary) !important;
-    font-family: var(--font-he) !important;
+/* ═══════ CUSTOM LAYER SWITCHER ═══════ */
+.mabat-layer-switcher {
+    font-family: var(--font-he);
     direction: rtl;
+    color: var(--text-primary);
 }
-.leaflet-control-layers-toggle {
-    background-image: none !important;
-    background-color: rgba(4, 8, 16, 0.95) !important;
-    color: var(--cyan) !important;
-    width: 32px !important;
-    height: 32px !important;
+.mls-toggle {
+    background: rgba(4, 8, 16, 0.95);
+    border: 1px solid var(--cyan-dim);
+    border-radius: 6px;
+    padding: 7px 12px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--cyan);
+    box-shadow: 0 0 15px rgba(0, 212, 255, 0.2);
+    backdrop-filter: blur(10px);
+    transition: all .15s;
+    user-select: none;
+}
+.mls-toggle:hover, .mls-toggle.active {
+    background: rgba(0, 212, 255, 0.12);
+    border-color: var(--cyan);
+}
+.mls-toggle .mls-icon { font-size: 14px; line-height: 1; }
+.mls-toggle .mls-label { letter-spacing: 1px; }
+.mls-panel {
+    margin-top: 6px;
+    background: rgba(4, 8, 16, 0.96);
+    border: 1px solid var(--cyan-dim);
+    border-radius: 6px;
+    padding: 10px 12px;
+    min-width: 190px;
+    backdrop-filter: blur(10px);
+    box-shadow: 0 0 20px rgba(0, 212, 255, 0.25);
+}
+.mls-section + .mls-section {
+    margin-top: 10px;
+    padding-top: 10px;
+    border-top: 1px dashed var(--cyan-dim);
+}
+.mls-section-title {
+    font-size: 9px;
+    font-weight: 700;
+    color: var(--cyan);
+    letter-spacing: 2px;
+    margin-bottom: 6px;
+    opacity: 0.8;
+    font-family: var(--font-mono);
+}
+.mls-row {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 4px 6px;
+    border-radius: 3px;
+    cursor: pointer;
+    font-size: 12px;
+    color: var(--text-primary);
+    transition: background .15s;
+    user-select: none;
+}
+.mls-row:hover {
+    background: rgba(0, 212, 255, 0.08);
+    color: var(--cyan);
+}
+.mls-radio, .mls-check {
+    width: 12px;
+    height: 12px;
+    border: 1.5px solid var(--cyan-dim);
+    flex-shrink: 0;
     position: relative;
+    transition: all .15s;
 }
-.leaflet-control-layers-toggle::before {
-    content: '☰';
+.mls-radio { border-radius: 50%; }
+.mls-check { border-radius: 2px; }
+.mls-radio.checked, .mls-check.checked {
+    border-color: var(--cyan);
+    background: rgba(0, 212, 255, 0.2);
+}
+.mls-radio.checked::after {
+    content: '';
+    position: absolute;
+    inset: 2px;
+    background: var(--cyan);
+    border-radius: 50%;
+    box-shadow: 0 0 4px var(--cyan);
+}
+.mls-check.checked::after {
+    content: '✓';
     position: absolute;
     inset: 0;
     display: flex;
     align-items: center;
     justify-content: center;
-    font-size: 18px;
-    color: var(--cyan);
-}
-.leaflet-control-layers-expanded {
-    padding: 10px 14px !important;
-    min-width: 180px;
-    font-size: 12px;
-}
-.leaflet-control-layers-expanded .leaflet-control-layers-list {
-    font-family: var(--font-he);
-}
-.leaflet-control-layers label {
-    display: flex !important;
-    align-items: center;
-    gap: 6px;
-    margin: 4px 0 !important;
-    cursor: pointer;
-    color: var(--text-primary);
-    font-size: 12px;
-    line-height: 1.4;
-    padding: 3px 4px;
-    border-radius: 3px;
-    transition: background .15s;
-}
-.leaflet-control-layers label:hover {
-    background: rgba(0, 212, 255, 0.08);
-    color: var(--cyan);
-}
-.leaflet-control-layers input[type="radio"],
-.leaflet-control-layers input[type="checkbox"] {
-    accent-color: var(--cyan);
-    cursor: pointer;
-    margin: 0 !important;
-    width: 14px;
-    height: 14px;
-    flex-shrink: 0;
-}
-.leaflet-control-layers-separator {
-    border-top: 1px solid var(--cyan-dim) !important;
-    margin: 6px 0 !important;
-    opacity: 0.5;
-}
-.leaflet-control-layers-base > label:first-child::before {
-    content: 'שכבת רקע';
-    display: block;
-    font-size: 9px;
-    color: var(--cyan);
-    letter-spacing: 1px;
+    font-size: 10px;
     font-weight: 700;
-    margin-bottom: 4px;
-    opacity: 0.7;
+    color: var(--cyan);
+    line-height: 1;
 }
-.leaflet-control-layers-overlays > label:first-child::before {
-    content: 'שכבות על';
-    display: block;
-    font-size: 9px;
-    color: var(--yellow);
-    letter-spacing: 1px;
-    font-weight: 700;
-    margin-bottom: 4px;
-    opacity: 0.7;
-}
-.leaflet-bar a {
-    background: transparent !important;
-    color: var(--cyan) !important;
-    border-bottom: 1px solid var(--cyan-dim) !important;
-    font-family: var(--font-mono) !important;
-    font-size: 11px !important;
-    font-weight: 700;
-    transition: background .15s;
-}
-.leaflet-bar a:last-child { border-bottom: none !important; }
-.leaflet-bar a:hover {
-    background: rgba(0, 212, 255, 0.15) !important;
-    color: var(--cyan) !important;
-}
+.mls-text { flex: 1; }
 .leaflet-container a { color: var(--cyan); }
 
 /* ═══════ ARREST PLANNER ═══════ */
@@ -3137,6 +3138,162 @@ function buildLocationPopup(loc, priority, color) {
     `</div>`;
 }
 
+// ═══════ CUSTOM LAYER SWITCHER — תואם לעיצוב המערכת ═══════
+function buildCustomLayerSwitcher(cfg) {
+    const container = L.DomUtil.create('div', 'mabat-layer-switcher');
+    container.innerHTML = `
+        <div class="mls-toggle" id="mlsToggle">
+            <span class="mls-icon">☰</span>
+            <span class="mls-label">שכבות</span>
+        </div>
+        <div class="mls-panel" id="mlsPanel">
+            <div class="mls-section">
+                <div class="mls-section-title">שכבת רקע</div>
+                <div class="mls-items" id="mlsBase"></div>
+            </div>
+            <div class="mls-section">
+                <div class="mls-section-title">שכבות על</div>
+                <div class="mls-items" id="mlsOverlays"></div>
+            </div>
+        </div>
+    `;
+
+    const ctl = L.control({ position: 'topright' });
+    ctl.onAdd = () => {
+        L.DomEvent.disableClickPropagation(container);
+        L.DomEvent.disableScrollPropagation(container);
+        return container;
+    };
+    ctl.addTo(map);
+
+    // build base layers (radio)
+    const baseHost = container.querySelector('#mlsBase');
+    cfg.base.forEach((opt, i) => {
+        const row = document.createElement('label');
+        row.className = 'mls-row';
+        row.innerHTML = `
+            <span class="mls-radio${opt.active ? ' checked' : ''}"></span>
+            <span class="mls-text">${opt.name}</span>
+        `;
+        row.onclick = () => {
+            cfg.base.forEach(o => { if (o.layer !== opt.layer && map.hasLayer(o.layer)) map.removeLayer(o.layer); });
+            if (!map.hasLayer(opt.layer)) opt.layer.addTo(map);
+            baseHost.querySelectorAll('.mls-radio').forEach(r => r.classList.remove('checked'));
+            row.querySelector('.mls-radio').classList.add('checked');
+        };
+        baseHost.appendChild(row);
+    });
+
+    // overlays (checkbox)
+    const ovHost = container.querySelector('#mlsOverlays');
+    cfg.overlays.forEach(opt => {
+        const row = document.createElement('label');
+        row.className = 'mls-row';
+        row.innerHTML = `
+            <span class="mls-check${opt.active ? ' checked' : ''}"></span>
+            <span class="mls-text">${opt.name}</span>
+        `;
+        if (opt.active && !map.hasLayer(opt.layer)) opt.layer.addTo(map);
+        row.onclick = () => {
+            const on = map.hasLayer(opt.layer);
+            if (on) map.removeLayer(opt.layer);
+            else opt.layer.addTo(map);
+            row.querySelector('.mls-check').classList.toggle('checked', !on);
+        };
+        ovHost.appendChild(row);
+    });
+
+    // toggle open/close
+    const toggle = container.querySelector('#mlsToggle');
+    const panel = container.querySelector('#mlsPanel');
+    let open = false;
+    toggle.onclick = () => {
+        open = !open;
+        panel.style.display = open ? 'block' : 'none';
+        toggle.classList.toggle('active', open);
+    };
+    panel.style.display = 'none';
+}
+
+// ═══════ OSM PLACES LOADER (דינמי, ללא hardcoded) ═══════
+// טוען כפרים/ערים/ישובים בגזרה ישירות מ-OSM Overpass API.
+// סיווג לפי שפת השם: עברי = ישוב ישראלי (כחול), ערבי = כפר ערבי (כתום).
+async function loadOsmPlaces() {
+    const CACHE_KEY = 'mabat443-osm-places-v1';
+    const TTL = 14 * 24 * 3600 * 1000;
+    const bbox = `${SECTOR_CENTER.lat - 0.18},${SECTOR_CENTER.lng - 0.22},${SECTOR_CENTER.lat + 0.18},${SECTOR_CENTER.lng + 0.22}`;
+
+    function render(places) {
+        places.forEach(p => {
+            const isHebrew = /[\u0590-\u05FF]/.test(p.name);
+            const isArabic = /[\u0600-\u06FF]/.test(p.name);
+            const isCity = p.place === 'city';
+            // ערים גדולות (רמאללה, ירושלים) — גודל מיוחד
+            let color, radius, tooltipName;
+            if (isHebrew) {
+                color = '#4488ff'; // ישוב ישראלי
+                radius = isCity ? 8 : 4.5;
+            } else if (isArabic) {
+                color = '#ff8800'; // כפר ערבי
+                radius = isCity ? 8 : 4.5;
+            } else {
+                color = '#ccc';
+                radius = 3;
+            }
+            tooltipName = p.nameHe || p.name;
+            L.circleMarker([p.lat, p.lng], {
+                radius: radius,
+                color: '#0a0a0a',
+                weight: 1,
+                fillColor: color,
+                fillOpacity: isCity ? 0.9 : 0.85
+            }).bindTooltip(tooltipName, { className: 'dark-tooltip', direction: 'right', offset: [6, 0] })
+              .addTo(map);
+        });
+        console.log(`📍 OSM places: ${places.length} rendered`);
+    }
+
+    // cache
+    try {
+        const cached = JSON.parse(localStorage.getItem(CACHE_KEY) || 'null');
+        if (cached && (Date.now() - cached.ts) < TTL) {
+            render(cached.places);
+            return;
+        }
+    } catch (e) {}
+
+    const query = `[out:json][timeout:25];
+(
+  node["place"~"^(city|town|village|suburb)$"](${bbox});
+);
+out;`;
+    try {
+        const res = await fetch('https://overpass-api.de/api/interpreter?data=' + encodeURIComponent(query),
+                                { signal: AbortSignal.timeout(20000) });
+        if (!res.ok) throw new Error('Overpass ' + res.status);
+        const data = await res.json();
+        const places = (data.elements || [])
+            .filter(el => el.tags && el.tags.name)
+            .map(el => ({
+                lat: el.lat,
+                lng: el.lon,
+                name: el.tags.name,
+                nameHe: el.tags['name:he'] || null,
+                nameAr: el.tags['name:ar'] || null,
+                place: el.tags.place
+            }));
+        localStorage.setItem(CACHE_KEY, JSON.stringify({ ts: Date.now(), places }));
+        render(places);
+    } catch (e) {
+        console.warn('OSM places load failed:', e.message);
+    }
+}
+
+window.clearOsmCache = function() {
+    localStorage.removeItem('mabat443-osm-places-v1');
+    console.log('✅ OSM cache cleared. Reload to refetch.');
+};
+
 // ═══════ SECURITY FENCE LOADER ═══════
 // 3 שכבות:
 // 1) override ידני (GeoJSON ב-localStorage תחת mabat443-fence-custom)
@@ -3911,21 +4068,21 @@ function initMap() {
     closuresLayer.addTo(map);
     loadClosures(closuresLayer);
 
-    L.control.layers(
-        {
-            'תצ"א (לוויין)': satLayer,
-            'מפה טופוגרפית 1:50,000': topoLayer,
-            'מפת רחובות': streetLayer,
-            'מפה עירונית (כהה)': urbanLayer,
-        },
-        {
-            'שמות ישובים': labelsOverlay,
-            'גדר המערכת': fenceLayer,
-            'מחסומים וחסימות': closuresLayer,
-            'כיסוי Mapillary': mapillaryCoverage,
-        },
-        { position: 'topright', collapsed: true }
-    ).addTo(map);
+    // בוחר שכבות מותאם — לא L.control.layers (שמגיע עם styling לבן דיפולטי)
+    buildCustomLayerSwitcher({
+        base: [
+            { name: 'תצ"א לוויין', layer: satLayer, active: true },
+            { name: 'טופוגרפית 1:50K', layer: topoLayer },
+            { name: 'רחובות', layer: streetLayer },
+            { name: 'עירונית כהה', layer: urbanLayer },
+        ],
+        overlays: [
+            { name: 'שמות ישובים', layer: labelsOverlay, active: true },
+            { name: 'גדר המערכת', layer: fenceLayer, active: true },
+            { name: 'מחסומים וחסימות', layer: closuresLayer, active: true },
+            { name: 'כיסוי Mapillary', layer: mapillaryCoverage },
+        ]
+    });
 
     // ═══════ Mapillary click-to-view (right-click opens Street View at point) ═══════
     map.on('contextmenu', (e) => {
@@ -4007,49 +4164,18 @@ function initMap() {
         fillOpacity: 0.5, weight: 2, className: 'sector-center-dot'
     }).addTo(map);
 
-    // ═══════ OUTSIDE SECTOR - CITIES ═══════
-    CITIES_OUTSIDE.forEach(loc => {
-        const isArab = ['רמאללה', 'אל-בירה', 'בית ג\'אלה'].includes(loc.he);
-        const color = isArab ? '#ff6644' : '#ffffff';
-        L.circleMarker([loc.lat, loc.lng], {
-            radius: 9, color: color, fillColor: color, fillOpacity: 0.2, weight: 2,
-            className: 'marker-3d marker-city'
-        }).bindTooltip(loc.he, { className: 'dark-tooltip', direction: 'right', offset: [8, 0] })
-          .addTo(map);
-    });
+    // CITIES_OUTSIDE + ARAB_OUTSIDE רנדור הוסר — נטענים דינמית מ-OSM.
 
-    // ═══════ OUTSIDE SECTOR - ARAB VILLAGES ═══════
-    ARAB_OUTSIDE.forEach(loc => {
-        L.circleMarker([loc.lat, loc.lng], {
-            radius: 5, color: '#ff6644', fillColor: '#ff6644', fillOpacity: 0.25, weight: 1,
-            className: 'marker-3d marker-outside'
-        }).bindTooltip(loc.he, { className: 'dark-tooltip', direction: 'right', offset: [8, 0] })
-          .bindPopup(buildLocationPopup(loc, 'כפר (מחוץ לגזרה)', '#ff6644'), { className: 'dark-tooltip', maxWidth: 280 })
-          .addTo(map);
-    });
+    // כפרים + ישובים נטענים דינמית מ-OSM (Overpass) — המיקומים
+    // מדויקים 1:1 למה שנראה במפה. P1/P2/ISRAELI_LOCATIONS עדיין
+    // משמשים לסינון newsData בלבד, לא לסימון על המפה.
+    loadOsmPlaces();
 
-    // P1/P2/P3 markers הוסרו — מוצגים רק KEY_VILLAGES (ערבים) +
-    // ISRAELI_LOCATIONS + מחסומי OCHA. P1/P2/P3 עדיין משמשים
-    // לסינון ב-newsData (לא למפה).
+    // ISRAELI_LOCATIONS רנדור הוסר — נטען דינמית מ-OSM.
 
-    // ═══════ ISRAELI SETTLEMENTS - כחול ═══════
-    ISRAELI_LOCATIONS.forEach(loc => {
-        const isOutside = loc.outside;
-        const fillOp = isOutside ? 0.45 : 0.8;
-        const r = isOutside ? 4 : 5.5;
-        L.circleMarker([loc.lat, loc.lng], {
-            radius: r,
-            color: '#0a1a40',
-            weight: 1,
-            fillColor: '#4488ff',
-            fillOpacity: fillOp
-        }).bindTooltip(loc.he, { className: 'dark-tooltip', direction: 'right', offset: [8, 0] })
-          .bindPopup(buildLocationPopup(loc, isOutside ? 'ישוב (מחוץ לגזרה)' : 'ישוב ישראלי', '#4488ff'), { className: 'dark-tooltip', maxWidth: 280 })
-          .addTo(map);
-    });
-
-    // KEY VILLAGES - orange with 3D glow, rich popups on click
-    KEY_VILLAGES.forEach(loc => {
+    // KEY VILLAGES הוסרו מהרנדור. רק לעיון בקוד עתידי אם יחזור.
+    const _KEY_VILLAGES_DISABLED = [];
+    _KEY_VILLAGES_DISABLED.forEach(loc => {
         const pColor = '#ff8800';
         const marker = L.circleMarker([loc.lat, loc.lng], {
             radius: 5.5,
