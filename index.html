@@ -832,6 +832,22 @@ body {
     box-shadow: 0 0 6px var(--purple);
 }
 
+.conf-filter {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 2px 8px;
+    background: rgba(0, 212, 255, 0.06);
+    border: 1px solid var(--cyan-dim);
+    border-radius: 3px;
+    font-size: 10px;
+    color: var(--text-secondary);
+    font-family: var(--font-he);
+}
+.conf-filter-label { color: var(--text-dim); white-space: nowrap; }
+.conf-filter input[type="range"] { width: 70px; accent-color: var(--cyan); cursor: pointer; }
+.conf-filter-val { font-family: var(--font-mono); color: var(--cyan); font-weight: 700; min-width: 26px; text-align: left; }
+
 .search-input {
     flex: 1;
     max-width: 220px;
@@ -2783,6 +2799,11 @@ document.getElementById('loginInput').addEventListener('keydown', function(e) {
             <button class="filter-chip purple" data-filter="anarchist" onclick="setFilter('anarchist', this)">אנרכיסטים</button>
             <button class="filter-chip green" data-filter="field" onclick="setFilter('field', this)">שטח</button>
             <button class="filter-chip" data-filter="false" onclick="setFilter('false', this)" style="border-color:#888;color:#888;">שגוי</button>
+            <label class="conf-filter" title="הסתר דיווחים שאמינותם פחות מ-X%">
+                <span class="conf-filter-label">אמינות מינ׳:</span>
+                <input type="range" id="confFilter" min="0" max="90" step="5" value="0" oninput="updateConfFilter()">
+                <span id="confFilterVal" class="conf-filter-val">0%</span>
+            </label>
             <input type="text" class="search-input" id="searchInput" placeholder="חיפוש..." oninput="applyFilters()">
         </div>
         <div class="timeline-graph">
@@ -3084,6 +3105,15 @@ let allNewsData = {};
 let summaryData = null;
 let metaData = null;
 let activeFilter = 'all';
+let minConfidence = 0;
+function updateConfFilter() {
+    const el = document.getElementById('confFilter');
+    const valEl = document.getElementById('confFilterVal');
+    if (!el) return;
+    minConfidence = Number(el.value) / 100;
+    if (valEl) valEl.textContent = Math.round(minConfidence * 100) + '%';
+    if (typeof applyFilters === 'function') applyFilters();
+}
 let historyFilter = 'all';
 let knownIds = new Set();
 let _unreadSinceHidden = 0;
@@ -4749,6 +4779,14 @@ function renderAlerts() {
         items = items.filter(i => { const aid = i.id || i.timestamp; return aid && alertVotes[aid] && alertVotes[aid].vote === 'dislike'; });
     } else if (activeFilter !== 'all') {
         items = items.filter(i => i.urgency === activeFilter);
+    }
+    // סינון לפי ביטחון (רק אם נקבע סף)
+    if (minConfidence > 0) {
+        items = items.filter(i => {
+            // אם אין confidence על הפריט, נחשב אותו כ-0.6 (ברירת מחדל נייטרלית)
+            const c = typeof i.confidence === 'number' ? i.confidence : 0.6;
+            return c >= minConfidence;
+        });
     }
     if (searchText) {
         items = items.filter(i =>
