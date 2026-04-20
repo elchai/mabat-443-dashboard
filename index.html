@@ -1039,6 +1039,19 @@ body {
     color: var(--cyan);
     font-family: var(--font-mono);
 }
+.ai-chips { display: flex; flex-wrap: wrap; gap: 3px; }
+.ai-chip {
+    display: inline-block;
+    padding: 1px 6px;
+    background: rgba(168, 85, 247, 0.12);
+    border: 1px solid rgba(168, 85, 247, 0.4);
+    border-radius: 3px;
+    font-size: 10px;
+    color: #d8b4fe;
+}
+.ai-chip.loc { background: rgba(0,212,255,.1); border-color: var(--cyan-dim); color: var(--cyan); }
+.ai-chip.time { background: rgba(255,208,0,.1); border-color: var(--yellow-dim); color: var(--yellow); }
+.ai-chip.act { background: rgba(0,0,0,.3); border-color: var(--border-primary); color: var(--text-secondary); }
 .alert-origtext {
     margin-top: 8px;
     padding-top: 8px;
@@ -5034,6 +5047,20 @@ function alertExpandedDetails(item) {
     if (item.sourceCount && item.sourceCount >= 2) {
         const srcs = (item.corroboratingSources || []).slice(0, 5).map(s => escapeHtml(s)).join(' · ');
         rows.push(['מאומת ע״י', `<span style="color:#00ff88;font-weight:700;">${item.sourceCount} מקורות</span>${srcs ? '<br><span style="font-size:10px;opacity:.75;">' + srcs + '</span>' : ''}`]);
+    }
+    // AI extract (Gemini) — ניתוח סמנטי מתקדם
+    if (item.aiExtract && typeof item.aiExtract === 'object') {
+        const ai = item.aiExtract;
+        const parts = [];
+        if (ai.event_type) parts.push(`<span class="ai-chip">${escapeHtml(ai.event_type)}</span>`);
+        if (ai.location) parts.push(`<span class="ai-chip loc">📍 ${escapeHtml(ai.location)}</span>`);
+        if (ai.time_ref) parts.push(`<span class="ai-chip time">⏱ ${escapeHtml(ai.time_ref)}</span>`);
+        if (Array.isArray(ai.actors) && ai.actors.length) {
+            ai.actors.slice(0, 4).forEach(a => parts.push(`<span class="ai-chip act">${escapeHtml(a)}</span>`));
+        }
+        if (parts.length) {
+            rows.push(['ניתוח AI', `<div class="ai-chips">${parts.join('')}</div>`]);
+        }
     }
     const publishedAt = item.publishedAt || item.timestamp;
     if (publishedAt) rows.push(['פורסם', escapeHtml(formatDateTime(publishedAt))]);
