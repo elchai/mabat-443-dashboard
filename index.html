@@ -1976,11 +1976,19 @@ body {
 .arrest-entrance-icon:active { cursor: grabbing; }
 .arrest-entrance-head {
     width: 18px; height: 18px; border-radius: 50%;
-    background: #ffd000; color: #040810;
+    color: #040810;
     font-weight: 900; font-family: 'Share Tech Mono', monospace; font-size: 10px;
     display: flex; align-items: center; justify-content: center;
-    border: 2px solid #040810; box-shadow: 0 0 6px #ffd000;
+    border: 2px solid #040810;
     user-select: none;
+}
+.arrest-entrance-head.entrance { box-shadow: 0 0 6px #ffd000; }
+.arrest-entrance-head.side {
+    width: 14px; height: 14px; font-size: 9px;
+    opacity: 0.85;
+    border-width: 1px;
+    box-shadow: 0 0 3px rgba(0,0,0,.5);
+    color: #fff;
 }
 
 /* ═══════ ARREST ENTRANCE PICKER ═══════ */
@@ -4148,47 +4156,72 @@ function offsetFromTarget(deg, distM) {
     return [lat + dLat, arrestState.target.lng + dLng];
 }
 
+// 4 פאות הבית — 6 תמיד הכניסה (drag לסיבוב), 12=אחור, 3=ימין, 9=שמאל
 function arrestRenderTargetWedge() {
     if (arrestState.targetWedge) {
         arrestState.targetWedge.forEach(l => map.removeLayer(l));
         arrestState.targetWedge = null;
     }
     if (!arrestState.target) return;
-    const deg = arrestState.targetEntranceDeg;
-    const OFFSET_M = 18; // צמוד הרבה יותר לבית (היה 40מ')
-    const [tipLat, tipLng] = offsetFromTarget(deg, OFFSET_M);
-    const hour = degToHour(deg);
-    arrestState.targetEntrance = hour;
+    const OFFSET_M = 18;
+    const sixDeg = arrestState.targetEntranceDeg;
+    arrestState.targetEntrance = 6;
 
-    const line = L.polyline([[arrestState.target.lat, arrestState.target.lng], [tipLat, tipLng]], {
-        color: '#ffd000', weight: 2.5, opacity: 0.95, lineCap: 'round'
-    }).addTo(map);
+    // 4 פאות: 6=sixDeg, 3=sixDeg-90, 12=sixDeg-180, 9=sixDeg+90
+    const faces = [
+        { label: '6', delta: 0,   color: '#ffd000', isDraggable: true,  className: 'entrance' }, // כניסה
+        { label: '3', delta: -90, color: '#00d4ff', isDraggable: false, className: 'side' },    // ימין
+        { label: '12', delta: -180, color: '#9ab0c8', isDraggable: false, className: 'side' },  // אחור
+        { label: '9', delta: 90,  color: '#00d4ff', isDraggable: false, className: 'side' },    // שמאל
+    ];
 
-    const head = L.marker([tipLat, tipLng], {
-        draggable: true,
-        icon: L.divIcon({
-            className: 'arrest-entrance-icon',
-            html: `<div class="arrest-entrance-head">${hour}</div>`,
-            iconSize: [18, 18], iconAnchor: [9, 9]
-        })
-    }).addTo(map);
-    head.bindTooltip(`כיוון פתח — גרור לסיבוב (${hour} · ${Math.round(deg)}°)`, { direction: 'top', className: 'dark-tooltip' });
+    const layers = [];
+    const line = L.polyline(
+        [[arrestState.target.lat, arrestState.target.lng], [...offsetFromTarget(sixDeg, OFFSET_M)]],
+        { color: '#ffd000', weight: 2.5, opacity: 0.95, lineCap: 'round' }
+    ).addTo(map);
+    layers.push(line);
 
-    head.on('drag', (ev) => {
+    const markers = {};
+    faces.forEach(f => {
+        const ang = ((sixDeg + f.delta) % 360 + 360) % 360;
+        const [la, lo] = offsetFromTarget(ang, OFFSET_M);
+        const m = L.marker([la, lo], {
+            draggable: f.isDraggable,
+            interactive: f.isDraggable,
+            icon: L.divIcon({
+                className: 'arrest-entrance-icon',
+                html: `<div class="arrest-entrance-head ${f.className}" style="background:${f.color};">${f.label}</div>`,
+                iconSize: [18, 18], iconAnchor: [9, 9]
+            })
+        }).addTo(map);
+        if (f.isDraggable) {
+            m.bindTooltip(`כניסה לבית — גרור לסיבוב (שעה 6 · ${Math.round(sixDeg)}°)`, { direction: 'top', className: 'dark-tooltip' });
+        }
+        markers[f.label] = m;
+        layers.push(m);
+    });
+
+    // Drag handler על "6" — כל השאר עוקבים
+    const six = markers['6'];
+    six.on('drag', (ev) => {
         const ll = ev.target.getLatLng();
         const newDeg = bearingDeg(arrestState.target, { lat: ll.lat, lng: ll.lng });
         arrestState.targetEntranceDeg = newDeg;
+        // snap "6" חזרה לרדיוס הקבוע
         const [nl, ng] = offsetFromTarget(newDeg, OFFSET_M);
         ev.target.setLatLng([nl, ng]);
         line.setLatLngs([[arrestState.target.lat, arrestState.target.lng], [nl, ng]]);
-        const h = degToHour(newDeg);
-        arrestState.targetEntrance = h;
-        const headEl = head.getElement()?.querySelector('.arrest-entrance-head');
-        if (headEl) headEl.textContent = h;
-        head.setTooltipContent(`כיוון פתח — גרור לסיבוב (${h} · ${Math.round(newDeg)}°)`);
+        // סיבוב של 3, 12, 9 יחד
+        faces.slice(1).forEach(f => {
+            const ang = ((newDeg + f.delta) % 360 + 360) % 360;
+            const [la, lo] = offsetFromTarget(ang, OFFSET_M);
+            markers[f.label].setLatLng([la, lo]);
+        });
+        six.setTooltipContent(`כניסה לבית — גרור לסיבוב (שעה 6 · ${Math.round(newDeg)}°)`);
     });
 
-    arrestState.targetWedge = [line, head];
+    arrestState.targetWedge = layers;
 }
 
 function arrestAddStart(lat, lng) {
