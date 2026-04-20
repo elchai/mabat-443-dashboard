@@ -2319,11 +2319,35 @@ body {
 .arrest-mode label {
     display: inline-flex;
     align-items: center;
-    gap: 4px;
+    gap: 6px;
     color: var(--text-primary);
     cursor: pointer;
+    flex: 1;
+    justify-content: center;
+    padding: 4px 6px;
+    border-radius: 2px;
+    transition: background 0.15s ease;
 }
+.arrest-mode label:hover { background: rgba(0,212,255,0.08); }
 .arrest-mode input[type="radio"] { accent-color: var(--cyan); margin: 0; }
+.arrest-mode .mode-icon {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 28px; height: 28px;
+    border-radius: 50%;
+    background: radial-gradient(circle at 50% 30%, rgba(0,212,255,0.15) 0%, rgba(4,8,16,0.95) 70%);
+    border: 1px solid rgba(0,212,255,0.35);
+    box-shadow: inset 0 1px 0 rgba(0,212,255,0.15), 0 1px 2px rgba(0,0,0,0.5);
+    color: var(--cyan);
+    transition: all 0.15s ease;
+}
+.arrest-mode label:has(input:checked) .mode-icon {
+    border-color: var(--cyan);
+    box-shadow: inset 0 0 8px rgba(0,212,255,0.25), 0 0 8px rgba(0,212,255,0.3);
+    color: #fff;
+}
+.arrest-mode .mode-icon svg { width: 16px; height: 16px; }
 .arrest-info {
     font-family: var(--font-mono);
     font-size: 11px;
@@ -3605,8 +3629,8 @@ window.tacticalAlert = function(message, opts) {
                     <input type="text" id="arrestTargetName" placeholder="לדוגמה: בית המבוקש" oninput="arrestUpdateTargetName()">
                 </div>
                 <div class="arrest-mode">
-                    <label><input type="radio" name="arrestTravelMode" value="foot" checked onchange="arrestSetTravelMode('foot')"> <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-2px;"><circle cx="12" cy="4" r="2"/><path d="M9 8l3 4 3-4"/><path d="M12 12v6l-3 4"/><path d="M12 18l3 4"/></svg> רגלית</label>
-                    <label><input type="radio" name="arrestTravelMode" value="vehicle" onchange="arrestSetTravelMode('vehicle')"> <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-2px;"><path d="M3 17h2v-6l2-4h10l2 4v6h2"/><rect x="5" y="11" width="14" height="6" rx="1"/><circle cx="8" cy="17.5" r="1.5"/><circle cx="16" cy="17.5" r="1.5"/></svg> רכובה</label>
+                    <label><input type="radio" name="arrestTravelMode" value="foot" checked onchange="arrestSetTravelMode('foot')"> <span class="mode-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="13" cy="4" r="1.8"/><path d="M15 8l-3 3 2 3 2-1"/><path d="M12 11l-3 2 2 4-3 4"/><path d="M14 14l2 4 3-1"/></svg></span> רגלית</label>
+                    <label><input type="radio" name="arrestTravelMode" value="vehicle" onchange="arrestSetTravelMode('vehicle')"> <span class="mode-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M2 15h2M22 15h-2"/><path d="M4 15v-3l2-4h4l1-2h4l2 3h2l1 3v3"/><path d="M3 15h18"/><circle cx="7" cy="17" r="1.8"/><circle cx="17" cy="17" r="1.8"/></svg></span> רכובה</label>
                 </div>
                 <div id="arrestInfo" class="arrest-info"></div>
                 <div class="arrest-actions">
