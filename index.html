@@ -5702,11 +5702,11 @@ function arrestUpdateTargetName() {
 function arrestUpdateExportLinks() {
     if (!arrestState.target || !arrestState.startPoint) return;
     const t = arrestState.target, s = arrestState.startPoint;
-    const name = arrestState.targetName || 'מטרה';
-    const nameEnc = encodeURIComponent(name.replace(/\s+/g, '+'));
-    // Target pin on Google Maps
+    // Target pin on Google Maps — pure coord query always drops a pin at exact location.
     const gmaps = document.getElementById('arrestGmaps');
-    if (gmaps) gmaps.href = `https://www.google.com/maps/place/${nameEnc}/@${t.lat},${t.lng},18z/data=!3m1!1e3`;
+    if (gmaps) {
+        gmaps.href = `https://www.google.com/maps/search/?api=1&query=${t.lat.toFixed(6)},${t.lng.toFixed(6)}`;
+    }
     // Directions — use API v1 with travelmode synced to planner's mode, waypoints as pipe-separated.
     // Google caps waypoints at ~8 and goes weird past that → downsample if user placed many.
     const gmapsDir = document.getElementById('arrestGmapsDir');
