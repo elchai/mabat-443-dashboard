@@ -2978,6 +2978,7 @@ body {
         align-items: center;
         gap: 8px;
         flex-shrink: 0;
+        order: -1 !important;  /* visual right in RTL (where the drawer slides in from) */
     }
     .header-right > div:first-child { display: none; }  /* Hide clock/date on mobile — reduce clutter */
     .clock { font-size: 16px !important; }
@@ -2994,8 +2995,16 @@ body {
         align-items: center;
         justify-content: center;
         margin: 0 !important;
+        order: -1 !important;  /* Force to visual-right side in RTL (same side as the drawer's origin) */
     }
     .sidebar-mobile-toggle:hover { background: rgba(0,212,255,0.18); }
+    /* Sidebar drawer + overlay must stack above the Leaflet map (which uses z-index up to 700) */
+    .sidebar {
+        z-index: 10000 !important;
+    }
+    .sidebar-overlay {
+        z-index: 9999 !important;
+    }
     .sidebar {
         position: fixed !important;
         top: 0; right: 0; bottom: 0;
