@@ -2783,6 +2783,7 @@ document.getElementById('loginInput').addEventListener('keydown', function(e) {
                 </div>
                 <div class="arrest-exports" id="arrestExports" style="display:none;">
                     <a href="#" id="arrestGmaps" target="_blank">📍 Google Maps</a>
+                    <a href="#" id="arrestWhatsApp" target="_blank">📱 שלח ב-WhatsApp</a>
                     <button onclick="arrestCopyText()">📋 העתק תקציר</button>
                     <button onclick="arrestSaveLocal()">💾 שמור מקומי</button>
                 </div>
@@ -4204,6 +4205,18 @@ async function arrestFinish() {
     const start = arrestState.startPoint;
     const wpStr = arrestState.waypoints.map(w => `/${w.lat},${w.lng}`).join('');
     document.getElementById('arrestGmaps').href = `https://www.google.com/maps/dir/${start.lat},${start.lng}${wpStr}/${tgt.lat},${tgt.lng}`;
+
+    // WhatsApp briefing link — תוכנית מלאה כטקסט
+    const waLines = [
+        '🎯 *תכנון מעצר – מבט 443*',
+        `🏠 יעד: ${tgt.lat.toFixed(5)}, ${tgt.lng.toFixed(5)} (פתח שעה ${arrestState.targetEntrance || 6})`,
+        `🟢 מוצא: ${start.lat.toFixed(5)}, ${start.lng.toFixed(5)}`,
+        `📏 ${(distanceM/1000).toFixed(2)} ק״מ · ⏱ ${Math.round(durationS/60)} דק׳`,
+        ...arrestState.waypoints.map((w, i) => `${i+1}. ${w.lat.toFixed(5)},${w.lng.toFixed(5)}${w.note ? ' – ' + w.note : ''}`),
+        `\n🗺 ${document.getElementById('arrestGmaps').href}`
+    ];
+    const waText = encodeURIComponent(waLines.join('\n'));
+    document.getElementById('arrestWhatsApp').href = `https://wa.me/?text=${waText}`;
 }
 
 function arrestClear(resetUI = true) {
