@@ -7721,6 +7721,7 @@ function renderHistory() {
 
     if (Object.keys(groups).length === 0) {
         body.innerHTML = '<div class="empty-state">אין רשומות תואמות</div>';
+        try { if (typeof historyInlineSync === 'function') historyInlineSync(); } catch(e) {}
         return;
     }
 
