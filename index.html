@@ -2410,6 +2410,39 @@ body {
     display:flex; flex-wrap:wrap; gap:6px;
     margin-bottom: 8px;
 }
+/* Activity-type segmented selector at top of planner */
+.activity-type-row {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 4px;
+    margin-bottom: 8px;
+    padding: 4px;
+    background: rgba(0,0,0,0.35);
+    border: 1px solid var(--cyan-dim);
+    border-radius: 3px;
+}
+.act-type-btn {
+    background: transparent;
+    border: 1px solid transparent;
+    color: var(--text-secondary);
+    padding: 6px 4px;
+    font-family: var(--font-he);
+    font-size: 10px;
+    letter-spacing: 1px;
+    cursor: pointer;
+    border-radius: 2px;
+    transition: all 0.15s ease;
+    text-transform: none;
+}
+.act-type-btn:hover { color: #fff; background: rgba(0,212,255,0.08); }
+.act-type-btn.active {
+    color: var(--cyan);
+    background: rgba(0,212,255,0.15);
+    border-color: var(--cyan-dim);
+    font-weight: 700;
+    box-shadow: inset 0 0 6px rgba(0,212,255,0.15);
+}
+
 /* Arrest actions: 2x2 grid — חשב ציר / התאם | מחק / שמור */
 .arrest-actions {
     display: grid !important;
@@ -3867,13 +3900,22 @@ window.tacticalAlert = function(message, opts) {
         <!-- Arrest Planner Panel -->
         <div id="arrestPanel" class="arrest-panel" style="display:none;">
             <div class="arrest-header">
-                <span style="display:inline-flex;align-items:center;gap:8px;"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="6"/><circle cx="12" cy="12" r="2" fill="currentColor"/><line x1="12" y1="2" x2="12" y2="5"/><line x1="12" y1="19" x2="12" y2="22"/><line x1="2" y1="12" x2="5" y2="12"/><line x1="19" y1="12" x2="22" y2="12"/></svg>תכנון מעצר</span>
+                <span id="arrestPanelTitle" style="display:inline-flex;align-items:center;gap:8px;"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="6"/><circle cx="12" cy="12" r="2" fill="currentColor"/></svg>תכנון מעצר</span>
                 <button onclick="toggleArrestPlanner()" class="arrest-close"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
             </div>
             <div class="arrest-body">
+                <div class="activity-type-row">
+                    <button type="button" class="act-type-btn active" data-type="arrest"   onclick="setActivityType('arrest')">מעצר</button>
+                    <button type="button" class="act-type-btn"        data-type="checkpoint" onclick="setActivityType('checkpoint')">מחסום</button>
+                    <button type="button" class="act-type-btn"        data-type="observation" onclick="setActivityType('observation')">תו״ס</button>
+                    <button type="button" class="act-type-btn"        data-type="ambush"    onclick="setActivityType('ambush')">מארב</button>
+                </div>
+                <div id="tusCircularRow" style="display:none;font-size:11px;margin-bottom:6px;padding:4px 8px;background:rgba(0,212,255,0.05);border:1px solid var(--cyan-dim);border-radius:3px;">
+                    <label style="display:inline-flex;align-items:center;gap:6px;cursor:pointer;"><input type="checkbox" id="tusCircular" onchange="arrestSetCircular(this.checked)" style="accent-color:var(--cyan);"> מסלול מעגלי (חזרה לנקודת כניסה)</label>
+                </div>
                 <div id="arrestStep" class="arrest-step">לחץ על המפה לסימון <b style="color:#ff0040;">מטרה</b></div>
                 <div class="arrest-name-row">
-                    <label>שם המטרה:</label>
+                    <label id="arrestTargetLabel">שם המטרה:</label>
                     <input type="text" id="arrestTargetName" placeholder="לדוגמה: בית המבוקש" oninput="arrestUpdateTargetName()">
                 </div>
                 <div class="arrest-mode">
@@ -5595,12 +5637,14 @@ function offsetFromTarget(deg, distM) {
 }
 
 // 4 פאות הבית — 6 תמיד הכניסה (drag לסיבוב), 12=אחור, 3=ימין, 9=שמאל
+// Only for 'arrest' activity type — checkpoint/ambush/observation don't use entrance markers
 function arrestRenderTargetWedge() {
     if (arrestState.targetWedge) {
         arrestState.targetWedge.forEach(l => map.removeLayer(l));
         arrestState.targetWedge = null;
     }
     if (!arrestState.target) return;
+    if (arrestState.activityType && arrestState.activityType !== 'arrest') return;
     const OFFSET_M = 13;
     const sixDeg = arrestState.targetEntranceDeg;
     arrestState.targetEntrance = 6;
@@ -5788,6 +5832,10 @@ async function arrestFinish() {
     // ציר ניווט = קווים ישרים בין הנקודות שסומנו (מוצא → נעץ → יעד)
     // אין OSRM — המשתמש שולט בציר על ידי מיקום נעץ.
     const pts = [arrestState.startPoint, ...arrestState.waypoints, arrestState.target];
+    // תו״ס מעגלי — מוסיף חזרה למוצא כקטע אחרון
+    if (arrestState.activityType === 'observation' && arrestState.tusCircular && arrestState.startPoint) {
+        pts.push(arrestState.startPoint);
+    }
     const routeCoords = pts.map(p => [p.lat, p.lng]);
     let distanceM = 0;
     for (let i = 1; i < pts.length; i++) distanceM += haversineMeters(pts[i - 1], pts[i]);
@@ -6103,6 +6151,9 @@ async function arrestSnapToRoads() {
 
     // Dedupe points (avoid OSRM round-tripping if user's waypoints duplicate start/target)
     const rawPts = [arrestState.startPoint, ...arrestState.waypoints, arrestState.target];
+    if (arrestState.activityType === 'observation' && arrestState.tusCircular) {
+        rawPts.push(arrestState.startPoint);
+    }
     const pts = [];
     const seen = new Set();
     for (const p of rawPts) {
@@ -6134,6 +6185,10 @@ async function arrestSnapToRoads() {
         if (!data.routes || !data.routes[0]) throw new Error('No route found');
         const route = data.routes[0];
         let coords = route.geometry.coordinates.map(c => [c[1], c[0]]);
+        // Skip trim for circular observation — full loop is the intended path
+        if (arrestState.activityType === 'observation' && arrestState.tusCircular) {
+            // keep full coords as-is
+        } else {
         // Trim everything past the target — two passes for robustness
         const tgt = arrestState.target;
         const mLat = 111000, mLng = 111000 * Math.cos(tgt.lat * Math.PI / 180);
@@ -6153,6 +6208,7 @@ async function arrestSnapToRoads() {
             coords.forEach((c, i) => { const d = distToTgt(c); if (d < bestDist) { bestDist = d; bestIdx = i; } });
             if (bestIdx < coords.length - 1) coords = coords.slice(0, bestIdx + 1);
         }
+        } // end if-not-circular
 
         // ניקוי מלא של הציר הקודם (פוליליין + תוויות המרחק)
         arrestClearRouteOnly();
@@ -6272,6 +6328,63 @@ async function arrestDeletePlan(idx) {
     plans.splice(idx, 1);
     localStorage.setItem('mabat443-arrest-plans', JSON.stringify(plans));
     arrestShowSavedPlans(); arrestShowSavedPlans(); // re-render
+}
+
+// ═══════ ACTIVITY TYPE (mission kind) ═══════
+// arrest      — מעצר (target + entrance direction 6/3/9/12)
+// checkpoint  — מחסום (target = checkpoint position, no entrance)
+// observation — תו״ס (no target; start=entry, last waypoint=exit; optional circular return)
+// ambush      — מארב (target = ambush position, no entrance)
+function activityLabels(type) {
+    const L = {
+        arrest:      { title: 'תכנון מעצר',    targetLabel: 'מטרה',         nameLabel: 'שם המטרה:',           placeholder: 'לדוגמה: בית המבוקש',  step: 'לחץ על המפה לסימון <b style="color:#ff0040;">מטרה</b>' },
+        checkpoint:  { title: 'תכנון מחסום',   targetLabel: 'נקודת מחסום', nameLabel: 'שם המחסום:',          placeholder: 'לדוגמה: מחסום הכניסה', step: 'לחץ על המפה לסימון <b style="color:#ffd000;">נקודת מחסום</b>' },
+        observation: { title: 'תכנון תו״ס',    targetLabel: 'נקודת יציאה', nameLabel: 'שם פעילות:',          placeholder: 'לדוגמה: תו״ס מערבי',   step: 'לחץ על המפה לסימון <b style="color:#00ff88;">נקודת כניסה</b>' },
+        ambush:      { title: 'תכנון מארב',    targetLabel: 'נקודת מארב',  nameLabel: 'שם המארב:',           placeholder: 'לדוגמה: מארב צפוני',    step: 'לחץ על המפה לסימון <b style="color:#ff0040;">נקודת מארב</b>' },
+    };
+    return L[type] || L.arrest;
+}
+function setActivityType(type) {
+    arrestState.activityType = type;
+    arrestState.tusCircular = (arrestState.tusCircular || false);
+    // Update selected button
+    document.querySelectorAll('.act-type-btn').forEach(b => b.classList.toggle('active', b.dataset.type === type));
+    // Update labels
+    const L = activityLabels(type);
+    const titleEl = document.getElementById('arrestPanelTitle');
+    if (titleEl) {
+        // Keep the icon, only swap the text (last text node)
+        const icon = titleEl.querySelector('svg');
+        titleEl.innerHTML = '';
+        if (icon) titleEl.appendChild(icon);
+        titleEl.appendChild(document.createTextNode(L.title));
+    }
+    const lbl = document.getElementById('arrestTargetLabel'); if (lbl) lbl.textContent = L.nameLabel;
+    const inp = document.getElementById('arrestTargetName'); if (inp) inp.placeholder = L.placeholder;
+    const tusRow = document.getElementById('tusCircularRow');
+    if (tusRow) tusRow.style.display = (type === 'observation') ? 'block' : 'none';
+    // Re-render markers: entrance wedge only for arrest
+    if (arrestState.targetWedge) {
+        arrestState.targetWedge.forEach(l => map.removeLayer(l));
+        arrestState.targetWedge = null;
+    }
+    if (type === 'arrest' && arrestState.target) arrestRenderTargetWedge();
+    // Update step message if at initial state
+    if (!arrestState.target) {
+        const step = document.getElementById('arrestStep');
+        if (step) step.innerHTML = L.step;
+    } else {
+        arrestUpdateStep();
+    }
+    // Refresh route/tooltips
+    if (arrestState.targetMarker) {
+        try { arrestState.targetMarker.setTooltipContent(arrestTooltipContent(L.targetLabel, false)); } catch(e){}
+    }
+    arrestRefreshRoute();
+}
+function arrestSetCircular(on) {
+    arrestState.tusCircular = !!on;
+    arrestRefreshRoute();
 }
 
 // ═══════ ARREST PLAN SESSION PERSISTENCE ═══════
