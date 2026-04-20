@@ -2225,6 +2225,24 @@ body {
     border-radius: 3px;
     font-size: 12px;
 }
+.arrest-mode {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 6px;
+    padding: 4px 6px;
+    background: rgba(0, 212, 255, 0.05);
+    border: 1px solid var(--cyan-dim);
+    border-radius: 3px;
+    font-size: 11px;
+}
+.arrest-mode label {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    color: var(--text-primary);
+    cursor: pointer;
+}
+.arrest-mode input[type="radio"] { accent-color: var(--cyan); margin: 0; }
 .arrest-info {
     font-family: var(--font-mono);
     font-size: 11px;
@@ -2861,6 +2879,10 @@ document.getElementById('loginInput').addEventListener('keydown', function(e) {
             </div>
             <div class="arrest-body">
                 <div id="arrestStep" class="arrest-step">לחץ על המפה לסימון <b style="color:#ff0040;">מטרה</b></div>
+                <div class="arrest-mode">
+                    <label><input type="radio" name="arrestTravelMode" value="foot" checked onchange="arrestSetTravelMode('foot')"> 🚶 רגלית</label>
+                    <label><input type="radio" name="arrestTravelMode" value="vehicle" onchange="arrestSetTravelMode('vehicle')"> 🚗 רכובה</label>
+                </div>
                 <div id="arrestInfo" class="arrest-info"></div>
                 <div class="arrest-actions">
                     <button onclick="arrestFinish()" id="arrestFinishBtn" disabled>חשב ציר ▶</button>
@@ -4026,6 +4048,7 @@ const arrestState = {
     target: null,           // בית המבוקש (יעד סופי)
     targetEntrance: 6,      // תאימות לאחור: שעה (1-12)
     targetEntranceDeg: 180,  // כיוון מעלות 0-360 (0=צפון, 90=מזרח, 180=דרום, 270=מערב)
+    travelMode: 'foot',     // 'foot' = רגלית (4 קמ"ש), 'vehicle' = רכובה (30 קמ"ש)
     startPoint: null,       // נקודת מוצא (יציאת הכוח)
     waypoints: [],          // נ״ד ביניים לניווט
     layers: [],
@@ -4362,7 +4385,7 @@ async function arrestFinish() {
     const routeCoords = pts.map(p => [p.lat, p.lng]);
     let distanceM = 0;
     for (let i = 1; i < pts.length; i++) distanceM += haversineMeters(pts[i - 1], pts[i]);
-    const durationS = distanceM / (30 * 1000 / 3600); // ~30 km/h ממוצע שטח
+    const durationS = distanceM / arrestSpeedMS();
 
     // קו סגול דק יחיד בלבד
     const routeInner = L.polyline(routeCoords, {
@@ -4401,7 +4424,7 @@ async function arrestFinish() {
     document.getElementById('arrestInfo').innerHTML = `
         🏠 יעד: <b>${arrestState.target.lat.toFixed(5)}, ${arrestState.target.lng.toFixed(5)}</b><br>
         🟢 מוצא: <b>${arrestState.startPoint.lat.toFixed(5)}, ${arrestState.startPoint.lng.toFixed(5)}</b><br>
-        📏 מרחק: <b>${(distanceM / 1000).toFixed(2)} ק״מ</b><br>
+        📏 מרחק: <b>${(distanceM / 1000).toFixed(2)} ק״מ</b> · ${arrestModeLabel()}<br>
         ⏱ זמן משוער: <b>${Math.round(durationS / 60)} דק׳</b><br>
         📍 נ״ד ביניים: <b>${arrestState.waypoints.length}</b>
     `;
@@ -4478,7 +4501,7 @@ function arrestCopyText() {
         '🎯 תכנון מעצר - מבט 443',
         `🏠 יעד: ${t.lat.toFixed(5)}, ${t.lng.toFixed(5)} (פתח שעה ${arrestState.targetEntrance || 6})`,
         s ? `🟢 נקודת מוצא: ${s.lat.toFixed(5)}, ${s.lng.toFixed(5)}` : '',
-        `📏 מרחק: ${(m.distanceM / 1000).toFixed(2)} ק״מ`,
+        `📏 מרחק: ${(m.distanceM / 1000).toFixed(2)} ק״מ · ${arrestModeLabel()}`,
         `⏱ זמן משוער: ${Math.round(m.durationS / 60)} דק׳`,
         wpLines.length ? `📍 נ״ד (${wpLines.length}):\n${wpLines.join('\n')}` : '',
         `Google Maps: https://www.google.com/maps?q=${t.lat},${t.lng}`,
@@ -4488,6 +4511,26 @@ function arrestCopyText() {
         step.innerHTML = '📋 הועתק ללוח';
         setTimeout(arrestUpdateStep, 1500);
     });
+}
+
+// החלפת מצב נסיעה — רגלית (4 קמ"ש) / רכובה (30 קמ"ש)
+function arrestSetTravelMode(mode) {
+    arrestState.travelMode = (mode === 'vehicle') ? 'vehicle' : 'foot';
+    // אם קיים ציר — חשב מחדש את הזמן
+    if (arrestState.routeMeta && arrestState.routeMeta.distanceM) {
+        const spdMS = (arrestState.travelMode === 'foot' ? 4 : 30) * 1000 / 3600;
+        arrestState.routeMeta.durationS = arrestState.routeMeta.distanceM / spdMS;
+        // רענון הטקסט
+        if (arrestState.target && arrestState.startPoint) {
+            arrestFinish();
+        }
+    }
+}
+function arrestSpeedMS() {
+    return (arrestState.travelMode === 'foot' ? 4 : 30) * 1000 / 3600;
+}
+function arrestModeLabel() {
+    return arrestState.travelMode === 'foot' ? '🚶 רגלית' : '🚗 רכובה';
 }
 
 // התאם את ציר המעצר לכבישים אמיתיים (OSRM open routing)
@@ -4533,13 +4576,15 @@ async function arrestSnapToRoads() {
             arrestState.routeLayers.push(lbl);
         }
 
+        // נחשב duration לפי מצב נסיעה (רגלית/רכובה) - OSRM נותן זמן נסיעה אבל אנחנו רוצים לפי ההקשר
+        const durOwn = route.distance / arrestSpeedMS();
         arrestState.routeCoords = coords;
-        arrestState.routeMeta = { distanceM: route.distance, durationS: route.duration };
+        arrestState.routeMeta = { distanceM: route.distance, durationS: durOwn };
 
         document.getElementById('arrestInfo').innerHTML = `
             🏠 יעד + 🟢 מוצא מוגדרים<br>
-            🛣 מרחק דרך כבישים: <b>${(route.distance/1000).toFixed(2)} ק״מ</b><br>
-            ⏱ זמן נסיעה: <b>${Math.round(route.duration/60)} דק׳</b><br>
+            🛣 מרחק דרך כבישים: <b>${(route.distance/1000).toFixed(2)} ק״מ</b> · ${arrestModeLabel()}<br>
+            ⏱ זמן משוער: <b>${Math.round(durOwn/60)} דק׳</b><br>
             📍 נ״ד ביניים: <b>${arrestState.waypoints.length}</b>
         `;
         step.innerHTML = '✅ ציר הותאם לכבישים';
