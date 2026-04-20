@@ -2940,6 +2940,7 @@ document.getElementById('loginInput').addEventListener('keydown', function(e) {
 <div class="history-overlay" id="historyOverlay">
     <div class="history-header">
         <div class="history-title">יומן מבצעים</div>
+        <button class="history-close" onclick="exportAlertsCsv()" style="margin-right:auto;background:transparent;border:1px solid var(--cyan);color:var(--cyan);" title="ייצוא CSV">📥 CSV</button>
         <button class="history-close" onclick="toggleHistory()">סגור ESC</button>
     </div>
     <div class="history-stat-bar" id="historyStats"></div>
@@ -4800,6 +4801,41 @@ function setFilter(level, btn) {
     if (btn) btn.classList.add('active');
     saveUserPrefs();
     renderAlerts();
+}
+
+// ═══════ CSV EXPORT ═══════
+function exportAlertsCsv() {
+    const items = Object.values(allNewsData || {});
+    if (!items.length) { alert('אין נתונים לייצוא'); return; }
+    items.sort((a, b) => (b.timestamp || 0) - (a.timestamp || 0));
+    const esc = v => {
+        if (v == null) return '';
+        const s = String(v).replace(/"/g, '""').replace(/[\r\n]+/g, ' ');
+        return /[",]/.test(s) ? `"${s}"` : s;
+    };
+    const header = ['timestamp','urgency','category','location','source','confidence','sourceCount','verified','title','summary'];
+    const rows = items.map(it => [
+        it.timestamp ? new Date(it.timestamp).toISOString() : '',
+        it.urgency || it.urgencyScore || '',
+        it.eventCategory || '',
+        it.locationHe || it.location || '',
+        it.source || '',
+        typeof it.confidence === 'number' ? (it.confidence).toFixed(2) : '',
+        it.sourceCount || 1,
+        it.verified ? 'true' : 'false',
+        it.title || '',
+        it.summary || ''
+    ].map(esc).join(','));
+    const csv = '\ufeff' + header.join(',') + '\n' + rows.join('\n'); // BOM כדי ש-Excel יקרא UTF-8
+    const blob = new Blob([csv], { type: 'text/csv;charset=utf-8' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    const d = new Date();
+    a.href = url;
+    a.download = `mabat443-alerts-${d.toISOString().slice(0,10)}-${String(d.getHours()).padStart(2,'0')}${String(d.getMinutes()).padStart(2,'0')}.csv`;
+    document.body.appendChild(a);
+    a.click();
+    setTimeout(() => { URL.revokeObjectURL(url); a.remove(); }, 500);
 }
 
 // ═══════ USER PREFERENCES (localStorage) ═══════
