@@ -1915,6 +1915,62 @@ body {
     border-radius: 2px;
 }
 
+/* ═══════ MAPILLARY VIEWER MODAL ═══════ */
+#mlyViewerOverlay {
+    position: fixed; inset: 0; z-index: 9999;
+    background: rgba(0, 0, 0, 0.85);
+    display: flex; align-items: center; justify-content: center;
+    backdrop-filter: blur(4px);
+}
+.mly-viewer-card {
+    width: min(1100px, 92vw);
+    height: min(750px, 88vh);
+    background: rgba(4, 8, 16, 0.98);
+    border: 1px solid #05CB63;
+    box-shadow: 0 0 40px rgba(5, 203, 99, 0.3);
+    display: flex; flex-direction: column;
+    overflow: hidden;
+}
+.mly-viewer-header {
+    display: flex; justify-content: space-between; align-items: center;
+    padding: 8px 14px;
+    background: rgba(5, 203, 99, 0.1);
+    border-bottom: 1px solid rgba(5, 203, 99, 0.3);
+    font-family: var(--font-he); direction: rtl;
+}
+.mly-viewer-title {
+    color: #05CB63;
+    font-size: 13px;
+    font-weight: 700;
+    display: flex; align-items: center; gap: 10px;
+}
+.mly-viewer-meta {
+    color: var(--text-secondary);
+    font-size: 11px;
+    font-weight: 400;
+    font-family: var(--font-mono);
+    padding: 1px 6px;
+    background: rgba(0,0,0,.3);
+    border: 1px solid var(--border-primary);
+    border-radius: 3px;
+}
+.mly-viewer-actions { display: flex; gap: 6px; }
+.mly-viewer-btn {
+    display: inline-flex; align-items: center; justify-content: center;
+    width: 28px; height: 28px;
+    background: transparent;
+    border: 1px solid var(--cyan-dim);
+    color: var(--cyan);
+    font-size: 14px;
+    cursor: pointer;
+    text-decoration: none;
+    transition: background .15s;
+}
+.mly-viewer-btn:hover { background: rgba(0, 212, 255, 0.15); }
+.mly-viewer-btn.close { border-color: var(--red-dim); color: var(--red); }
+.mly-viewer-btn.close:hover { background: rgba(255, 0, 64, 0.15); }
+.mly-viewer-frame { flex: 1; width: 100%; background: #000; }
+
 /* ═══════ ARREST ENTRANCE HEAD ═══════ */
 .arrest-entrance-icon { cursor: grab; }
 .arrest-entrance-icon:active { cursor: grabbing; }
@@ -3895,6 +3951,40 @@ async function loadMapillaryAt(lat, lng, radiusM = 1200) {
     showToast(`✅ ${plotted} תמונות נטענו. לחץ על נקודה לצפייה.`);
 }
 
+// Mapillary Viewer Modal — מציג את התמונה/פנורמה מבפנים, בלי לעזוב את הדשבורד
+function openMapillaryViewer(imageId, imgMeta) {
+    const existing = document.getElementById('mlyViewerOverlay');
+    if (existing) existing.remove();
+
+    const creator = imgMeta && imgMeta.creator ? imgMeta.creator.username : '';
+    const when = imgMeta && imgMeta.captured_at ? new Date(imgMeta.captured_at).toISOString().slice(0, 10) : '';
+    const pano = imgMeta && imgMeta.is_pano;
+
+    const overlay = document.createElement('div');
+    overlay.id = 'mlyViewerOverlay';
+    overlay.innerHTML = `
+        <div class="mly-viewer-card">
+            <div class="mly-viewer-header">
+                <div class="mly-viewer-title">
+                    📷 Mapillary
+                    ${creator ? `<span class="mly-viewer-meta">@${escapeHtml(creator)}</span>` : ''}
+                    ${when ? `<span class="mly-viewer-meta">${when}</span>` : ''}
+                    ${pano ? '<span class="mly-viewer-meta">360°</span>' : ''}
+                </div>
+                <div class="mly-viewer-actions">
+                    <a href="https://www.mapillary.com/app/?pKey=${imageId}&focus=photo" target="_blank" class="mly-viewer-btn" title="פתח ב-Mapillary.com">↗</a>
+                    <button class="mly-viewer-btn close" onclick="document.getElementById('mlyViewerOverlay').remove()" title="סגור (Esc)">✕</button>
+                </div>
+            </div>
+            <iframe class="mly-viewer-frame"
+                src="https://www.mapillary.com/embed?image_key=${imageId}&style=photo"
+                frameborder="0" allowfullscreen allow="geolocation"></iframe>
+        </div>
+    `;
+    overlay.onclick = (e) => { if (e.target === overlay) overlay.remove(); };
+    document.body.appendChild(overlay);
+}
+
 // Toast helper
 function showToast(msg) {
     let toast = document.getElementById('mabat-toast');
@@ -4524,7 +4614,7 @@ function initMap() {
                     color: '#05CB63', fillColor: '#05CB63', fillOpacity: 0.9, weight: 0
                 });
                 m.bindTooltip(`${(img.creator||{}).username || '?'} • ${when}${img.is_pano ? ' • 360°' : ''}`, { direction: 'top', className: 'dark-tooltip' });
-                m.on('click', () => window.open(`https://www.mapillary.com/app/?pKey=${img.id}&focus=photo`, '_blank', 'noopener'));
+                m.on('click', () => openMapillaryViewer(img.id, img));
                 m.addTo(mapillaryCoverage);
                 plotted++;
             });
@@ -6031,6 +6121,8 @@ document.addEventListener('keydown', (e) => {
         if (lmp && lmp.style.display === 'block') toggleLayerMenu();
         const picker = document.getElementById('arrestEntrancePicker');
         if (picker) picker.remove();
+        const mlyView = document.getElementById('mlyViewerOverlay');
+        if (mlyView) mlyView.remove();
         return;
     }
 
