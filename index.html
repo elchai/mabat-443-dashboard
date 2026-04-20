@@ -5824,16 +5824,23 @@ async function arrestSnapToRoads() {
         pts.push(p);
     }
     const coordsStr = pts.map(p => `${p.lng},${p.lat}`).join(';');
-    // Use foot profile when planning a foot approach — avoids car-only detours around blocks
-    const isFoot = arrestState.travelMode === 'foot';
-    const profile = isFoot ? 'foot' : 'driving';
-    const base = isFoot ? 'https://routing.openstreetmap.de/routed-foot' : 'https://router.project-osrm.org';
+    // Always use driving profile + OSRM public server — stays on streets user sees on satellite.
+    // Foot profile prefers footpaths through fields/groves which creates unexpected loops.
+    // For arrest planning, waypoints are placed on specific roads; we want the route to follow them.
+    const base = 'https://router.project-osrm.org';
+    const profile = 'driving';
     // radiuses= limits how far OSRM may snap each waypoint to a road (avoid phantom detours via far streets)
-    const radii = pts.map(() => '80').join(';');
+    const radii = pts.map(() => '30').join(';');
     const url = `${base}/route/v1/${profile}/${coordsStr}?overview=full&geometries=geojson&steps=false&continue_straight=true&radiuses=${radii}`;
 
     try {
-        const res = await fetch(url, { signal: AbortSignal.timeout(15000) });
+        let res = await fetch(url, { signal: AbortSignal.timeout(15000) });
+        // If tight-radius failed (no route near), retry with wider radius
+        if (!res.ok) {
+            const wideRadii = pts.map(() => '120').join(';');
+            const wideUrl = `${base}/route/v1/${profile}/${coordsStr}?overview=full&geometries=geojson&steps=false&continue_straight=true&radiuses=${wideRadii}`;
+            res = await fetch(wideUrl, { signal: AbortSignal.timeout(15000) });
+        }
         if (!res.ok) throw new Error('OSRM ' + res.status);
         const data = await res.json();
         if (!data.routes || !data.routes[0]) throw new Error('No route found');
