@@ -5509,6 +5509,9 @@ async function arrestFinish() {
     if (!arrestState.target || !arrestState.startPoint) return;
     const step = document.getElementById('arrestStep');
 
+    // Clear any previously-drawn route (straight-line or snapped) before drawing fresh
+    arrestClearRouteOnly();
+
     // ציר ניווט = קווים ישרים בין הנקודות שסומנו (מוצא → נעץ → יעד)
     // אין OSRM — המשתמש שולט בציר על ידי מיקום נעץ.
     const pts = [arrestState.startPoint, ...arrestState.waypoints, arrestState.target];
