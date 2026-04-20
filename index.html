@@ -660,26 +660,34 @@ body {
     text-shadow: 0 0 10px var(--cyan-dim);
 }
 
-.map-btn {
+.map-btn-row {
     position: absolute;
     top: 10px;
     left: 10px;
     z-index: 1001;
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+}
+.map-btn {
     background: var(--bg-panel);
     border: 1px solid var(--border-primary);
     color: var(--cyan);
-    padding: 6px 10px;
+    padding: 6px 12px;
     border-radius: 4px;
     cursor: pointer;
     font-family: var(--font-he);
     font-size: 12px;
-    transition: all 0.3s ease;
+    transition: background .15s, border-color .15s;
+    white-space: nowrap;
 }
-
 .map-btn:hover {
-    background: rgba(0, 212, 255, 0.15);
+    background: rgba(0, 212, 255, 0.12);
+    border-color: var(--cyan-dim);
+}
+.map-btn.active {
+    background: rgba(0, 212, 255, 0.18);
     border-color: var(--cyan);
-    box-shadow: 0 0 10px var(--cyan-dim);
 }
 
 /* ═══════ RIGHT PANEL - AI SUMMARY ═══════ */
@@ -2075,7 +2083,7 @@ body {
     border-right: 1.5px solid var(--cyan); border-bottom: 1.5px solid var(--cyan); transform: rotate(45deg);
 }
 .lmp-text { flex: 1; }
-#layersBtn.active { background: rgba(0,212,255,.15); border-color: var(--cyan); color: var(--cyan); }
+/* #layersBtn.active — מנוהל דרך .map-btn.active */
 
 .mabat-layer-switcher {
     font-family: var(--font-he);
@@ -2839,10 +2847,12 @@ document.getElementById('loginInput').addEventListener('keydown', function(e) {
         <div class="map-overlay"></div>
         <div class="map-coords">31.870N  35.120E</div>
         <div class="map-label">גזרה 443</div>
-        <button class="map-btn" onclick="toggleMapFullscreen()" id="mapBtn" title="F = Fullscreen">&#x26F6; הרחב</button>
-        <button class="map-btn" onclick="toggleArrestPlanner()" id="arrestBtn" title="תכנון מעצר" style="left:calc(1.5rem + 120px);right:auto;">🎯 תכנן מעצר</button>
-        <button class="map-btn" onclick="toggleMapillaryLayer()" id="mlyBtn" title="הפעל/כבה שכבת Mapillary" style="left:calc(1.5rem + 240px);right:auto;">📷 Mapillary</button>
-        <button class="map-btn" onclick="toggleLayerMenu()" id="layersBtn" title="שכבות מפה" style="left:calc(1.5rem + 360px);right:auto;">☰ שכבות</button>
+        <div class="map-btn-row">
+            <button class="map-btn" onclick="toggleMapFullscreen()" id="mapBtn" title="F = Fullscreen">&#x26F6; הרחב</button>
+            <button class="map-btn" onclick="toggleArrestPlanner()" id="arrestBtn" title="תכנון מעצר">🎯 תכנן מעצר</button>
+            <button class="map-btn" onclick="toggleMapillaryLayer()" id="mlyBtn" title="הפעל/כבה שכבת Mapillary">📷 Mapillary</button>
+            <button class="map-btn" onclick="toggleLayerMenu()" id="layersBtn" title="שכבות מפה">☰ שכבות</button>
+        </div>
         <!-- Arrest Planner Panel -->
         <div id="arrestPanel" class="arrest-panel" style="display:none;">
             <div class="arrest-header">
