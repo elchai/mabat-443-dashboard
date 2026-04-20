@@ -2906,6 +2906,168 @@ body {
     text-shadow: 0 0 8px var(--cyan-dim);
 }
 
+/* ═══════ MOBILE COMPREHENSIVE ═══════ */
+@media (max-width: 768px) {
+    /* Layout: sidebar becomes drawer, everything stacks */
+    .dashboard {
+        display: block !important;
+        padding: 4px !important;
+        min-height: 100vh;
+        height: auto;
+    }
+    .dashboard .header {
+        position: sticky; top: 0; z-index: 50;
+        padding: 6px 10px !important;
+        min-height: 48px;
+        display: flex;
+        flex-wrap: wrap;
+        gap: 6px;
+        font-size: 11px;
+    }
+    .logo-section { gap: 6px; }
+    .logo-section svg, .logo-hex svg { width: 28px !important; height: 34px !important; }
+    .system-title { font-size: 14px !important; letter-spacing: 2px !important; }
+    .system-subtitle { font-size: 9px !important; }
+    .header-center { order: 3; width: 100%; justify-content: center; }
+    .header-status-group { font-size: 10px; }
+    .header-divider { display: none; }
+    .clock { font-size: 16px !important; }
+    .date-display { font-size: 9px !important; }
+
+    .sidebar-mobile-toggle { display: inline-flex !important; min-width: 42px; min-height: 42px; }
+    .sidebar {
+        position: fixed !important;
+        top: 0; right: 0; bottom: 0;
+        width: min(280px, 82vw) !important;
+        transform: translateX(100%);
+        transition: transform 0.3s cubic-bezier(0.4,0,0.2,1);
+        z-index: 200;
+        height: 100vh !important;
+    }
+    .sidebar.open { transform: translateX(0); }
+    .sidebar-overlay { display: block; }
+    .sidebar-overlay.active { background: rgba(0,0,0,0.6); }
+
+    .main-views { margin: 0 !important; }
+    .view { height: auto !important; }
+
+    /* Dashboard view: stack everything */
+    #view-dashboard.active {
+        display: flex !important;
+        flex-direction: column;
+        gap: 4px;
+        height: auto;
+    }
+    #view-dashboard .left-panel,
+    #view-dashboard .map-panel,
+    #view-dashboard .right-panel,
+    #view-dashboard .alert-feed {
+        grid-row: auto !important;
+        grid-column: auto !important;
+        width: 100%;
+        max-height: none !important;
+    }
+    #view-dashboard .map-panel { min-height: 55vh !important; order: 1; }
+    #view-dashboard .left-panel { order: 2; flex-direction: row !important; overflow-x: auto; }
+    #view-dashboard .left-panel .panel { flex: 0 0 260px; }
+    #view-dashboard .alert-feed { order: 3; min-height: 400px; }
+    #view-dashboard .right-panel { order: 4; min-height: 240px; }
+
+    /* Operations view: dock below map */
+    #view-operations.active { min-height: auto; }
+    #view-operations .ops-layout { flex-direction: column !important; min-height: auto; }
+    #view-operations .ops-planner-dock {
+        width: 100% !important;
+        max-height: 55vh;
+        order: 2;
+        border-left: none !important;
+        border-top: 1px solid var(--red-dim);
+    }
+    #view-operations .ops-map-wrap { order: 1; min-height: 50vh; }
+    #view-operations .ops-hdr-btn { padding: 5px 10px; font-size: 11px; }
+
+    /* Data view: scrollable tabs */
+    #view-data .data-tabs {
+        overflow-x: auto;
+        flex-wrap: nowrap;
+        -webkit-overflow-scrolling: touch;
+    }
+    #view-data .data-tab { white-space: nowrap; flex-shrink: 0; }
+    #view-data .data-panel { padding: 8px; }
+
+    /* Arrest planner panel */
+    .arrest-panel {
+        position: static !important;
+        width: 100% !important;
+        max-width: 100%;
+        border-radius: 0;
+    }
+    .arrest-actions, .arrest-exports { flex-wrap: wrap; }
+    .arrest-actions button,
+    .arrest-exports a, .arrest-exports button {
+        flex: 1 1 calc(50% - 6px) !important;
+        font-size: 9px !important;
+        padding: 8px 6px !important;
+        min-height: 40px;
+    }
+    .arrest-save-btn, #arrestDeleteStartBtn { flex: 1 1 calc(50% - 6px) !important; }
+
+    /* Alert feed filter chips: scroll horizontally */
+    .alert-toolbar {
+        overflow-x: auto;
+        flex-wrap: nowrap;
+        -webkit-overflow-scrolling: touch;
+    }
+    .filter-chip { flex-shrink: 0; white-space: nowrap; }
+
+    /* Touch targets — min 40px */
+    button, .map-btn, .filter-chip, input[type="radio"]+span, .sidebar-item {
+        min-height: 40px;
+    }
+
+    /* Tactical modal: full-width on mobile */
+    .tactical-modal {
+        width: 92vw;
+        min-width: 0 !important;
+    }
+
+    /* Map controls: smaller and stacked */
+    .map-btn-row {
+        top: 6px !important; left: 6px !important;
+        gap: 4px !important;
+        max-width: calc(100% - 12px);
+    }
+    .map-btn { font-size: 10px !important; padding: 5px 8px !important; }
+
+    /* Legend in fullscreen: smaller */
+    .map-legend { font-size: 10px; max-width: 120px; padding: 6px 8px; }
+
+    /* Hide scan line on mobile for performance */
+    body::after { display: none; }
+
+    /* Login form */
+    #loginOverlay > div:nth-child(3) {
+        min-width: 0 !important;
+        width: 92vw;
+        padding: 30px 24px !important;
+    }
+
+    /* View headers */
+    .view-header { padding: 8px 10px; font-size: 12px; flex-wrap: wrap; gap: 6px; }
+    .view-title { font-size: 12px !important; letter-spacing: 1.5px !important; }
+}
+
+/* Very small phones */
+@media (max-width: 420px) {
+    .arrest-actions button,
+    .arrest-exports a, .arrest-exports button {
+        flex: 1 1 100% !important;
+    }
+    .sidebar { width: min(260px, 85vw) !important; }
+    .system-subtitle { display: none; }
+    #view-dashboard .map-panel { min-height: 50vh !important; }
+}
+
 /* ═══════ TACTICAL HUD OVERLAY ═══════ */
 /* Sharper corners everywhere — tactical systems don't use rounded bubbles */
 .panel, .arrest-panel, .sidebar, .history-overlay, .report-form,
