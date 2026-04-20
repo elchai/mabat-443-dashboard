@@ -6404,7 +6404,19 @@ function activityLabels(type) {
     };
     return L[type] || L.arrest;
 }
-function setActivityType(type) {
+async function setActivityType(type) {
+    if (arrestState.activityType === type) return;
+    // If an unsaved plan exists, warn before wiping
+    const hasPlan = !!(arrestState.target || arrestState.startPoint || (arrestState.waypoints && arrestState.waypoints.length));
+    if (hasPlan) {
+        const ok = await tacticalConfirm('יש פעילות לא שמורה. להמשיך ולנקות למעבר?', { danger: false, okText: 'נקה והמשך', cancelText: 'חזרה' });
+        if (!ok) {
+            // Re-select the previous type button
+            document.querySelectorAll('.act-type-btn').forEach(b => b.classList.toggle('active', b.dataset.type === (arrestState.activityType || 'arrest')));
+            return;
+        }
+        arrestClear(true);
+    }
     arrestState.activityType = type;
     arrestState.tusCircular = (arrestState.tusCircular || false);
     // Update selected button
@@ -6452,10 +6464,14 @@ function arrestSetCircular(on) {
 // (Later, when email auth is added, we can save to Firebase keyed by user UID for permanent per-user plans.)
 const ARREST_SESSION_KEY = 'mabat443-arrest-session-v1';
 
+// Saves current plan to an ARRAY of session plans (multiple plans preserved),
+// then clears the canvas so the user can start a new activity immediately.
 function arrestSaveSession() {
-    if (!arrestState.target) { showToast('⚠ אין מטרה לשמור'); return; }
+    if (!arrestState.target && !arrestState.startPoint) { showToast('⚠ אין פעילות לשמור'); return; }
     const payload = {
         savedAt: Date.now(),
+        activityType: arrestState.activityType || 'arrest',
+        tusCircular: !!arrestState.tusCircular,
         target: arrestState.target,
         targetEntrance: arrestState.targetEntrance || 6,
         targetEntranceDeg: arrestState.targetEntranceDeg,
@@ -6465,48 +6481,33 @@ function arrestSaveSession() {
         travelMode: arrestState.travelMode || 'foot',
     };
     try {
-        sessionStorage.setItem(ARREST_SESSION_KEY, JSON.stringify(payload));
-        showToast('💾 נשמר · יישמר עד סגירת הדפדפן');
-        const step = document.getElementById('arrestStep');
-        if (step) {
-            step.innerHTML = '<span style="color:var(--green);">›› תוכנית נשמרה לסשן</span>';
-            setTimeout(arrestUpdateStep, 1500);
+        const raw = sessionStorage.getItem(ARREST_SESSION_KEY);
+        let plans = [];
+        if (raw) {
+            try {
+                const parsed = JSON.parse(raw);
+                plans = Array.isArray(parsed) ? parsed : [parsed]; // migrate from v1 single-plan shape
+            } catch(e) { plans = []; }
         }
+        plans.push(payload);
+        // Keep last 20 plans max
+        if (plans.length > 20) plans = plans.slice(-20);
+        sessionStorage.setItem(ARREST_SESSION_KEY, JSON.stringify(plans));
+        const label = activityLabels(payload.activityType).title;
+        showToast(`💾 ${label} נשמר · המערכת פנויה לתכנון חדש`);
+        // Clear canvas for next plan
+        arrestClear(true);
     } catch (e) {
         showToast('⚠ שמירה נכשלה: ' + e.message);
     }
 }
 
+// Auto-restore: do NOT restore anything automatically on load — the saved plans are archive,
+// not a single "current plan". User should be able to open a fresh session and start planning.
+// (Future UI can list saved plans and let user load one explicitly.)
 function arrestRestoreSession() {
-    try {
-        const raw = sessionStorage.getItem(ARREST_SESSION_KEY);
-        if (!raw) return false;
-        const p = JSON.parse(raw);
-        if (!p || !p.target) return false;
-        // Wait for map to be ready
-        if (!window.map) { setTimeout(arrestRestoreSession, 500); return false; }
-        arrestClear(false);
-        if (p.targetName) {
-            arrestState.targetName = p.targetName;
-            const inp = document.getElementById('arrestTargetName');
-            if (inp) inp.value = p.targetName;
-        }
-        if (p.travelMode) {
-            arrestState.travelMode = p.travelMode;
-            const radio = document.querySelector(`input[name="arrestTravelMode"][value="${p.travelMode}"]`);
-            if (radio) radio.checked = true;
-        }
-        arrestAddTarget(p.target.lat, p.target.lng);
-        if (p.targetEntranceDeg != null) arrestState.targetEntranceDeg = p.targetEntranceDeg;
-        if (p.startPoint) arrestAddStart(p.startPoint.lat, p.startPoint.lng);
-        (p.waypoints || []).forEach(w => { arrestAddWaypoint(w.lat, w.lng); if (w.note && arrestState.waypoints.length) arrestState.waypoints[arrestState.waypoints.length - 1].note = w.note; });
-        if (p.startPoint) arrestFinish();
-        showToast('🔄 תוכנית שמורה שוחזרה');
-        return true;
-    } catch (e) {
-        console.warn('arrestRestoreSession failed:', e.message);
-        return false;
-    }
+    // no-op by design — kept as symbol for DOMContentLoaded compatibility
+    return false;
 }
 
 function arrestPlanPayload() {
