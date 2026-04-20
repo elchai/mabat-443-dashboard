@@ -5813,13 +5813,24 @@ async function arrestSnapToRoads() {
     const step = document.getElementById('arrestStep');
     step.innerHTML = '⏳ מחשב התאמה לכבישים...';
 
-    const pts = [arrestState.startPoint, ...arrestState.waypoints, arrestState.target];
+    // Dedupe points (avoid OSRM round-tripping if user's waypoints duplicate start/target)
+    const rawPts = [arrestState.startPoint, ...arrestState.waypoints, arrestState.target];
+    const pts = [];
+    const seen = new Set();
+    for (const p of rawPts) {
+        const k = `${p.lat.toFixed(5)},${p.lng.toFixed(5)}`;
+        if (seen.has(k)) continue;
+        seen.add(k);
+        pts.push(p);
+    }
     const coordsStr = pts.map(p => `${p.lng},${p.lat}`).join(';');
     // Use foot profile when planning a foot approach — avoids car-only detours around blocks
     const isFoot = arrestState.travelMode === 'foot';
     const profile = isFoot ? 'foot' : 'driving';
     const base = isFoot ? 'https://routing.openstreetmap.de/routed-foot' : 'https://router.project-osrm.org';
-    const url = `${base}/route/v1/${profile}/${coordsStr}?overview=full&geometries=geojson&steps=false&continue_straight=true`;
+    // radiuses= limits how far OSRM may snap each waypoint to a road (avoid phantom detours via far streets)
+    const radii = pts.map(() => '80').join(';');
+    const url = `${base}/route/v1/${profile}/${coordsStr}?overview=full&geometries=geojson&steps=false&continue_straight=true&radiuses=${radii}`;
 
     try {
         const res = await fetch(url, { signal: AbortSignal.timeout(15000) });
@@ -5827,7 +5838,15 @@ async function arrestSnapToRoads() {
         const data = await res.json();
         if (!data.routes || !data.routes[0]) throw new Error('No route found');
         const route = data.routes[0];
-        const coords = route.geometry.coordinates.map(c => [c[1], c[0]]);
+        let coords = route.geometry.coordinates.map(c => [c[1], c[0]]);
+        // Trim anything past the target — OSRM sometimes overshoots if the target snap-radius caught a loop
+        const tgt = arrestState.target;
+        let bestIdx = coords.length - 1, bestDist = Infinity;
+        coords.forEach(([la, lo], i) => {
+            const d = Math.hypot(la - tgt.lat, lo - tgt.lng);
+            if (d < bestDist) { bestDist = d; bestIdx = i; }
+        });
+        if (bestIdx < coords.length - 1) coords = coords.slice(0, bestIdx + 1);
 
         // ניקוי מלא של הציר הקודם (פוליליין + תוויות המרחק)
         arrestClearRouteOnly();
