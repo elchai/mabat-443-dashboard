@@ -3796,7 +3796,7 @@ function toggleMapillarySearch() {
         if (!mlyState.layer) {
             mlyState.layer = L.layerGroup().addTo(map);
         }
-        mlyState.lastClickHandler = (e) => loadMapillaryAt(e.latlng.lat, e.latlng.lng, 600);
+        mlyState.lastClickHandler = (e) => loadMapillaryAt(e.latlng.lat, e.latlng.lng, 1200);
         map.on('click', mlyState.lastClickHandler);
         if (btn) { btn.style.background = 'rgba(168,85,247,.25)'; btn.style.borderColor = '#a855f7'; }
         document.getElementById('mapPanel').classList.add('map-planning-mode');
@@ -3814,51 +3814,70 @@ function clearMapillaryPins() {
     if (mlyState.layer) mlyState.layer.clearLayers();
 }
 
-async function loadMapillaryAt(lat, lng, radiusM = 500) {
+async function loadMapillaryAt(lat, lng, radiusM = 1200) {
     if (!mlyState.layer) mlyState.layer = L.layerGroup().addTo(map);
-    // חישוב bbox מהרדיוס (approx)
-    const dLat = radiusM / 111000;
-    const dLng = radiusM / (111000 * Math.cos(lat * Math.PI / 180));
-    const bbox = `${lng - dLng},${lat - dLat},${lng + dLng},${lat + dLat}`;
+    // Tile בגלל מגבלת Mapillary: 0.01 sq-deg/bbox. לכל tile limit=2000.
+    // רדיוס 1.2km = ~2.4km × 2.4km ≈ 0.022×0.025 sq-deg → מחלקים 3×3 = 9 tiles.
+    const dLatTotal = radiusM / 111000;
+    const dLngTotal = radiusM / (111000 * Math.cos(lat * Math.PI / 180));
+    const GRID = 3;
+    const dLat = dLatTotal / GRID * 2; // רוחב של כל tile
+    const dLng = dLngTotal / GRID * 2;
 
-    const url = `https://graph.mapillary.com/images?bbox=${bbox}&limit=200&fields=id,computed_geometry,creator,captured_at,is_pano&access_token=${MAPILLARY_TOKEN_CLIENT}`;
-    showToast('⏳ טוען תמונות Mapillary...');
-    try {
-        const res = await fetch(url, { signal: AbortSignal.timeout(12000) });
-        if (!res.ok) throw new Error('Mapillary ' + res.status);
-        const data = await res.json();
-        const imgs = data.data || [];
-        if (!imgs.length) {
-            showToast('❌ לא נמצאו תמונות בטווח');
-            return;
+    const tiles = [];
+    for (let i = 0; i < GRID; i++) {
+        for (let j = 0; j < GRID; j++) {
+            const cLat = lat - dLatTotal + dLat * (i + 0.5);
+            const cLng = lng - dLngTotal + dLng * (j + 0.5);
+            tiles.push(`${cLng - dLng/2},${cLat - dLat/2},${cLng + dLng/2},${cLat + dLat/2}`);
         }
-        let plotted = 0;
-        imgs.forEach(img => {
-            if (!img.computed_geometry || !img.computed_geometry.coordinates) return;
-            const [clng, clat] = img.computed_geometry.coordinates;
-            const creator = img.creator || {};
-            const color = '#05CB63'; // ירוק של Mapillary המקורי
-            const when = img.captured_at ? new Date(img.captured_at).toISOString().slice(0, 10) : '';
-            const marker = L.circleMarker([clat, clng], {
-                radius: img.is_pano ? 2.5 : 1.8,
-                color: color, fillColor: color, fillOpacity: 0.9, weight: 0,
-                className: 'mly-pin'
-            });
-            marker.bindTooltip(`${creator.username || '?'} • ${when}${img.is_pano ? ' • 360°' : ''}`, {
-                direction: 'top', className: 'dark-tooltip'
-            });
-            marker.on('click', () => {
-                const viewerUrl = `https://www.mapillary.com/app/?pKey=${img.id}&focus=photo`;
-                window.open(viewerUrl, '_blank', 'noopener');
-            });
-            marker.addTo(mlyState.layer);
-            plotted++;
-        });
-        showToast(`✅ ${plotted} תמונות נטענו. לחץ על נקודה לצפייה.`);
-    } catch (e) {
-        console.warn('Mapillary load failed:', e.message);
-        showToast('⚠️ טעינה נכשלה: ' + e.message);
     }
+
+    showToast('⏳ טוען תמונות Mapillary...');
+    const results = await Promise.all(tiles.map(async bbox => {
+        const url = `https://graph.mapillary.com/images?bbox=${bbox}&limit=2000&fields=id,computed_geometry,creator,captured_at,is_pano&access_token=${MAPILLARY_TOKEN_CLIENT}`;
+        try {
+            const res = await fetch(url, { signal: AbortSignal.timeout(15000) });
+            if (!res.ok) return [];
+            const data = await res.json();
+            return data.data || [];
+        } catch (e) { return []; }
+    }));
+    const allImgs = results.flat();
+    const seen = new Set();
+    const uniqueImgs = allImgs.filter(img => {
+        if (!img.id || seen.has(img.id)) return false;
+        seen.add(img.id);
+        return true;
+    });
+
+    if (!uniqueImgs.length) {
+        showToast('❌ לא נמצאו תמונות בטווח');
+        return;
+    }
+    let plotted = 0;
+    uniqueImgs.forEach(img => {
+        if (!img.computed_geometry || !img.computed_geometry.coordinates) return;
+        const [clng, clat] = img.computed_geometry.coordinates;
+        const creator = img.creator || {};
+        const color = '#05CB63';
+        const when = img.captured_at ? new Date(img.captured_at).toISOString().slice(0, 10) : '';
+        const marker = L.circleMarker([clat, clng], {
+            radius: img.is_pano ? 2.5 : 1.8,
+            color: color, fillColor: color, fillOpacity: 0.9, weight: 0,
+            className: 'mly-pin'
+        });
+        marker.bindTooltip(`${creator.username || '?'} • ${when}${img.is_pano ? ' • 360°' : ''}`, {
+            direction: 'top', className: 'dark-tooltip'
+        });
+        marker.on('click', () => {
+            const viewerUrl = `https://www.mapillary.com/app/?pKey=${img.id}&focus=photo`;
+            window.open(viewerUrl, '_blank', 'noopener');
+        });
+        marker.addTo(mlyState.layer);
+        plotted++;
+    });
+    showToast(`✅ ${plotted} תמונות נטענו. לחץ על נקודה לצפייה.`);
 }
 
 // Toast helper
