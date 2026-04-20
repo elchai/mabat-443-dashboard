@@ -2330,24 +2330,73 @@ body {
 }
 .arrest-mode label:hover { background: rgba(0,212,255,0.08); }
 .arrest-mode input[type="radio"] { accent-color: var(--cyan); margin: 0; }
+/* Metallic tactical button — inspired by Delta Force / modern FPS HUD */
 .arrest-mode .mode-icon {
+    position: relative;
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    width: 28px; height: 28px;
+    width: 34px; height: 34px;
     border-radius: 50%;
-    background: radial-gradient(circle at 50% 30%, rgba(0,212,255,0.15) 0%, rgba(4,8,16,0.95) 70%);
-    border: 1px solid rgba(0,212,255,0.35);
-    box-shadow: inset 0 1px 0 rgba(0,212,255,0.15), 0 1px 2px rgba(0,0,0,0.5);
-    color: var(--cyan);
-    transition: all 0.15s ease;
+    /* Multi-stop metallic bezel */
+    background:
+        radial-gradient(circle at 30% 20%, #3a4a5c 0%, #1a2332 30%, #0a1220 70%, #040810 100%);
+    box-shadow:
+        inset 0 2px 2px rgba(120,160,200,0.3),
+        inset 0 -2px 3px rgba(0,0,0,0.9),
+        inset 0 0 0 1px rgba(0,0,0,0.8),
+        0 2px 4px rgba(0,0,0,0.8),
+        0 1px 0 rgba(255,255,255,0.05);
+    color: #7a95b0;
+    transition: all 0.2s ease;
 }
+/* Inner recessed "screen" where the icon sits */
+.arrest-mode .mode-icon::before {
+    content: '';
+    position: absolute;
+    inset: 4px;
+    border-radius: 50%;
+    background: radial-gradient(circle at 50% 20%, #0a1828 0%, #050d18 100%);
+    box-shadow:
+        inset 0 1px 2px rgba(0,0,0,0.9),
+        inset 0 0 0 1px rgba(0,212,255,0.15);
+}
+/* Subtle crosshair grid over the inner screen */
+.arrest-mode .mode-icon::after {
+    content: '';
+    position: absolute;
+    inset: 5px;
+    border-radius: 50%;
+    background:
+        linear-gradient(90deg, transparent 49%, rgba(0,212,255,0.12) 49%, rgba(0,212,255,0.12) 51%, transparent 51%),
+        linear-gradient(0deg, transparent 49%, rgba(0,212,255,0.12) 49%, rgba(0,212,255,0.12) 51%, transparent 51%);
+    pointer-events: none;
+}
+.arrest-mode .mode-icon svg {
+    position: relative;
+    z-index: 2;
+    width: 18px; height: 18px;
+    filter: drop-shadow(0 0 3px rgba(0,0,0,0.8));
+}
+/* Active (selected) — glowing cyan icon */
 .arrest-mode label:has(input:checked) .mode-icon {
-    border-color: var(--cyan);
-    box-shadow: inset 0 0 8px rgba(0,212,255,0.25), 0 0 8px rgba(0,212,255,0.3);
-    color: #fff;
+    color: #00d4ff;
+    box-shadow:
+        inset 0 2px 2px rgba(120,200,240,0.4),
+        inset 0 -2px 3px rgba(0,0,0,0.9),
+        inset 0 0 0 1px rgba(0,212,255,0.6),
+        0 2px 6px rgba(0,0,0,0.8),
+        0 0 10px rgba(0,212,255,0.5);
 }
-.arrest-mode .mode-icon svg { width: 16px; height: 16px; }
+.arrest-mode label:has(input:checked) .mode-icon svg {
+    filter: drop-shadow(0 0 4px rgba(0,212,255,0.8));
+}
+.arrest-mode label:has(input:checked) .mode-icon::before {
+    background: radial-gradient(circle at 50% 30%, #0c2236 0%, #061220 100%);
+    box-shadow:
+        inset 0 1px 2px rgba(0,0,0,0.9),
+        inset 0 0 8px rgba(0,212,255,0.3);
+}
 .arrest-info {
     font-family: var(--font-mono);
     font-size: 11px;
@@ -3629,8 +3678,8 @@ window.tacticalAlert = function(message, opts) {
                     <input type="text" id="arrestTargetName" placeholder="לדוגמה: בית המבוקש" oninput="arrestUpdateTargetName()">
                 </div>
                 <div class="arrest-mode">
-                    <label><input type="radio" name="arrestTravelMode" value="foot" checked onchange="arrestSetTravelMode('foot')"> <span class="mode-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="13" cy="4" r="1.8"/><path d="M15 8l-3 3 2 3 2-1"/><path d="M12 11l-3 2 2 4-3 4"/><path d="M14 14l2 4 3-1"/></svg></span> רגלית</label>
-                    <label><input type="radio" name="arrestTravelMode" value="vehicle" onchange="arrestSetTravelMode('vehicle')"> <span class="mode-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M2 15h2M22 15h-2"/><path d="M4 15v-3l2-4h4l1-2h4l2 3h2l1 3v3"/><path d="M3 15h18"/><circle cx="7" cy="17" r="1.8"/><circle cx="17" cy="17" r="1.8"/></svg></span> רכובה</label>
+                    <label><input type="radio" name="arrestTravelMode" value="foot" checked onchange="arrestSetTravelMode('foot')"> <span class="mode-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M13 4a1 1 0 1 0 2 0a1 1 0 0 0 -2 0"/><path d="M4 17l5 1l.75 -1.5"/><path d="M15 21l0 -4l-4 -3l1 -6"/><path d="M7 12l0 -3l5 -1l3 3l3 1"/></svg></span> רגלית</label>
+                    <label><input type="radio" name="arrestTravelMode" value="vehicle" onchange="arrestSetTravelMode('vehicle')"> <span class="mode-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M5 17a2 2 0 1 0 4 0a2 2 0 0 0 -4 0"/><path d="M15 17a2 2 0 1 0 4 0a2 2 0 0 0 -4 0"/><path d="M5 17h-2v-6l2 -5h9l4 5h1a2 2 0 0 1 2 2v4h-2m-4 0h-6"/><path d="M6 11h12"/></svg></span> רכובה</label>
                 </div>
                 <div id="arrestInfo" class="arrest-info"></div>
                 <div class="arrest-actions">
