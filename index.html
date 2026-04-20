@@ -2337,40 +2337,101 @@ body {
     display:flex; flex-wrap:wrap; gap:6px;
     margin-bottom: 8px;
 }
-.arrest-actions button {
+/* ═══ TACTICAL BUTTON CHROME (Delta Force HUD style) ═══ */
+.arrest-actions button,
+.arrest-exports a, .arrest-exports button {
+    position: relative;
     flex: 1;
     min-width: 80px;
-    background: rgba(0,212,255,.1);
+    background:
+        radial-gradient(ellipse at 50% 0%, rgba(0,212,255,0.08) 0%, transparent 70%),
+        linear-gradient(180deg, #0e1e36 0%, #050b17 100%);
     color: var(--cyan);
-    border: 1px solid var(--cyan-dim);
-    padding: 6px 8px;
-    border-radius: 4px;
+    border: 1px solid rgba(0,212,255,0.45);
+    padding: 8px 10px;
     cursor: pointer;
-    font-size: 11px;
+    font-size: 10px;
+    letter-spacing: 1.5px;
     font-family: var(--font-he);
+    text-transform: uppercase;
+    text-decoration: none;
+    text-align: center;
+    box-shadow:
+        inset 0 1px 0 rgba(0,212,255,0.15),
+        inset 0 -1px 0 rgba(0,0,0,0.5),
+        0 1px 3px rgba(0,0,0,0.6),
+        0 0 0 1px rgba(0,0,0,0.4);
+    transition: all 0.15s ease;
+    clip-path: polygon(6px 0, 100% 0, 100% calc(100% - 6px), calc(100% - 6px) 100%, 0 100%, 0 6px);
 }
-.arrest-actions button:hover:not(:disabled) { background: rgba(0,212,255,.2); }
+/* Corner tick marks — tactical HUD signature */
+.arrest-actions button::before,
+.arrest-exports a::before, .arrest-exports button::before {
+    content: '';
+    position: absolute;
+    inset: 3px;
+    pointer-events: none;
+    background:
+        linear-gradient(to right, var(--cyan) 0, var(--cyan) 5px, transparent 5px) top left / 5px 1px no-repeat,
+        linear-gradient(to bottom, var(--cyan) 0, var(--cyan) 5px, transparent 5px) top left / 1px 5px no-repeat,
+        linear-gradient(to left, var(--cyan) 0, var(--cyan) 5px, transparent 5px) top right / 5px 1px no-repeat,
+        linear-gradient(to bottom, var(--cyan) 0, var(--cyan) 5px, transparent 5px) top right / 1px 5px no-repeat,
+        linear-gradient(to right, var(--cyan) 0, var(--cyan) 5px, transparent 5px) bottom left / 5px 1px no-repeat,
+        linear-gradient(to top, var(--cyan) 0, var(--cyan) 5px, transparent 5px) bottom left / 1px 5px no-repeat,
+        linear-gradient(to left, var(--cyan) 0, var(--cyan) 5px, transparent 5px) bottom right / 5px 1px no-repeat,
+        linear-gradient(to top, var(--cyan) 0, var(--cyan) 5px, transparent 5px) bottom right / 1px 5px no-repeat;
+    opacity: 0.55;
+    transition: opacity 0.15s ease;
+}
+.arrest-actions button:hover:not(:disabled),
+.arrest-exports a:hover, .arrest-exports button:hover {
+    background:
+        radial-gradient(ellipse at 50% 0%, rgba(0,212,255,0.18) 0%, transparent 70%),
+        linear-gradient(180deg, #142c4d 0%, #081428 100%);
+    color: #fff;
+    border-color: var(--cyan);
+    box-shadow:
+        inset 0 1px 0 rgba(0,212,255,0.25),
+        inset 0 -1px 0 rgba(0,0,0,0.5),
+        0 2px 6px rgba(0,0,0,0.7),
+        0 0 12px rgba(0,212,255,0.3);
+}
+.arrest-actions button:hover:not(:disabled)::before,
+.arrest-exports a:hover::before, .arrest-exports button:hover::before { opacity: 1; }
 .arrest-actions button:disabled { opacity: .4; cursor: not-allowed; }
+.arrest-actions button:disabled::before { opacity: 0.2; }
+
 .arrest-exports {
     display:flex; flex-wrap:wrap; gap:6px;
     padding-top: 8px;
     border-top: 1px dashed var(--cyan-dim);
 }
 .arrest-exports a, .arrest-exports button {
-    flex: 1;
-    min-width: 110px;
-    text-align: center;
-    background: rgba(255,208,0,.08);
+    min-width: 100px;
+    /* Override to yellow accent for exports */
     color: var(--yellow);
-    border: 1px solid var(--yellow-dim);
-    padding: 5px 6px;
-    border-radius: 4px;
-    text-decoration: none;
-    font-size: 10px;
-    cursor: pointer;
-    font-family: var(--font-he);
+    border-color: rgba(255,208,0,0.45);
 }
-.arrest-exports a:hover, .arrest-exports button:hover { background: rgba(255,208,0,.18); }
+.arrest-exports a::before, .arrest-exports button::before {
+    background:
+        linear-gradient(to right, var(--yellow) 0, var(--yellow) 5px, transparent 5px) top left / 5px 1px no-repeat,
+        linear-gradient(to bottom, var(--yellow) 0, var(--yellow) 5px, transparent 5px) top left / 1px 5px no-repeat,
+        linear-gradient(to left, var(--yellow) 0, var(--yellow) 5px, transparent 5px) top right / 5px 1px no-repeat,
+        linear-gradient(to bottom, var(--yellow) 0, var(--yellow) 5px, transparent 5px) top right / 1px 5px no-repeat,
+        linear-gradient(to right, var(--yellow) 0, var(--yellow) 5px, transparent 5px) bottom left / 5px 1px no-repeat,
+        linear-gradient(to top, var(--yellow) 0, var(--yellow) 5px, transparent 5px) bottom left / 1px 5px no-repeat,
+        linear-gradient(to left, var(--yellow) 0, var(--yellow) 5px, transparent 5px) bottom right / 5px 1px no-repeat,
+        linear-gradient(to top, var(--yellow) 0, var(--yellow) 5px, transparent 5px) bottom right / 1px 5px no-repeat;
+}
+.arrest-exports a:hover, .arrest-exports button:hover {
+    color: #fff;
+    border-color: var(--yellow);
+    box-shadow:
+        inset 0 1px 0 rgba(255,208,0,0.25),
+        inset 0 -1px 0 rgba(0,0,0,0.5),
+        0 2px 6px rgba(0,0,0,0.7),
+        0 0 12px rgba(255,208,0,0.3);
+}
 .map-planning-mode .leaflet-container { cursor: crosshair !important; }
 
 .map-legend {
@@ -3226,6 +3287,139 @@ document.getElementById('loginInput').addEventListener('keydown', function(e) {
 <!-- Red Alert Flash -->
 <div class="red-alert-flash" id="redAlertFlash"></div>
 
+<!-- Tactical modal (custom confirm/alert to replace browser-native dialogs) -->
+<div id="tacticalModal" class="tactical-modal-overlay" style="display:none;">
+  <div class="tactical-modal">
+    <div class="tactical-modal-header">
+      <span class="tactical-modal-icon" id="tacticalModalIcon"></span>
+      <span class="tactical-modal-title" id="tacticalModalTitle">CONFIRM</span>
+    </div>
+    <div class="tactical-modal-body" id="tacticalModalBody"></div>
+    <div class="tactical-modal-actions" id="tacticalModalActions"></div>
+  </div>
+</div>
+<style>
+.tactical-modal-overlay {
+  position: fixed; inset: 0; z-index: 100000;
+  background: rgba(4,8,16,0.75);
+  backdrop-filter: blur(6px);
+  display: flex; align-items: center; justify-content: center;
+  animation: tmFade 0.15s ease-out;
+}
+@keyframes tmFade { from { opacity: 0; } to { opacity: 1; } }
+.tactical-modal {
+  min-width: 340px; max-width: 500px;
+  background:
+    linear-gradient(180deg, rgba(14,30,54,0.97) 0%, rgba(5,11,23,0.98) 100%);
+  border: 1px solid var(--cyan);
+  box-shadow: 0 0 40px rgba(0,212,255,0.25), inset 0 1px 0 rgba(0,212,255,0.15);
+  font-family: var(--font-he);
+  direction: rtl;
+  clip-path: polygon(8px 0, 100% 0, 100% calc(100% - 8px), calc(100% - 8px) 100%, 0 100%, 0 8px);
+  animation: tmSlide 0.18s ease-out;
+}
+@keyframes tmSlide { from { transform: translateY(-6px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+.tactical-modal-header {
+  display: flex; align-items: center; gap: 10px;
+  padding: 14px 18px;
+  background: linear-gradient(90deg, rgba(0,212,255,0.15), transparent);
+  border-bottom: 1px solid rgba(0,212,255,0.35);
+  font-family: var(--font-mono);
+  text-transform: uppercase;
+  letter-spacing: 2.5px;
+  font-size: 11px;
+  color: var(--cyan);
+  font-weight: 700;
+}
+.tactical-modal-icon svg { display: block; }
+.tactical-modal-body {
+  padding: 22px 20px;
+  font-size: 14px;
+  color: var(--text-primary);
+  line-height: 1.5;
+}
+.tactical-modal-actions {
+  display: flex; gap: 10px;
+  padding: 12px 18px 18px;
+  justify-content: flex-start;
+}
+.tactical-modal-btn {
+  background: radial-gradient(ellipse at 50% 0%, rgba(0,212,255,0.1) 0%, transparent 70%),
+              linear-gradient(180deg, #0e1e36, #050b17);
+  border: 1px solid rgba(0,212,255,0.5);
+  color: var(--cyan);
+  padding: 9px 22px;
+  font-family: var(--font-he);
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 2px;
+  cursor: pointer;
+  clip-path: polygon(5px 0, 100% 0, 100% calc(100% - 5px), calc(100% - 5px) 100%, 0 100%, 0 5px);
+  transition: all 0.15s ease;
+  min-width: 90px;
+}
+.tactical-modal-btn:hover { background: linear-gradient(180deg, #142c4d, #081428); color: #fff; box-shadow: 0 0 12px rgba(0,212,255,0.3); }
+.tactical-modal-btn.danger { border-color: rgba(255,0,64,0.55); color: var(--red); }
+.tactical-modal-btn.danger:hover { background: linear-gradient(180deg, #3a0a18, #1a0309); color: #fff; box-shadow: 0 0 12px rgba(255,0,64,0.4); }
+.tactical-modal-btn.ghost { border-color: var(--border-primary); color: var(--text-secondary); }
+.tactical-modal-btn.ghost:hover { color: #fff; background: rgba(255,255,255,0.05); box-shadow: none; }
+</style>
+<script>
+// Custom confirm/alert replacement — tactical HUD style
+window.tacticalConfirm = function(message, opts) {
+  opts = opts || {};
+  return new Promise((resolve) => {
+    const ov = document.getElementById('tacticalModal');
+    const body = document.getElementById('tacticalModalBody');
+    const title = document.getElementById('tacticalModalTitle');
+    const icon = document.getElementById('tacticalModalIcon');
+    const actions = document.getElementById('tacticalModalActions');
+    const isDanger = !!opts.danger;
+    title.textContent = opts.title || 'אישור פעולה';
+    body.textContent = message;
+    icon.innerHTML = isDanger
+      ? '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#ff0040" stroke-width="2" stroke-linecap="round"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>'
+      : '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>';
+    actions.innerHTML = '';
+    const okBtn = document.createElement('button');
+    okBtn.className = 'tactical-modal-btn' + (isDanger ? ' danger' : '');
+    okBtn.textContent = opts.okText || (isDanger ? 'מחק' : 'אישור');
+    const cancelBtn = document.createElement('button');
+    cancelBtn.className = 'tactical-modal-btn ghost';
+    cancelBtn.textContent = opts.cancelText || 'ביטול';
+    okBtn.onclick = () => { ov.style.display = 'none'; resolve(true); };
+    cancelBtn.onclick = () => { ov.style.display = 'none'; resolve(false); };
+    actions.append(okBtn, cancelBtn);
+    ov.style.display = 'flex';
+    setTimeout(() => okBtn.focus(), 50);
+    const esc = (e) => { if (e.key === 'Escape') { cancelBtn.click(); document.removeEventListener('keydown', esc); } if (e.key === 'Enter') { okBtn.click(); document.removeEventListener('keydown', esc); } };
+    document.addEventListener('keydown', esc);
+  });
+};
+window.tacticalAlert = function(message, opts) {
+  opts = opts || {};
+  return new Promise((resolve) => {
+    const ov = document.getElementById('tacticalModal');
+    const body = document.getElementById('tacticalModalBody');
+    const title = document.getElementById('tacticalModalTitle');
+    const icon = document.getElementById('tacticalModalIcon');
+    const actions = document.getElementById('tacticalModalActions');
+    title.textContent = opts.title || 'הודעה';
+    body.textContent = message;
+    icon.innerHTML = '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>';
+    actions.innerHTML = '';
+    const ok = document.createElement('button');
+    ok.className = 'tactical-modal-btn';
+    ok.textContent = 'אישור';
+    ok.onclick = () => { ov.style.display = 'none'; resolve(); };
+    actions.append(ok);
+    ov.style.display = 'flex';
+    setTimeout(() => ok.focus(), 50);
+  });
+};
+</script>
+
 <!-- Dashboard Grid -->
 <div class="dashboard" id="mainDashboard">
 
@@ -4018,7 +4212,7 @@ async function submitFieldReport() {
     const locVal = document.getElementById('reportLocation').value;
     const reporter = document.getElementById('reportReporter').value.trim();
 
-    if (!title) { alert('נא להזין כותרת'); return; }
+    if (!title) { tacticalAlert('נא להזין כותרת'); return; }
 
     let locationHe = '';
     let coordinates = null;
@@ -4070,7 +4264,7 @@ async function submitFieldReport() {
         toggleReportForm();
     } catch (e) {
         console.error('Error submitting field report:', e);
-        alert('שגיאה בשליחת הדיווח');
+        tacticalAlert('שגיאה בשליחת הדיווח');
     }
 }
 
@@ -4525,7 +4719,7 @@ function parseKMLToLineStrings(kmlText) {
 }
 
 function clearFenceCustom() {
-    if (!confirm('למחוק את הגדר המותאמת ולחזור ל-OSM?')) return;
+    if (!(await tacticalConfirm('למחוק את הגדר המותאמת ולחזור ל-OSM?', {danger:true}))) return;
     localStorage.removeItem('mabat443-fence-custom');
     localStorage.removeItem('mabat443-fence-v2');
     location.reload();
@@ -5094,10 +5288,10 @@ function arrestAddTarget(lat, lng) {
     });
     m.on('dragend', arrestRefreshRoute);
     // קליק על המטרה — פתיחה/סגירה של הציר (לא בשימוש כרגע; סיבוב כיוון בגרירה של הראש)
-    m.on('dblclick contextmenu', (ev) => {
+    m.on('dblclick contextmenu', async (ev) => {
         L.DomEvent.stopPropagation(ev);
         if (ev.originalEvent) ev.originalEvent.preventDefault();
-        if (!confirm('למחוק את המטרה?')) return;
+        if (!(await tacticalConfirm('למחוק את המטרה?', {danger:true}))) return;
         arrestClear();
     });
     if (m.getElement()) m.getElement().oncontextmenu = (e) => { e.preventDefault(); return false; };
@@ -5207,8 +5401,8 @@ function arrestAddStart(lat, lng) {
         arrestState.startPoint = { lat: ll.lat, lng: ll.lng };
     });
     m.on('dragend', arrestRefreshRoute);
-    const deleteStart = () => {
-        if (!confirm('למחוק את נקודת המוצא?')) return;
+    const deleteStart = async () => {
+        if (!(await tacticalConfirm('למחוק את נקודת המוצא?', {danger:true}))) return;
         map.removeLayer(m);
         arrestState.startMarker = null;
         arrestState.startPoint = null;
@@ -5248,12 +5442,12 @@ function arrestAddWaypoint(lat, lng) {
         if (idx >= 0) arrestState.waypoints[idx] = { lat: ll.lat, lng: ll.lng };
     });
     m.on('dragend', arrestRefreshRoute);
-    m.on('dblclick contextmenu', (ev) => {
+    m.on('dblclick contextmenu', async (ev) => {
         L.DomEvent.stopPropagation(ev);
         if (ev.originalEvent) ev.originalEvent.preventDefault();
         const idx = arrestState.waypointMarkers.indexOf(m);
         if (idx < 0) return;
-        if (!confirm(`למחוק נעץ ${idx + 1}?`)) return;
+        if (!(await tacticalConfirm(`למחוק נעץ ${idx + 1}?`, {danger:true}))) return;
         map.removeLayer(m);
         arrestState.waypoints.splice(idx, 1);
         arrestState.waypointMarkers.splice(idx, 1);
@@ -5572,12 +5766,12 @@ function buildWaypointMarker(wp, idx) {
         if (i >= 0) arrestState.waypoints[i] = { ...arrestState.waypoints[i], lat: ll.lat, lng: ll.lng };
     });
     m.on('dragend', arrestRefreshRoute);
-    m.on('dblclick contextmenu', (ev) => {
+    m.on('dblclick contextmenu', async (ev) => {
         L.DomEvent.stopPropagation(ev);
         if (ev.originalEvent) ev.originalEvent.preventDefault();
         const i = arrestState.waypointMarkers.indexOf(m);
         if (i < 0) return;
-        if (!confirm(`למחוק נעץ ${i + 1}?`)) return;
+        if (!(await tacticalConfirm(`למחוק נעץ ${i + 1}?`, {danger:true}))) return;
         map.removeLayer(m);
         arrestState.waypoints.splice(i, 1);
         arrestState.waypointMarkers.splice(i, 1);
@@ -5609,7 +5803,11 @@ async function arrestSnapToRoads() {
 
     const pts = [arrestState.startPoint, ...arrestState.waypoints, arrestState.target];
     const coordsStr = pts.map(p => `${p.lng},${p.lat}`).join(';');
-    const url = `https://router.project-osrm.org/route/v1/driving/${coordsStr}?overview=full&geometries=geojson&steps=false`;
+    // Use foot profile when planning a foot approach — avoids car-only detours around blocks
+    const isFoot = arrestState.travelMode === 'foot';
+    const profile = isFoot ? 'foot' : 'driving';
+    const base = isFoot ? 'https://routing.openstreetmap.de/routed-foot' : 'https://router.project-osrm.org';
+    const url = `${base}/route/v1/${profile}/${coordsStr}?overview=full&geometries=geojson&steps=false&continue_straight=true`;
 
     try {
         const res = await fetch(url, { signal: AbortSignal.timeout(15000) });
@@ -5731,7 +5929,7 @@ function arrestLoadPlan(idx) {
 }
 
 function arrestDeletePlan(idx) {
-    if (!confirm('למחוק תוכנית זו?')) return;
+    if (!(await tacticalConfirm('למחוק תוכנית זו?', {danger:true}))) return;
     const plans = JSON.parse(localStorage.getItem('mabat443-arrest-plans') || '[]');
     plans.splice(idx, 1);
     localStorage.setItem('mabat443-arrest-plans', JSON.stringify(plans));
@@ -5815,7 +6013,7 @@ function initMap() {
         zoom: 12,
         zoomControl: false,
         attributionControl: false,
-        maxZoom: 28,         // זום עמוק מקסימלי (Leaflet יעלה את ה-tiles האחרונים)
+        maxZoom: 22,         // זום עמוק מקסימלי (Leaflet יעלה את ה-tiles האחרונים)
         wheelPxPerZoomLevel: 40  // זום מהיר בגלגלת
     });
 
@@ -5823,22 +6021,29 @@ function initMap() {
     // maxNativeZoom = הרמה שבה עדיין יש tiles אמיתיים
     // maxZoom = 25 → Leaflet ימתח את ה-tile האחרון לכל הדרך
     const satLayer = L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', {
-        maxNativeZoom: 19, maxZoom: 28, attribution: 'Esri'
+        maxNativeZoom: 19, maxZoom: 22, attribution: 'Esri'
+    });
+    // Google satellite — deeper native zoom (up to 21), crucial for close-up inspection
+    const gSatLayer = L.tileLayer('https://mt{s}.google.com/vt/lyrs=s&x={x}&y={y}&z={z}', {
+        maxNativeZoom: 21, maxZoom: 22, subdomains: ['0','1','2','3'], attribution: 'Google'
+    });
+    const gHybridLayer = L.tileLayer('https://mt{s}.google.com/vt/lyrs=y&x={x}&y={y}&z={z}', {
+        maxNativeZoom: 21, maxZoom: 22, subdomains: ['0','1','2','3'], attribution: 'Google'
     });
     const topoLayer = L.tileLayer('https://{s}.tile.opentopomap.org/{z}/{x}/{y}.png', {
-        maxNativeZoom: 17, maxZoom: 28, attribution: 'OpenTopoMap'
+        maxNativeZoom: 17, maxZoom: 22, attribution: 'OpenTopoMap'
     });
     const streetLayer = L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-        maxNativeZoom: 19, maxZoom: 28, attribution: 'OSM'
+        maxNativeZoom: 19, maxZoom: 22, attribution: 'OSM'
     });
     const urbanLayer = L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', {
-        maxNativeZoom: 19, maxZoom: 28, attribution: 'Carto'
+        maxNativeZoom: 19, maxZoom: 22, attribution: 'Carto'
     });
-    satLayer.addTo(map);
+    gSatLayer.addTo(map);
 
     // ═══════ OVERLAYS ═══════
     const labelsOverlay = L.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/voyager_only_labels/{z}/{x}/{y}{r}.png', {
-        maxNativeZoom: 19, maxZoom: 28, opacity: 0.7, pane: 'overlayPane', attribution: 'Carto'
+        maxNativeZoom: 19, maxZoom: 22, opacity: 0.7, pane: 'overlayPane', attribution: 'Carto'
     });
     labelsOverlay.addTo(map);
 
@@ -5931,7 +6136,9 @@ function initMap() {
     // בוחר שכבות מותאם — לא L.control.layers (שמגיע עם styling לבן דיפולטי)
     buildCustomLayerSwitcher({
         base: [
-            { name: 'תצ"א לוויין', layer: satLayer, active: true },
+            { name: 'תצ"א גוגל (זום עמוק)', layer: gSatLayer, active: true },
+            { name: 'תצ"א גוגל היברידי', layer: gHybridLayer },
+            { name: 'תצ"א Esri', layer: satLayer },
             { name: 'טופוגרפית 1:50K', layer: topoLayer },
             { name: 'רחובות', layer: streetLayer },
             { name: 'עירונית כהה', layer: urbanLayer },
@@ -6231,7 +6438,7 @@ function setFilter(level, btn) {
 // ═══════ CSV EXPORT ═══════
 function exportAlertsCsv() {
     const items = Object.values(allNewsData || {});
-    if (!items.length) { alert('אין נתונים לייצוא'); return; }
+    if (!items.length) { tacticalAlert('אין נתונים לייצוא'); return; }
     items.sort((a, b) => (b.timestamp || 0) - (a.timestamp || 0));
     const esc = v => {
         if (v == null) return '';
@@ -7246,7 +7453,7 @@ async function savePublisherProfile() {
 function handlePhotoUpload(input) {
     const file = input.files[0];
     if (!file) return;
-    if (file.size > 500000) { alert('תמונה גדולה מדי (מקסימום 500KB)'); return; }
+    if (file.size > 500000) { tacticalAlert('תמונה גדולה מדי (מקסימום 500KB)'); return; }
     const reader = new FileReader();
     reader.onload = function(e) {
         document.getElementById('pe_photo').value = e.target.result;
