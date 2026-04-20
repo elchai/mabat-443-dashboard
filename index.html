@@ -2777,7 +2777,7 @@ document.getElementById('loginInput').addEventListener('keydown', function(e) {
         <div class="map-label">גזרה 443</div>
         <button class="map-btn" onclick="toggleMapFullscreen()" id="mapBtn" title="F = Fullscreen">&#x26F6; הרחב</button>
         <button class="map-btn" onclick="toggleArrestPlanner()" id="arrestBtn" title="תכנון מעצר" style="left:calc(1.5rem + 120px);right:auto;">🎯 תכנן מעצר</button>
-        <button class="map-btn" onclick="toggleMapillarySearch()" id="mlyBtn" title="חפש צילומי רחוב Mapillary" style="left:calc(1.5rem + 240px);right:auto;">📷 Mapillary</button>
+        <button class="map-btn" onclick="toggleMapillaryLayer()" id="mlyBtn" title="הפעל/כבה שכבת Mapillary" style="left:calc(1.5rem + 240px);right:auto;">📷 Mapillary</button>
         <button class="map-btn" onclick="toggleLayerMenu()" id="layersBtn" title="שכבות מפה" style="left:calc(1.5rem + 360px);right:auto;">☰ שכבות</button>
         <!-- Arrest Planner Panel -->
         <div id="arrestPanel" class="arrest-panel" style="display:none;">
@@ -3789,6 +3789,21 @@ const MAPILLARY_CREATORS = [
 ];
 const mlyState = { active: false, layer: null, lastClickHandler: null };
 
+// מחליף את המצב של שכבת Mapillary בבוחר השכבות
+function toggleMapillaryLayer() {
+    if (!window._mlyLayerRef) {
+        // מציאת השכבה הרשומה
+        const rows = document.querySelectorAll('#lmpOverlays .lmp-row');
+        for (const row of rows) {
+            const text = row.querySelector('.lmp-text');
+            if (text && text.textContent.includes('Mapillary')) {
+                row.click();
+                return;
+            }
+        }
+    }
+}
+
 function toggleMapillarySearch() {
     const btn = document.getElementById('mlyBtn');
     if (!mlyState.active) {
@@ -4441,12 +4456,81 @@ function initMap() {
     });
     labelsOverlay.addTo(map);
 
-    // Mapillary street-level coverage (vector tiles rendered as raster via mapillary tile service)
-    const MAPILLARY_TOKEN = 'MLY|26636963299290715|555a2cc2563d0e534e9b49896c447f93';
-    const mapillaryCoverage = L.tileLayer(
-        `https://tiles.mapillary.com/maps/vtp/mly1_public/2/{z}/{x}/{y}?access_token=${MAPILLARY_TOKEN}`,
-        { maxZoom: 17, opacity: 0.6, attribution: 'Mapillary' }
-    );
+    // Mapillary street-level coverage (Graph API pulling actual image points)
+    const mapillaryCoverage = L.layerGroup();
+    let _mlyPanHandler = null;
+    let _mlyFetching = false;
+    mapillaryCoverage.on('add', () => {
+        // בטעינה — מביא תמונות מה-viewport הנוכחי
+        fetchMapillaryInViewport();
+        // ברגע שהמפה זזה, רענון אוטומטי (עם debounce)
+        if (!_mlyPanHandler) {
+            let t = null;
+            _mlyPanHandler = () => {
+                clearTimeout(t);
+                t = setTimeout(fetchMapillaryInViewport, 600);
+            };
+            map.on('moveend zoomend', _mlyPanHandler);
+        }
+    });
+    mapillaryCoverage.on('remove', () => {
+        mapillaryCoverage.clearLayers();
+        if (_mlyPanHandler) { map.off('moveend zoomend', _mlyPanHandler); _mlyPanHandler = null; }
+    });
+    async function fetchMapillaryInViewport() {
+        if (_mlyFetching) return;
+        if (map.getZoom() < 13) {
+            mapillaryCoverage.clearLayers();
+            showToast('זום פנימה יותר לטעינת Mapillary (z≥13)');
+            return;
+        }
+        _mlyFetching = true;
+        try {
+            const b = map.getBounds();
+            const minLat = b.getSouth(), maxLat = b.getNorth();
+            const minLng = b.getWest(),  maxLng = b.getEast();
+            const GRID = 3;
+            const tiles = [];
+            for (let i = 0; i < GRID; i++) {
+                for (let j = 0; j < GRID; j++) {
+                    const a = minLng + (maxLng - minLng) * j / GRID;
+                    const c = minLng + (maxLng - minLng) * (j + 1) / GRID;
+                    const s = minLat + (maxLat - minLat) * i / GRID;
+                    const n = minLat + (maxLat - minLat) * (i + 1) / GRID;
+                    tiles.push(`${a},${s},${c},${n}`);
+                }
+            }
+            const results = await Promise.all(tiles.map(async bbox => {
+                const url = `https://graph.mapillary.com/images?bbox=${bbox}&limit=2000&fields=id,computed_geometry,creator,captured_at,is_pano&access_token=${MAPILLARY_TOKEN_CLIENT}`;
+                try {
+                    const res = await fetch(url, { signal: AbortSignal.timeout(15000) });
+                    if (!res.ok) return [];
+                    const d = await res.json();
+                    return d.data || [];
+                } catch (e) { return []; }
+            }));
+            const all = results.flat();
+            const seen = new Set();
+            mapillaryCoverage.clearLayers();
+            let plotted = 0;
+            all.forEach(img => {
+                if (!img.id || seen.has(img.id)) return;
+                seen.add(img.id);
+                if (!img.computed_geometry) return;
+                const [clng, clat] = img.computed_geometry.coordinates;
+                const when = img.captured_at ? new Date(img.captured_at).toISOString().slice(0, 10) : '';
+                const m = L.circleMarker([clat, clng], {
+                    radius: img.is_pano ? 2.5 : 1.8,
+                    color: '#05CB63', fillColor: '#05CB63', fillOpacity: 0.9, weight: 0
+                });
+                m.bindTooltip(`${(img.creator||{}).username || '?'} • ${when}${img.is_pano ? ' • 360°' : ''}`, { direction: 'top', className: 'dark-tooltip' });
+                m.on('click', () => window.open(`https://www.mapillary.com/app/?pKey=${img.id}&focus=photo`, '_blank', 'noopener'));
+                m.addTo(mapillaryCoverage);
+                plotted++;
+            });
+            if (plotted > 0) showToast(`📷 ${plotted} תמונות Mapillary`);
+        } finally { _mlyFetching = false; }
+    }
 
     // Security Fence layer — נטען מ-OCHA (bundled) עם fallback ל-OSM
     const fenceLayer = L.layerGroup();
@@ -4479,19 +4563,7 @@ function initMap() {
         if (e.originalEvent) e.originalEvent.preventDefault();
     });
     // Button to open Mapillary at sector center
-    const mlyBtn = L.control({ position: 'topright' });
-    mlyBtn.onAdd = function() {
-        const div = L.DomUtil.create('div', 'leaflet-bar');
-        div.innerHTML = `<a href="#" title="Mapillary במרכז הגזרה" style="width:32px;height:32px;display:flex;align-items:center;justify-content:center;font-size:11px;font-family:'Share Tech Mono',monospace;font-weight:700;letter-spacing:1px;color:#05CB63;">MLY</a>`;
-        div.onclick = (ev) => {
-            ev.preventDefault();
-            const c = map.getCenter();
-            window.open(`https://www.mapillary.com/app/?lat=${c.lat}&lng=${c.lng}&z=${map.getZoom()}`, '_blank', 'noopener');
-            return false;
-        };
-        return div;
-    };
-    mlyBtn.addTo(map);
+    // מחק את ה-MLY button הנפרד — תפקידו עבר לשכבה "כיסוי Mapillary"
 
     // ═══════ ROUTE 443 POLYLINE (OpenStreetMap data) ═══════
     const ROUTE_443 = [
@@ -5969,7 +6041,7 @@ document.addEventListener('keydown', (e) => {
         'f': () => toggleMapFullscreen(),
         'h': () => toggleHistory(),
         'a': () => toggleArrestPlanner(),
-        'm': () => toggleMapillarySearch(),
+        'm': () => toggleMapillaryLayer(),
         'l': () => toggleLayerMenu(),
         '/': () => {
             const s = document.getElementById('searchInput');
