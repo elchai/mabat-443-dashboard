@@ -1077,6 +1077,7 @@ body {
 .alert-item.alert-false .alert-title { text-decoration:line-through; text-decoration-color:var(--red); }
 .false-badge { display:inline-block; font-family:var(--font-he); font-size:9px; font-weight:700; color:var(--red); background:var(--red-dim); border:1px solid var(--red); border-radius:3px; padding:0px 5px; margin-left:6px; }
 .alert-conf-badge { display:inline-block; font-family:var(--font-he); font-size:9px; font-weight:700; border:1px solid; border-radius:3px; padding:0 5px; margin-left:6px; background:rgba(0,0,0,.3); }
+.alert-conf-badge.verified { border-color:var(--green); color:var(--green); background:rgba(0,255,136,.08); }
 .verified-badge { display:inline-block; font-family:var(--font-he); font-size:9px; font-weight:700; color:var(--green); background:rgba(0,255,136,0.1); border:1px solid var(--green); border-radius:3px; padding:0px 5px; margin-left:6px; }
 
 /* ═══════ PUBLISHER PROFILE OVERLAY ═══════ */
@@ -4985,11 +4986,15 @@ function isDistinct(a, b) {
     return true;
 }
 
-// תג ביטחון קטן ליד הכותרת — מוצג רק כשיש ערך וקרובים לגבול (low-conf)
+// תג ביטחון/אימות ליד הכותרת
 function alertConfidenceBadge(item) {
+    // Verified (2+ sources) - תג ירוק חיובי
+    if (item.verified && item.sourceCount >= 2) {
+        const n = item.sourceCount;
+        return `<span class="alert-conf-badge verified" title="אומת ע״י ${n} מקורות שונים">✓ ${n} מקורות</span>`;
+    }
     if (typeof item.confidence !== 'number') return '';
     const c = item.confidence;
-    // רק חלשים/חשודים מוצגים בכותרת — בטוחים לא זקוקים לתג
     if (c >= 0.6) return '';
     const color = c >= 0.45 ? '#ff8800' : '#ff0040';
     const label = c >= 0.45 ? 'אמינות נמוכה' : 'לא מאומת';
@@ -5025,6 +5030,10 @@ function alertExpandedDetails(item) {
         const pct = Math.round(c * 100);
         const color = c >= 0.75 ? '#00ff88' : c >= 0.55 ? '#ffd000' : c >= 0.35 ? '#ff8800' : '#ff0040';
         rows.push(['ביטחון דיווח', `<span style="color:${color};font-weight:700;">${pct}%</span>`]);
+    }
+    if (item.sourceCount && item.sourceCount >= 2) {
+        const srcs = (item.corroboratingSources || []).slice(0, 5).map(s => escapeHtml(s)).join(' · ');
+        rows.push(['מאומת ע״י', `<span style="color:#00ff88;font-weight:700;">${item.sourceCount} מקורות</span>${srcs ? '<br><span style="font-size:10px;opacity:.75;">' + srcs + '</span>' : ''}`]);
     }
     const publishedAt = item.publishedAt || item.timestamp;
     if (publishedAt) rows.push(['פורסם', escapeHtml(formatDateTime(publishedAt))]);
