@@ -3584,9 +3584,9 @@ async function loadSecurityFence(targetLayerGroup) {
             console.warn('🛡️ No fence geometry loaded from', source);
             return;
         }
-        // סינון לתוך תיבת גזרה להגבלת רעש
-        const sMin = SECTOR_CENTER.lat - 0.2, sMax = SECTOR_CENTER.lat + 0.2;
-        const lMin = SECTOR_CENTER.lng - 0.25, lMax = SECTOR_CENTER.lng + 0.25;
+        // סינון לתוך תיבת גזרה להגבלת רעש (רחב — כולל רנתיס/נעלה בצפון, בית אכסא בדרום)
+        const sMin = SECTOR_CENTER.lat - 0.25, sMax = SECTOR_CENTER.lat + 0.30;
+        const lMin = SECTOR_CENTER.lng - 0.30, lMax = SECTOR_CENTER.lng + 0.30;
         let rendered = 0;
         geojsonFeatures.forEach(feat => {
             const coords = feat.geometry.coordinates
