@@ -5839,14 +5839,25 @@ async function arrestSnapToRoads() {
         if (!data.routes || !data.routes[0]) throw new Error('No route found');
         const route = data.routes[0];
         let coords = route.geometry.coordinates.map(c => [c[1], c[0]]);
-        // Trim anything past the target — OSRM sometimes overshoots if the target snap-radius caught a loop
+        // Trim everything past the target — two passes for robustness
         const tgt = arrestState.target;
-        let bestIdx = coords.length - 1, bestDist = Infinity;
-        coords.forEach(([la, lo], i) => {
-            const d = Math.hypot(la - tgt.lat, lo - tgt.lng);
-            if (d < bestDist) { bestDist = d; bestIdx = i; }
-        });
-        if (bestIdx < coords.length - 1) coords = coords.slice(0, bestIdx + 1);
+        const mLat = 111000, mLng = 111000 * Math.cos(tgt.lat * Math.PI / 180);
+        const distToTgt = ([la, lo]) => Math.hypot((la - tgt.lat) * mLat, (lo - tgt.lng) * mLng);
+        // Pass 1: find the first point within 40m of target → that's effectively arrival
+        let arrivalIdx = -1;
+        for (let i = 0; i < coords.length; i++) {
+            if (distToTgt(coords[i]) <= 40) { arrivalIdx = i; break; }
+        }
+        if (arrivalIdx >= 0) {
+            coords = coords.slice(0, arrivalIdx + 1);
+            // Append exact target as final point so the line visually touches the crosshair
+            coords.push([tgt.lat, tgt.lng]);
+        } else {
+            // Pass 2: no point within 40m — fall back to closest approach and trim tail there
+            let bestIdx = coords.length - 1, bestDist = Infinity;
+            coords.forEach((c, i) => { const d = distToTgt(c); if (d < bestDist) { bestDist = d; bestIdx = i; } });
+            if (bestIdx < coords.length - 1) coords = coords.slice(0, bestIdx + 1);
+        }
 
         // ניקוי מלא של הציר הקודם (פוליליין + תוויות המרחק)
         arrestClearRouteOnly();
