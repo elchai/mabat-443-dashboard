@@ -2410,6 +2410,14 @@ body {
     display:flex; flex-wrap:wrap; gap:6px;
     margin-bottom: 8px;
 }
+/* Smaller save button — sits next to delete */
+.arrest-save-btn {
+    flex: 0 0 auto !important;
+    min-width: 64px !important;
+    padding: 6px 8px !important;
+    font-size: 9px !important;
+}
+
 /* ═══ TACTICAL BUTTON CHROME (Delta Force HUD style) ═══ */
 .arrest-actions button,
 .arrest-exports a, .arrest-exports button {
@@ -3686,6 +3694,7 @@ window.tacticalAlert = function(message, opts) {
                     <button onclick="arrestFinish()" id="arrestFinishBtn" disabled><svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor" style="vertical-align:-1px;"><polygon points="6 4 20 12 6 20 6 4"/></svg> חשב ציר</button>
                     <button onclick="arrestSnapToRoads()" id="arrestSnapBtn" title="התאם את הציר לכבישים אמיתיים (OSRM)" disabled><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-2px;"><path d="M4 19l5-14"/><path d="M20 19l-5-14"/><line x1="12" y1="5" x2="12" y2="8"/><line x1="12" y1="11" x2="12" y2="14"/><line x1="12" y1="17" x2="12" y2="19"/></svg> התאם לכבישים</button>
                     <button onclick="arrestDeleteStart()" id="arrestDeleteStartBtn" style="display:none;background:rgba(255,0,64,.08);border-color:var(--red-dim);color:var(--red);"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-2px;"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M10 11v6M14 11v6"/></svg> מחק מוצא</button>
+                    <button onclick="arrestSaveSession()" id="arrestSaveBtn" class="arrest-save-btn" title="שמור לסשן — זמין עד סגירת הדפדפן"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-1px;"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg> שמור</button>
                 </div>
                 <div class="arrest-exports" id="arrestExports" style="display:none;">
                     <a href="#" id="arrestGmaps" target="_blank" title="פותח את המטרה בגוגל מפות עם השם לעריכה"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-2px;"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg> מטרה</a>
@@ -6074,6 +6083,68 @@ async function arrestDeletePlan(idx) {
     arrestShowSavedPlans(); arrestShowSavedPlans(); // re-render
 }
 
+// ═══════ ARREST PLAN SESSION PERSISTENCE ═══════
+// Saves to sessionStorage — survives page refresh, cleared when browser tab closes.
+// (Later, when email auth is added, we can save to Firebase keyed by user UID for permanent per-user plans.)
+const ARREST_SESSION_KEY = 'mabat443-arrest-session-v1';
+
+function arrestSaveSession() {
+    if (!arrestState.target) { showToast('⚠ אין מטרה לשמור'); return; }
+    const payload = {
+        savedAt: Date.now(),
+        target: arrestState.target,
+        targetEntrance: arrestState.targetEntrance || 6,
+        targetEntranceDeg: arrestState.targetEntranceDeg,
+        targetName: arrestState.targetName || '',
+        startPoint: arrestState.startPoint,
+        waypoints: arrestState.waypoints || [],
+        travelMode: arrestState.travelMode || 'foot',
+    };
+    try {
+        sessionStorage.setItem(ARREST_SESSION_KEY, JSON.stringify(payload));
+        showToast('💾 נשמר · יישמר עד סגירת הדפדפן');
+        const step = document.getElementById('arrestStep');
+        if (step) {
+            step.innerHTML = '<span style="color:var(--green);">›› תוכנית נשמרה לסשן</span>';
+            setTimeout(arrestUpdateStep, 1500);
+        }
+    } catch (e) {
+        showToast('⚠ שמירה נכשלה: ' + e.message);
+    }
+}
+
+function arrestRestoreSession() {
+    try {
+        const raw = sessionStorage.getItem(ARREST_SESSION_KEY);
+        if (!raw) return false;
+        const p = JSON.parse(raw);
+        if (!p || !p.target) return false;
+        // Wait for map to be ready
+        if (!window.map) { setTimeout(arrestRestoreSession, 500); return false; }
+        arrestClear(false);
+        if (p.targetName) {
+            arrestState.targetName = p.targetName;
+            const inp = document.getElementById('arrestTargetName');
+            if (inp) inp.value = p.targetName;
+        }
+        if (p.travelMode) {
+            arrestState.travelMode = p.travelMode;
+            const radio = document.querySelector(`input[name="arrestTravelMode"][value="${p.travelMode}"]`);
+            if (radio) radio.checked = true;
+        }
+        arrestAddTarget(p.target.lat, p.target.lng);
+        if (p.targetEntranceDeg != null) arrestState.targetEntranceDeg = p.targetEntranceDeg;
+        if (p.startPoint) arrestAddStart(p.startPoint.lat, p.startPoint.lng);
+        (p.waypoints || []).forEach(w => { arrestAddWaypoint(w.lat, w.lng); if (w.note && arrestState.waypoints.length) arrestState.waypoints[arrestState.waypoints.length - 1].note = w.note; });
+        if (p.startPoint) arrestFinish();
+        showToast('🔄 תוכנית שמורה שוחזרה');
+        return true;
+    } catch (e) {
+        console.warn('arrestRestoreSession failed:', e.message);
+        return false;
+    }
+}
+
 function arrestPlanPayload() {
     return {
         generatedAt: new Date().toISOString(),
@@ -8201,6 +8272,8 @@ document.addEventListener('DOMContentLoaded', () => {
     try { startRefreshCycle(); } catch(e) { console.error('Refresh init error:', e); }
     try { fetchWeatherDirect(); } catch(e) { console.error('Weather init error:', e); }
     try { checkCalendarLocal(); } catch(e) { console.error('Calendar init error:', e); }
+    // Restore saved arrest plan after map is ready (slight delay so all layers initialize)
+    setTimeout(() => { try { arrestRestoreSession(); } catch(e) { console.warn('Arrest restore:', e.message); } }, 1200);
 });
 </script>
 </body>
