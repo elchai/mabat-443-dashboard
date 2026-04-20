@@ -2864,6 +2864,7 @@ document.getElementById('loginInput').addEventListener('keydown', function(e) {
                 <div id="arrestInfo" class="arrest-info"></div>
                 <div class="arrest-actions">
                     <button onclick="arrestFinish()" id="arrestFinishBtn" disabled>חשב ציר ▶</button>
+                    <button onclick="arrestDeleteStart()" id="arrestDeleteStartBtn" style="display:none;background:rgba(255,0,64,.08);border-color:var(--red-dim);color:var(--red);">🗑 מחק מוצא</button>
                     <button onclick="arrestShowSavedPlans()">📁 תוכניות שמורות</button>
                     <button onclick="arrestClear()">איפוס</button>
                 </div>
@@ -4246,20 +4247,30 @@ function arrestAddStart(lat, lng) {
         arrestState.startPoint = { lat: ll.lat, lng: ll.lng };
     });
     m.on('dragend', arrestRefreshRoute);
-    m.on('dblclick contextmenu', (ev) => {
-        L.DomEvent.stopPropagation(ev);
-        if (ev.originalEvent) ev.originalEvent.preventDefault();
+    const deleteStart = () => {
         if (!confirm('למחוק את נקודת המוצא?')) return;
         map.removeLayer(m);
         arrestState.startMarker = null;
         arrestState.startPoint = null;
         arrestClearRouteOnly();
         arrestUpdateStep();
+        const btn = document.getElementById('arrestDeleteStartBtn');
+        if (btn) btn.style.display = 'none';
         document.getElementById('arrestFinishBtn').disabled = true;
+    };
+    m.on('dblclick contextmenu', (ev) => {
+        L.DomEvent.stopPropagation(ev);
+        if (ev.originalEvent) ev.originalEvent.preventDefault();
+        deleteStart();
     });
     if (m.getElement()) m.getElement().oncontextmenu = (e) => { e.preventDefault(); return false; };
     m.on('add', () => { if (m.getElement()) m.getElement().oncontextmenu = (e) => { e.preventDefault(); return false; }; });
     arrestState.startMarker = m;
+    arrestState._deleteStart = deleteStart;
+    // הצג כפתור "מחק מוצא" בפאנל
+    const btn = document.getElementById('arrestDeleteStartBtn');
+    if (btn) btn.style.display = 'inline-block';
+    showToast('🟢 נקודת מוצא סומנה · גרור להזזה, דבל-קליק למחיקה');
 }
 
 function arrestAddWaypoint(lat, lng) {
@@ -4443,6 +4454,8 @@ function arrestClear(resetUI = true) {
     if (resetUI) {
         document.getElementById('arrestFinishBtn').disabled = true;
         document.getElementById('arrestExports').style.display = 'none';
+        const delBtn = document.getElementById('arrestDeleteStartBtn');
+        if (delBtn) delBtn.style.display = 'none';
         arrestUpdateStep();
     }
 }
@@ -4470,6 +4483,10 @@ function arrestCopyText() {
         step.innerHTML = '📋 הועתק ללוח';
         setTimeout(arrestUpdateStep, 1500);
     });
+}
+
+function arrestDeleteStart() {
+    if (arrestState._deleteStart) arrestState._deleteStart();
 }
 
 function arrestShowSavedPlans() {
