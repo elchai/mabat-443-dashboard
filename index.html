@@ -5676,16 +5676,28 @@ function arrestUpdateExportLinks() {
     const t = arrestState.target, s = arrestState.startPoint;
     const name = arrestState.targetName || 'מטרה';
     const nameEnc = encodeURIComponent(name.replace(/\s+/g, '+'));
-    const wpStr = arrestState.waypoints.map(w => `/${w.lat},${w.lng}`).join('');
-    // פורמט place/<name> - השם ניתן לעריכה ב-URL ומוצג ב-Google Maps
+    // Target pin on Google Maps
     const gmaps = document.getElementById('arrestGmaps');
     if (gmaps) gmaps.href = `https://www.google.com/maps/place/${nameEnc}/@${t.lat},${t.lng},18z/data=!3m1!1e3`;
+    // Directions — use API v1 with travelmode synced to planner's mode, waypoints as pipe-separated
     const gmapsDir = document.getElementById('arrestGmapsDir');
-    if (gmapsDir) gmapsDir.href = `https://www.google.com/maps/dir/${s.lat},${s.lng}${wpStr}/${t.lat},${t.lng}`;
+    if (gmapsDir) {
+        const travelmode = arrestState.travelMode === 'foot' ? 'walking' : 'driving';
+        const waypointsParam = arrestState.waypoints.length
+            ? '&waypoints=' + arrestState.waypoints.map(w => `${w.lat},${w.lng}`).join('|')
+            : '';
+        gmapsDir.href = `https://www.google.com/maps/dir/?api=1`
+            + `&origin=${s.lat},${s.lng}`
+            + `&destination=${t.lat},${t.lng}`
+            + waypointsParam
+            + `&travelmode=${travelmode}`;
+    }
 }
 
 function arrestSetTravelMode(mode) {
     arrestState.travelMode = (mode === 'vehicle') ? 'vehicle' : 'foot';
+    // Keep Google Maps link in sync with the selected travel mode
+    try { arrestUpdateExportLinks(); } catch(e) {}
     // אם קיים ציר — חשב מחדש את הזמן
     if (arrestState.routeMeta && arrestState.routeMeta.distanceM) {
         const spdMS = (arrestState.travelMode === 'foot' ? 4 : 30) * 1000 / 3600;
