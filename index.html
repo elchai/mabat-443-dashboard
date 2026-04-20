@@ -4718,7 +4718,7 @@ function parseKMLToLineStrings(kmlText) {
     return out;
 }
 
-function clearFenceCustom() {
+async function clearFenceCustom() {
     if (!(await tacticalConfirm('למחוק את הגדר המותאמת ולחזור ל-OSM?', {danger:true}))) return;
     localStorage.removeItem('mabat443-fence-custom');
     localStorage.removeItem('mabat443-fence-v2');
@@ -5940,7 +5940,7 @@ function arrestLoadPlan(idx) {
     else map.setView([plan.target.lat, plan.target.lng], 16);
 }
 
-function arrestDeletePlan(idx) {
+async function arrestDeletePlan(idx) {
     if (!(await tacticalConfirm('למחוק תוכנית זו?', {danger:true}))) return;
     const plans = JSON.parse(localStorage.getItem('mabat443-arrest-plans') || '[]');
     plans.splice(idx, 1);
