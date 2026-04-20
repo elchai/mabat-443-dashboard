@@ -5718,7 +5718,7 @@ function initMap() {
         zoom: 12,
         zoomControl: false,
         attributionControl: false,
-        maxZoom: 25,         // זום עמוק מקסימלי (Leaflet יעלה את ה-tiles האחרונים)
+        maxZoom: 28,         // זום עמוק מקסימלי (Leaflet יעלה את ה-tiles האחרונים)
         wheelPxPerZoomLevel: 40  // זום מהיר בגלגלת
     });
 
@@ -5726,22 +5726,22 @@ function initMap() {
     // maxNativeZoom = הרמה שבה עדיין יש tiles אמיתיים
     // maxZoom = 25 → Leaflet ימתח את ה-tile האחרון לכל הדרך
     const satLayer = L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', {
-        maxNativeZoom: 19, maxZoom: 25, attribution: 'Esri'
+        maxNativeZoom: 19, maxZoom: 28, attribution: 'Esri'
     });
     const topoLayer = L.tileLayer('https://{s}.tile.opentopomap.org/{z}/{x}/{y}.png', {
-        maxNativeZoom: 17, maxZoom: 25, attribution: 'OpenTopoMap'
+        maxNativeZoom: 17, maxZoom: 28, attribution: 'OpenTopoMap'
     });
     const streetLayer = L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-        maxNativeZoom: 19, maxZoom: 25, attribution: 'OSM'
+        maxNativeZoom: 19, maxZoom: 28, attribution: 'OSM'
     });
     const urbanLayer = L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', {
-        maxNativeZoom: 19, maxZoom: 25, attribution: 'Carto'
+        maxNativeZoom: 19, maxZoom: 28, attribution: 'Carto'
     });
     satLayer.addTo(map);
 
     // ═══════ OVERLAYS ═══════
     const labelsOverlay = L.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/voyager_only_labels/{z}/{x}/{y}{r}.png', {
-        maxNativeZoom: 19, maxZoom: 25, opacity: 0.7, pane: 'overlayPane', attribution: 'Carto'
+        maxNativeZoom: 19, maxZoom: 28, opacity: 0.7, pane: 'overlayPane', attribution: 'Carto'
     });
     labelsOverlay.addTo(map);
 
