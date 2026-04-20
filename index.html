@@ -4522,27 +4522,30 @@ function initMap() {
         center: [SECTOR_CENTER.lat, SECTOR_CENTER.lng],
         zoom: 12,
         zoomControl: false,
-        attributionControl: false
+        attributionControl: false,
+        maxZoom: 22  // מאפשר זום עמוק עד רמת מבנה בודד
     });
 
     // ═══════ BASE LAYERS (map type switcher) ═══════
+    // maxNativeZoom = הזום המקסימלי שיש בו tiles אמיתיים
+    // maxZoom = Leaflet ימתח את הtile האחרון (מעט מטושטש אבל ממשיך לעבוד)
     const satLayer = L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', {
-        maxZoom: 19, attribution: 'Esri'
+        maxNativeZoom: 19, maxZoom: 22, attribution: 'Esri'
     });
     const topoLayer = L.tileLayer('https://{s}.tile.opentopomap.org/{z}/{x}/{y}.png', {
-        maxZoom: 17, attribution: 'OpenTopoMap'
+        maxNativeZoom: 17, maxZoom: 22, attribution: 'OpenTopoMap'
     });
     const streetLayer = L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-        maxZoom: 19, attribution: 'OSM'
+        maxNativeZoom: 19, maxZoom: 22, attribution: 'OSM'
     });
     const urbanLayer = L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', {
-        maxZoom: 19, attribution: 'Carto'
+        maxNativeZoom: 19, maxZoom: 22, attribution: 'Carto'
     });
     satLayer.addTo(map);
 
     // ═══════ OVERLAYS ═══════
     const labelsOverlay = L.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/voyager_only_labels/{z}/{x}/{y}{r}.png', {
-        maxZoom: 19, opacity: 0.7, pane: 'overlayPane', attribution: 'Carto'
+        maxNativeZoom: 19, maxZoom: 22, opacity: 0.7, pane: 'overlayPane', attribution: 'Carto'
     });
     labelsOverlay.addTo(map);
 
