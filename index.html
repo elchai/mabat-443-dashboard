@@ -2864,6 +2864,7 @@ document.getElementById('loginInput').addEventListener('keydown', function(e) {
                 <div id="arrestInfo" class="arrest-info"></div>
                 <div class="arrest-actions">
                     <button onclick="arrestFinish()" id="arrestFinishBtn" disabled>חשב ציר ▶</button>
+                    <button onclick="arrestSnapToRoads()" id="arrestSnapBtn" title="התאם את הציר לכבישים אמיתיים (OSRM)" style="display:none;">🛣️ התאם לכבישים</button>
                     <button onclick="arrestDeleteStart()" id="arrestDeleteStartBtn" style="display:none;background:rgba(255,0,64,.08);border-color:var(--red-dim);color:var(--red);">🗑 מחק מוצא</button>
                     <button onclick="arrestShowSavedPlans()">📁 תוכניות שמורות</button>
                     <button onclick="arrestClear()">איפוס</button>
@@ -4405,6 +4406,8 @@ async function arrestFinish() {
         📍 נ״ד ביניים: <b>${arrestState.waypoints.length}</b>
     `;
     document.getElementById('arrestFinishBtn').disabled = false;
+    const snapBtn = document.getElementById('arrestSnapBtn');
+    if (snapBtn) snapBtn.style.display = 'inline-block';
     const exports = document.getElementById('arrestExports');
     exports.style.display = 'flex';
     const tgt = arrestState.target;
@@ -4456,6 +4459,8 @@ function arrestClear(resetUI = true) {
         document.getElementById('arrestExports').style.display = 'none';
         const delBtn = document.getElementById('arrestDeleteStartBtn');
         if (delBtn) delBtn.style.display = 'none';
+        const snapBtn = document.getElementById('arrestSnapBtn');
+        if (snapBtn) snapBtn.style.display = 'none';
         arrestUpdateStep();
     }
 }
@@ -4483,6 +4488,67 @@ function arrestCopyText() {
         step.innerHTML = '📋 הועתק ללוח';
         setTimeout(arrestUpdateStep, 1500);
     });
+}
+
+// התאם את ציר המעצר לכבישים אמיתיים (OSRM open routing)
+// מחליף את הקווים הישרים במסלול דרך הרשת הכבישים
+async function arrestSnapToRoads() {
+    if (!arrestState.target || !arrestState.startPoint) return;
+    const step = document.getElementById('arrestStep');
+    step.innerHTML = '⏳ מחשב התאמה לכבישים...';
+
+    const pts = [arrestState.startPoint, ...arrestState.waypoints, arrestState.target];
+    const coordsStr = pts.map(p => `${p.lng},${p.lat}`).join(';');
+    const url = `https://router.project-osrm.org/route/v1/driving/${coordsStr}?overview=full&geometries=geojson&steps=false`;
+
+    try {
+        const res = await fetch(url, { signal: AbortSignal.timeout(15000) });
+        if (!res.ok) throw new Error('OSRM ' + res.status);
+        const data = await res.json();
+        if (!data.routes || !data.routes[0]) throw new Error('No route found');
+        const route = data.routes[0];
+        const coords = route.geometry.coordinates.map(c => [c[1], c[0]]);
+
+        // ניקוי מלא של הציר הקודם (פוליליין + תוויות המרחק)
+        arrestClearRouteOnly();
+
+        // קו חדש דרך הכבישים
+        const line = L.polyline(coords, {
+            color: '#a855f7', weight: 2.5, opacity: 0.95, lineCap: 'round'
+        }).bindTooltip(`ציר ניווט (${(route.distance/1000).toFixed(2)} ק״מ · ${Math.round(route.duration/60)} דק׳)`, { sticky: true, className: 'dark-tooltip' }).addTo(map);
+        arrestState.routeLayers.push(line);
+
+        // תוויות מרחק בין waypoints (לפי הסגמנטים המקוריים)
+        for (let i = 1; i < pts.length; i++) {
+            const a = pts[i - 1], b = pts[i];
+            const segM = haversineMeters(a, b);
+            const lbl = L.marker([(a.lat + b.lat) / 2, (a.lng + b.lng) / 2], {
+                icon: L.divIcon({
+                    className: 'arrest-seg-label',
+                    html: `<span>${segM < 1000 ? Math.round(segM) + 'מ׳' : (segM/1000).toFixed(2) + 'ק״מ'}</span>`,
+                    iconSize: null, iconAnchor: [0, 0]
+                }),
+                interactive: false, keyboard: false
+            }).addTo(map);
+            arrestState.routeLayers.push(lbl);
+        }
+
+        arrestState.routeCoords = coords;
+        arrestState.routeMeta = { distanceM: route.distance, durationS: route.duration };
+
+        document.getElementById('arrestInfo').innerHTML = `
+            🏠 יעד + 🟢 מוצא מוגדרים<br>
+            🛣 מרחק דרך כבישים: <b>${(route.distance/1000).toFixed(2)} ק״מ</b><br>
+            ⏱ זמן נסיעה: <b>${Math.round(route.duration/60)} דק׳</b><br>
+            📍 נ״ד ביניים: <b>${arrestState.waypoints.length}</b>
+        `;
+        step.innerHTML = '✅ ציר הותאם לכבישים';
+        showToast('🛣 הציר הותאם לרשת הכבישים');
+    } catch (e) {
+        console.warn('OSRM snap failed:', e.message);
+        step.innerHTML = '⚠️ התאמה לכבישים נכשלה (ציר קו-ישר נשאר)';
+        showToast('⚠️ התאמה נכשלה: ' + e.message);
+    }
 }
 
 function arrestDeleteStart() {
