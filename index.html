@@ -5707,16 +5707,27 @@ function arrestUpdateExportLinks() {
     // Target pin on Google Maps
     const gmaps = document.getElementById('arrestGmaps');
     if (gmaps) gmaps.href = `https://www.google.com/maps/place/${nameEnc}/@${t.lat},${t.lng},18z/data=!3m1!1e3`;
-    // Directions — use API v1 with travelmode synced to planner's mode, waypoints as pipe-separated
+    // Directions — use API v1 with travelmode synced to planner's mode, waypoints as pipe-separated.
+    // Google caps waypoints at ~8 and goes weird past that → downsample if user placed many.
     const gmapsDir = document.getElementById('arrestGmapsDir');
     if (gmapsDir) {
         const travelmode = arrestState.travelMode === 'foot' ? 'walking' : 'driving';
-        const waypointsParam = arrestState.waypoints.length
-            ? '&waypoints=' + arrestState.waypoints.map(w => `${w.lat},${w.lng}`).join('|')
+        const fmt = n => (+n).toFixed(6); // 6-decimal precision — more than enough (~11cm)
+        const wps = arrestState.waypoints;
+        const MAX_WP = 8;
+        let wpsToUse = wps;
+        if (wps.length > MAX_WP) {
+            // Evenly sample MAX_WP points out of the array, preserving first and last
+            const step = (wps.length - 1) / (MAX_WP - 1);
+            wpsToUse = [];
+            for (let i = 0; i < MAX_WP; i++) wpsToUse.push(wps[Math.round(i * step)]);
+        }
+        const waypointsParam = wpsToUse.length
+            ? '&waypoints=' + wpsToUse.map(w => `${fmt(w.lat)},${fmt(w.lng)}`).join('|')
             : '';
         gmapsDir.href = `https://www.google.com/maps/dir/?api=1`
-            + `&origin=${s.lat},${s.lng}`
-            + `&destination=${t.lat},${t.lng}`
+            + `&origin=${fmt(s.lat)},${fmt(s.lng)}`
+            + `&destination=${fmt(t.lat)},${fmt(t.lng)}`
             + waypointsParam
             + `&travelmode=${travelmode}`;
     }
