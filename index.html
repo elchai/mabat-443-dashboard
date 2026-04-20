@@ -4077,7 +4077,7 @@ const arrestState = {
     travelMode: 'foot',     // 'foot' = רגלית (4 קמ"ש), 'vehicle' = רכובה (30 קמ"ש)
     targetName: '',         // שם המטרה (לעריכה - נכנס ל-Google Maps link)
     startPoint: null,       // נקודת מוצא (יציאת הכוח)
-    waypoints: [],          // נ״ד ביניים לניווט
+    waypoints: [],          // נעץ ביניים לניווט
     layers: [],
     targetMarker: null,
     targetWedge: null,      // חץ כיוון הפתח
@@ -4124,7 +4124,7 @@ function arrestOnMapClick(e) {
     document.getElementById('arrestFinishBtn').disabled = !(arrestState.target && arrestState.startPoint);
 }
 
-// כל האייקונים — מינימליים, SVG, דקים. מטרה=אדום, מוצא=ירוק, נ״ד=סיכת מפה.
+// כל האייקונים — מינימליים, SVG, דקים. מטרה=אדום, מוצא=ירוק, נעץ=סיכת מפה.
 function arrestCrosshairSVG(color) {
     return `<svg width="18" height="18" viewBox="0 0 18 18" xmlns="http://www.w3.org/2000/svg" style="filter:drop-shadow(0 0 2px ${color});">
         <circle cx="9" cy="9" r="7" fill="none" stroke="${color}" stroke-width="1.2"/>
@@ -4331,7 +4331,7 @@ function arrestAddWaypoint(lat, lng) {
         icon: arrestBuildWpIcon(wpIdx + 1),
         draggable: true,
         autoPan: true
-    }).bindTooltip(arrestTooltipContent(`נ״ד ${wpIdx + 1}`), { direction: 'top', className: 'dark-tooltip' }).addTo(map);
+    }).bindTooltip(arrestTooltipContent(`נעץ ${wpIdx + 1}`), { direction: 'top', className: 'dark-tooltip' }).addTo(map);
     m.on('drag', (ev) => {
         const ll = ev.target.getLatLng();
         // מצא את ה-index הנוכחי לפי ה-marker (ייתכן והשתנה בעקבות מחיקה של אחר)
@@ -4344,13 +4344,13 @@ function arrestAddWaypoint(lat, lng) {
         if (ev.originalEvent) ev.originalEvent.preventDefault();
         const idx = arrestState.waypointMarkers.indexOf(m);
         if (idx < 0) return;
-        if (!confirm(`למחוק נ״ד ${idx + 1}?`)) return;
+        if (!confirm(`למחוק נעץ ${idx + 1}?`)) return;
         map.removeLayer(m);
         arrestState.waypoints.splice(idx, 1);
         arrestState.waypointMarkers.splice(idx, 1);
         arrestState.waypointMarkers.forEach((mm, i) => {
             mm.setIcon(arrestBuildWpIcon(i + 1));
-            mm.setTooltipContent(arrestTooltipContent(`נ״ד ${i + 1}`));
+            mm.setTooltipContent(arrestTooltipContent(`נעץ ${i + 1}`));
         });
         arrestRefreshRoute();
         arrestUpdateStep();
@@ -4360,10 +4360,10 @@ function arrestAddWaypoint(lat, lng) {
         const idx = arrestState.waypointMarkers.indexOf(m);
         if (idx < 0) return;
         const cur = arrestState.waypoints[idx].note || '';
-        const note = prompt(`הערה לנ״ד ${idx + 1}:`, cur);
+        const note = prompt(`הערה לנעץ ${idx + 1}:`, cur);
         if (note === null) return; // cancel
         arrestState.waypoints[idx].note = note;
-        const badge = note ? `נ״ד ${idx + 1} · ${note.substring(0, 30)}` : `נ״ד ${idx + 1}`;
+        const badge = note ? `נעץ ${idx + 1} · ${note.substring(0, 30)}` : `נעץ ${idx + 1}`;
         m.setTooltipContent(arrestTooltipContent(badge));
     });
     if (m.getElement()) m.getElement().oncontextmenu = (e) => { e.preventDefault(); return false; };
@@ -4396,9 +4396,9 @@ function arrestUpdateStep() {
         step.innerHTML = 'לחץ לסימון <b style="color:#00ff88;">נקודת מוצא</b>';
         info.innerHTML = `🔴 מטרה: <b>${arrestState.target.lat.toFixed(5)}, ${arrestState.target.lng.toFixed(5)}</b>`;
     } else {
-        step.innerHTML = 'הוסף <b>נ״ד</b> ביניים (אופציונלי) או <b>"חשב ציר"</b> לסיום';
+        step.innerHTML = 'הוסף <b>נעץ</b> ביניים (אופציונלי) או <b>"חשב ציר"</b> לסיום';
         const wpsCount = arrestState.waypoints.length;
-        info.innerHTML = `🔴 מטרה מוגדרת<br>🟢 מוצא מוגדר<br>📍 ${wpsCount} נ״ד ביניים`;
+        info.innerHTML = `🔴 מטרה מוגדרת<br>🟢 מוצא מוגדר<br>📍 ${wpsCount} נעץ ביניים`;
     }
 }
 
@@ -4406,18 +4406,24 @@ async function arrestFinish() {
     if (!arrestState.target || !arrestState.startPoint) return;
     const step = document.getElementById('arrestStep');
 
-    // ציר ניווט = קווים ישרים בין הנקודות שסומנו (מוצא → נ״ד → יעד)
-    // אין OSRM — המשתמש שולט בציר על ידי מיקום נ״ד.
+    // ציר ניווט = קווים ישרים בין הנקודות שסומנו (מוצא → נעץ → יעד)
+    // אין OSRM — המשתמש שולט בציר על ידי מיקום נעץ.
     const pts = [arrestState.startPoint, ...arrestState.waypoints, arrestState.target];
     const routeCoords = pts.map(p => [p.lat, p.lng]);
     let distanceM = 0;
     for (let i = 1; i < pts.length; i++) distanceM += haversineMeters(pts[i - 1], pts[i]);
     const durationS = distanceM / arrestSpeedMS();
 
-    // קו סגול דק יחיד בלבד
+    // קו סגול דק יחיד בלבד — קליק עליו מוסיף נעץ חדש בנקודה המדויקת
     const routeInner = L.polyline(routeCoords, {
-        color: '#a855f7', weight: 2.5, opacity: 0.95, lineCap: 'round'
-    }).bindTooltip('ציר ניווט', { sticky: true, className: 'dark-tooltip' }).addTo(map);
+        color: '#a855f7', weight: 4, opacity: 0.95, lineCap: 'round',
+        className: 'arrest-route-line'
+    }).bindTooltip('לחץ להוספת נעץ', { sticky: true, className: 'dark-tooltip' }).addTo(map);
+    // click על הקו → הוספת נעץ בנקודה המדויקת
+    routeInner.on('click', (ev) => {
+        L.DomEvent.stopPropagation(ev);
+        insertWaypointAt(ev.latlng);
+    });
     arrestState.routeLayers.push(routeInner);
 
     // תוויות מרחק על כל segment (אמצע הקו בין שתי נקודות)
@@ -4453,7 +4459,7 @@ async function arrestFinish() {
         🟢 מוצא: <b>${arrestState.startPoint.lat.toFixed(5)}, ${arrestState.startPoint.lng.toFixed(5)}</b><br>
         📏 מרחק: <b>${(distanceM / 1000).toFixed(2)} ק״מ</b> · ${arrestModeLabel()}<br>
         ⏱ זמן משוער: <b>${Math.round(durationS / 60)} דק׳</b><br>
-        📍 נ״ד ביניים: <b>${arrestState.waypoints.length}</b>
+        📍 נעץ ביניים: <b>${arrestState.waypoints.length}</b>
     `;
     document.getElementById('arrestFinishBtn').disabled = false;
     const snapBtn = document.getElementById('arrestSnapBtn');
@@ -4536,7 +4542,7 @@ function arrestCopyText() {
         s ? `🟢 נקודת מוצא: ${s.lat.toFixed(5)}, ${s.lng.toFixed(5)}` : '',
         `📏 מרחק: ${(m.distanceM / 1000).toFixed(2)} ק״מ · ${arrestModeLabel()}`,
         `⏱ זמן משוער: ${Math.round(m.durationS / 60)} דק׳`,
-        wpLines.length ? `📍 נ״ד (${wpLines.length}):\n${wpLines.join('\n')}` : '',
+        wpLines.length ? `📍 נעץ (${wpLines.length}):\n${wpLines.join('\n')}` : '',
         `📍 מטרה בגוגל: https://www.google.com/maps/place/${nameEnc}/@${t.lat},${t.lng},18z`,
     ].filter(Boolean);
     navigator.clipboard.writeText(lines.join('\n')).then(() => {
@@ -4589,6 +4595,97 @@ function arrestModeLabel() {
 
 // התאם את ציר המעצר לכבישים אמיתיים (OSRM open routing)
 // מחליף את הקווים הישרים במסלול דרך הרשת הכבישים
+// הוספת נעץ חדש באמצע הציר — נקרא על-קליק של הקו הסגול
+// מצא את הסגמנט שהכי קרוב ללחיצה, ותוסיף נעץ בדיוק שם
+function insertWaypointAt(latlng) {
+    if (!arrestState.target || !arrestState.startPoint) return;
+    const pts = [arrestState.startPoint, ...arrestState.waypoints, arrestState.target];
+    // מוצא את הסגמנט הכי קרוב
+    let bestIdx = 0, bestDist = Infinity, bestProj = null;
+    for (let i = 1; i < pts.length; i++) {
+        const proj = projectOnSegment(latlng, pts[i - 1], pts[i]);
+        const d = haversineMeters(latlng, proj);
+        if (d < bestDist) {
+            bestDist = d;
+            bestIdx = i;
+            bestProj = proj;
+        }
+    }
+    // הוסף נעץ במיקום המוצמד לסגמנט
+    // bestIdx=1 → בין startPoint לנעץ 1 → insertAt 0 ב-waypoints
+    // bestIdx=n → בין נעץ n-1 לtarget → insertAt waypoints.length
+    const insertIdx = bestIdx - 1;
+    const newWp = { lat: bestProj.lat, lng: bestProj.lng, note: '' };
+    arrestState.waypoints.splice(insertIdx, 0, newWp);
+
+    // הוסף marker למפה
+    const m = buildWaypointMarker(newWp, insertIdx);
+    arrestState.waypointMarkers.splice(insertIdx, 0, m);
+    // רענון מספרי כל ה-markers הקיימים
+    arrestState.waypointMarkers.forEach((mm, i) => {
+        mm.setIcon(arrestBuildWpIcon(i + 1));
+        mm.setTooltipContent(arrestTooltipContent(`נעץ ${i + 1}`));
+    });
+    arrestRefreshRoute();
+    arrestUpdateStep();
+    showToast(`📍 נעץ ${insertIdx + 1} נוסף`);
+}
+
+// helper: הטלת נקודה על סגמנט (לdesign של "מצא הכי קרוב על הקו")
+function projectOnSegment(p, a, b) {
+    // עבודה בגיאוגרפיה פשוטה (small distances)
+    const ax = a.lng, ay = a.lat, bx = b.lng, by = b.lat;
+    const dx = bx - ax, dy = by - ay;
+    const len2 = dx * dx + dy * dy;
+    if (len2 === 0) return { lat: ay, lng: ax };
+    let t = ((p.lng - ax) * dx + (p.lat - ay) * dy) / len2;
+    t = Math.max(0, Math.min(1, t));
+    return { lat: ay + t * dy, lng: ax + t * dx };
+}
+
+// בונה marker של נעץ חדש (הוצא לפונקציה נפרדת כדי לאפשר insert)
+function buildWaypointMarker(wp, idx) {
+    const m = L.marker([wp.lat, wp.lng], {
+        icon: arrestBuildWpIcon(idx + 1),
+        draggable: true,
+        autoPan: true
+    }).bindTooltip(arrestTooltipContent(`נעץ ${idx + 1}`), { direction: 'top', className: 'dark-tooltip' }).addTo(map);
+    m.on('drag', (ev) => {
+        const ll = ev.target.getLatLng();
+        const i = arrestState.waypointMarkers.indexOf(m);
+        if (i >= 0) arrestState.waypoints[i] = { ...arrestState.waypoints[i], lat: ll.lat, lng: ll.lng };
+    });
+    m.on('dragend', arrestRefreshRoute);
+    m.on('dblclick contextmenu', (ev) => {
+        L.DomEvent.stopPropagation(ev);
+        if (ev.originalEvent) ev.originalEvent.preventDefault();
+        const i = arrestState.waypointMarkers.indexOf(m);
+        if (i < 0) return;
+        if (!confirm(`למחוק נעץ ${i + 1}?`)) return;
+        map.removeLayer(m);
+        arrestState.waypoints.splice(i, 1);
+        arrestState.waypointMarkers.splice(i, 1);
+        arrestState.waypointMarkers.forEach((mm, k) => {
+            mm.setIcon(arrestBuildWpIcon(k + 1));
+            mm.setTooltipContent(arrestTooltipContent(`נעץ ${k + 1}`));
+        });
+        arrestRefreshRoute();
+        arrestUpdateStep();
+    });
+    m.on('click', (ev) => {
+        const i = arrestState.waypointMarkers.indexOf(m);
+        if (i < 0) return;
+        const cur = arrestState.waypoints[i].note || '';
+        const note = prompt(`הערה לנעץ ${i + 1}:`, cur);
+        if (note === null) return;
+        arrestState.waypoints[i].note = note;
+        m.setTooltipContent(arrestTooltipContent(note ? `נעץ ${i + 1} · ${note.substring(0, 30)}` : `נעץ ${i + 1}`));
+    });
+    if (m.getElement()) m.getElement().oncontextmenu = (e) => { e.preventDefault(); return false; };
+    m.on('add', () => { if (m.getElement()) m.getElement().oncontextmenu = (e) => { e.preventDefault(); return false; }; });
+    return m;
+}
+
 async function arrestSnapToRoads() {
     if (!arrestState.target || !arrestState.startPoint) return;
     const step = document.getElementById('arrestStep');
@@ -4639,7 +4736,7 @@ async function arrestSnapToRoads() {
             🏠 יעד + 🟢 מוצא מוגדרים<br>
             🛣 מרחק דרך כבישים: <b>${(route.distance/1000).toFixed(2)} ק״מ</b> · ${arrestModeLabel()}<br>
             ⏱ זמן משוער: <b>${Math.round(durOwn/60)} דק׳</b><br>
-            📍 נ״ד ביניים: <b>${arrestState.waypoints.length}</b>
+            📍 נעץ ביניים: <b>${arrestState.waypoints.length}</b>
         `;
         step.innerHTML = '✅ ציר הותאם לכבישים';
         showToast('🛣 הציר הותאם לרשת הכבישים');
@@ -4674,7 +4771,7 @@ function arrestShowSavedPlans() {
                     <div class="arrest-saved-item" data-idx="${idx}">
                         <div class="arrest-saved-main">
                             <div class="arrest-saved-time">${dStr}</div>
-                            <div class="arrest-saved-meta">${nm}${loc} · ${km} ק״מ · ${wpCount} נ״ד · פתח ${p.targetEntrance || 6}</div>
+                            <div class="arrest-saved-meta">${nm}${loc} · ${km} ק״מ · ${wpCount} נעץ · פתח ${p.targetEntrance || 6}</div>
                         </div>
                         <button class="arrest-saved-btn load" onclick="arrestLoadPlan(${idx})" title="טען">↩</button>
                         <button class="arrest-saved-btn del" onclick="arrestDeletePlan(${idx})" title="מחק">🗑</button>
