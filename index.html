@@ -3053,17 +3053,36 @@ body {
     /* Threat gauge: fill the width properly, no wasted space around circle */
     .threat-container, .threat-gauge { width: 100%; padding: 12px; }
 
-    /* Operations view: dock below map */
-    #view-operations.active { min-height: auto; }
-    #view-operations .ops-layout { flex-direction: column !important; min-height: auto; }
+    /* Operations view: map on top (fixed height), dock below (grows) */
+    #view-operations.active {
+        min-height: auto !important;
+        display: flex !important;
+        flex-direction: column !important;
+    }
+    #view-operations .ops-layout {
+        flex-direction: column !important;
+        min-height: auto !important;
+    }
+    #view-operations .ops-map-wrap {
+        order: 1 !important;
+        width: 100% !important;
+        height: 55vh !important;
+        min-height: 360px !important;
+        flex: 0 0 auto !important;
+        position: relative;
+    }
     #view-operations .ops-planner-dock {
         width: 100% !important;
-        max-height: 55vh;
-        order: 2;
+        max-height: none !important;
+        order: 2 !important;
         border-left: none !important;
         border-top: 1px solid var(--red-dim);
     }
-    #view-operations .ops-map-wrap { order: 1; min-height: 50vh; }
+    #view-operations .ops-map-wrap #map,
+    #view-operations .ops-map-wrap .leaflet-container {
+        width: 100% !important;
+        height: 100% !important;
+    }
     #view-operations .ops-hdr-btn { padding: 5px 10px; font-size: 11px; }
 
     /* Data view: scrollable tabs */
@@ -4071,7 +4090,7 @@ window.tacticalAlert = function(message, opts) {
         <div class="view-header">
             <div class="view-title">ניהול מידע</div>
             <div style="display:flex;gap:8px;">
-                <button onclick="exportAlertsCsv()" style="background:transparent;border:1px solid var(--cyan);color:var(--cyan);padding:5px 12px;border-radius:4px;cursor:pointer;font-family:inherit;font-size:12px;">📥 CSV</button>
+                <button onclick="exportAlertsCsv()" style="background:transparent;border:1px solid var(--cyan);color:var(--cyan);padding:5px 12px;border-radius:4px;cursor:pointer;font-family:inherit;font-size:12px;"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-2px;margin-left:4px;"><path d="M3 3h18v18H3z"/><path d="M3 9h18M3 15h18M9 3v18M15 3v18"/></svg>CSV</button>
             </div>
         </div>
         <div class="data-tabs">
@@ -4211,7 +4230,7 @@ window.tacticalAlert = function(message, opts) {
 <div class="history-overlay" id="historyOverlay">
     <div class="history-header">
         <div class="history-title">יומן מבצעים</div>
-        <button class="history-close" onclick="exportAlertsCsv()" style="margin-right:auto;background:transparent;border:1px solid var(--cyan);color:var(--cyan);" title="ייצוא CSV">📥 CSV</button>
+        <button class="history-close" onclick="exportAlertsCsv()" style="margin-right:auto;background:transparent;border:1px solid var(--cyan);color:var(--cyan);" title="ייצוא CSV"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-2px;margin-left:4px;"><path d="M3 3h18v18H3z"/><path d="M3 9h18M3 15h18M9 3v18M15 3v18"/></svg>CSV</button>
         <button class="history-close" onclick="toggleHistory()">סגור ESC</button>
     </div>
     <div class="history-stat-bar" id="historyStats"></div>
@@ -5404,7 +5423,10 @@ function switchView(name) {
     } catch(e) {}
 
     if (window.map && typeof window.map.invalidateSize === 'function') {
+        // Multiple invalidations — mobile layout transitions can take a beat
         setTimeout(() => window.map.invalidateSize(), 50);
+        setTimeout(() => window.map.invalidateSize(), 300);
+        setTimeout(() => window.map.invalidateSize(), 800);
     }
 
     // Mobile: close sidebar after nav
