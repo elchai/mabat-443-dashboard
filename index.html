@@ -1923,6 +1923,43 @@ body {
     border-radius: 2px;
 }
 
+/* ═══════ VIDEO MODAL ═══════ */
+#videoModalOverlay {
+    position: fixed; inset: 0; z-index: 9999;
+    background: rgba(0,0,0,.88);
+    display: flex; align-items: center; justify-content: center;
+    backdrop-filter: blur(4px);
+}
+.video-modal-card {
+    width: min(1100px, 94vw);
+    height: min(700px, 88vh);
+    background: rgba(4, 8, 16, 0.98);
+    border: 1px solid var(--red);
+    box-shadow: 0 0 40px rgba(255,0,64,.3);
+    display: flex; flex-direction: column;
+    overflow: hidden;
+    position: relative;
+}
+.video-modal-header {
+    display: flex; justify-content: space-between; align-items: center;
+    padding: 8px 14px;
+    background: rgba(255,0,64,.1);
+    border-bottom: 1px solid rgba(255,0,64,.3);
+    font-family: var(--font-he); direction: rtl;
+    color: var(--red); font-weight: 700; font-size: 13px;
+}
+.video-modal-btn {
+    display: inline-flex; align-items: center; justify-content: center;
+    width: 28px; height: 28px;
+    background: transparent; border: 1px solid var(--cyan-dim);
+    color: var(--cyan); font-size: 14px; cursor: pointer;
+    text-decoration: none; margin-left: 4px;
+}
+.video-modal-btn:hover { background: rgba(0,212,255,.15); }
+.video-modal-btn.close { border-color: var(--red-dim); color: var(--red); }
+.video-modal-btn.close:hover { background: rgba(255,0,64,.15); }
+.video-modal-body { flex: 1; width: 100%; background: #000; position: relative; }
+
 /* ═══════ MAPILLARY VIEWER MODAL ═══════ */
 #mlyViewerOverlay {
     position: fixed; inset: 0; z-index: 9999;
@@ -4019,6 +4056,53 @@ async function loadMapillaryAt(lat, lng, radiusM = 1200) {
     showToast(`✅ ${plotted} תמונות נטענו. לחץ על נקודה לצפייה.`);
 }
 
+// Video modal — מזהה את סוג ה-URL ומרנדר בהתאם (mp4, YouTube, Twitter, Telegram embed)
+function openVideoModal(url) {
+    if (!url) return;
+    const existing = document.getElementById('videoModalOverlay');
+    if (existing) existing.remove();
+
+    let body = '';
+    if (/\.mp4(\?|$)/i.test(url)) {
+        // HTML5 video
+        body = `<video src="${url}" controls autoplay style="width:100%;height:100%;background:#000;"></video>`;
+    } else if (/youtube\.com\/watch\?v=|youtu\.be\//i.test(url)) {
+        const m = url.match(/(?:v=|youtu\.be\/|shorts\/|embed\/)([A-Za-z0-9_-]{6,20})/);
+        const vid = m ? m[1] : '';
+        body = `<iframe src="https://www.youtube.com/embed/${vid}?autoplay=1" frameborder="0" allow="autoplay;fullscreen;encrypted-media" allowfullscreen style="width:100%;height:100%;"></iframe>`;
+    } else if (/twitter\.com|x\.com/i.test(url)) {
+        // Twitter embed via blog card
+        body = `<iframe src="${url.replace('x.com','twitter.com')}" frameborder="0" style="width:100%;height:100%;background:#000;"></iframe>
+                <div style="position:absolute;bottom:8px;right:8px;z-index:10;"><a href="${url}" target="_blank" style="color:#00d4ff;font-size:10px;">פתח ב-X ↗</a></div>`;
+    } else if (/t\.me\//i.test(url)) {
+        // Telegram embed
+        const embedUrl = url.includes('?embed=1') ? url : url + '?embed=1';
+        body = `<iframe src="${embedUrl}" frameborder="0" style="width:100%;height:100%;background:#000;"></iframe>`;
+    } else {
+        body = `<div style="padding:20px;text-align:center;color:#ccc;">
+                <p>לא ניתן להציג את הוידאו בתצוגה פנימית.</p>
+                <a href="${url}" target="_blank" style="color:#00d4ff;">פתח בטאב חדש ↗</a>
+            </div>`;
+    }
+
+    const overlay = document.createElement('div');
+    overlay.id = 'videoModalOverlay';
+    overlay.innerHTML = `
+        <div class="video-modal-card">
+            <div class="video-modal-header">
+                <span>▶️ סרטון</span>
+                <div>
+                    <a href="${url}" target="_blank" class="video-modal-btn">↗</a>
+                    <button onclick="document.getElementById('videoModalOverlay').remove()" class="video-modal-btn close">✕</button>
+                </div>
+            </div>
+            <div class="video-modal-body">${body}</div>
+        </div>
+    `;
+    overlay.onclick = (e) => { if (e.target === overlay) overlay.remove(); };
+    document.body.appendChild(overlay);
+}
+
 // Mapillary Viewer Modal — מציג את התמונה/פנורמה מבפנים, בלי לעזוב את הדשבורד
 function openMapillaryViewer(imageId, imgMeta) {
     const existing = document.getElementById('mlyViewerOverlay');
@@ -5468,6 +5552,7 @@ function renderAlerts() {
             ${alertExpandedDetails(item)}
             <div class="alert-meta-row" style="display:none;">
                 <a href="javascript:void(0)" onclick="openPublisherProfile('${escapeHtml(srcIdForProfile)}',event)" class="source-link-clickable" style="color:#00d4ff;font-size:10px;text-decoration:none;">&#128225; ${escapeHtml(item.source || 'N/A')}</a>
+                ${item.videoUrl ? '<a href="javascript:void(0)" onclick="event.stopPropagation();openVideoModal(\'' + escapeHtml(item.videoUrl).replace(/'/g,'\\\'') + '\')" style="color:#ff0040;font-size:10px;text-decoration:none;font-weight:700;">▶️ סרטון</a>' : ''}
                 ${tgLinkFull ? '<a href="' + escapeHtml(tgLinkFull) + '" target="_blank" onclick="event.stopPropagation();" style="color:#00d4ff;font-size:10px;text-decoration:none;">✈️ טלגרם</a>' : ''}
                 ${sourceUrl && sourceUrl !== tgLinkFull ? '<a href="' + escapeHtml(sourceUrl) + '" target="_blank" onclick="event.stopPropagation();" style="color:var(--text-dim);font-size:10px;text-decoration:none;">&#128279; מקור</a>' : ''}
                 <div class="vote-buttons">
@@ -6460,6 +6545,8 @@ document.addEventListener('keydown', (e) => {
         if (picker) picker.remove();
         const mlyView = document.getElementById('mlyViewerOverlay');
         if (mlyView) mlyView.remove();
+        const vidView = document.getElementById('videoModalOverlay');
+        if (vidView) vidView.remove();
         return;
     }
 
