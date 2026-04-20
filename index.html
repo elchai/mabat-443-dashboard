@@ -2823,7 +2823,7 @@ document.getElementById('loginInput').addEventListener('keydown', function(e) {
                 <input type="range" id="confFilter" min="0" max="90" step="5" value="0" oninput="updateConfFilter()">
                 <span id="confFilterVal" class="conf-filter-val">0%</span>
             </label>
-            <input type="text" class="search-input" id="searchInput" placeholder="חיפוש..." oninput="applyFilters()">
+            <input type="text" class="search-input" id="searchInput" placeholder="חיפוש..." oninput="applyFilters(); saveUserPrefs && saveUserPrefs()">
         </div>
         <div class="timeline-graph">
             <div class="timeline-label">פעילות 24 שעות</div>
@@ -3131,6 +3131,7 @@ function updateConfFilter() {
     if (!el) return;
     minConfidence = Number(el.value) / 100;
     if (valEl) valEl.textContent = Math.round(minConfidence * 100) + '%';
+    if (typeof saveUserPrefs === 'function') saveUserPrefs();
     if (typeof applyFilters === 'function') applyFilters();
 }
 let historyFilter = 'all';
@@ -4769,8 +4770,48 @@ function renderAll() {
 function setFilter(level, btn) {
     activeFilter = level;
     document.querySelectorAll('.alert-toolbar .filter-chip').forEach(c => c.classList.remove('active'));
-    btn.classList.add('active');
+    if (btn) btn.classList.add('active');
+    saveUserPrefs();
     renderAlerts();
+}
+
+// ═══════ USER PREFERENCES (localStorage) ═══════
+const PREFS_KEY = 'mabat443-user-prefs-v1';
+function saveUserPrefs() {
+    try {
+        const prefs = {
+            activeFilter: activeFilter,
+            minConfidence: minConfidence,
+            searchText: (document.getElementById('searchInput') || {}).value || '',
+            showAnarchists: typeof showAnarchists !== 'undefined' ? showAnarchists : true,
+        };
+        localStorage.setItem(PREFS_KEY, JSON.stringify(prefs));
+    } catch (e) { /* ignore */ }
+}
+function loadUserPrefs() {
+    try {
+        const raw = localStorage.getItem(PREFS_KEY);
+        if (!raw) return;
+        const prefs = JSON.parse(raw);
+        if (prefs.activeFilter && prefs.activeFilter !== 'all') {
+            const chip = document.querySelector(`.alert-toolbar .filter-chip[data-filter="${prefs.activeFilter}"]`);
+            if (chip) setFilter(prefs.activeFilter, chip);
+        }
+        if (typeof prefs.minConfidence === 'number' && prefs.minConfidence > 0) {
+            minConfidence = prefs.minConfidence;
+            const sl = document.getElementById('confFilter');
+            const valEl = document.getElementById('confFilterVal');
+            if (sl) sl.value = Math.round(minConfidence * 100);
+            if (valEl) valEl.textContent = Math.round(minConfidence * 100) + '%';
+        }
+        if (prefs.searchText) {
+            const si = document.getElementById('searchInput');
+            if (si) si.value = prefs.searchText;
+        }
+        if (typeof prefs.showAnarchists === 'boolean' && typeof showAnarchists !== 'undefined') {
+            showAnarchists = prefs.showAnarchists;
+        }
+    } catch (e) { /* ignore */ }
 }
 
 function applyFilters() {
@@ -6292,6 +6333,7 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     } catch(e) { console.error('Map init error:', e); }
 
+    try { loadUserPrefs(); } catch(e) { console.error('Prefs init error:', e); }
     try { fetchData(); } catch(e) { console.error('Fetch init error:', e); }
     try { loadJournalNotes(); } catch(e) { console.error('Notes init error:', e); }
     try { loadAlertVotes(); } catch(e) { console.error('Votes init error:', e); }
