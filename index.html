@@ -2225,6 +2225,27 @@ body {
     border-radius: 3px;
     font-size: 12px;
 }
+.arrest-name-row {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    margin-bottom: 6px;
+    font-size: 11px;
+    color: var(--text-secondary);
+}
+.arrest-name-row label { white-space: nowrap; }
+.arrest-name-row input {
+    flex: 1;
+    background: rgba(0, 0, 0, 0.3);
+    border: 1px solid var(--border-primary);
+    color: var(--text-primary);
+    padding: 4px 6px;
+    font-family: var(--font-he);
+    font-size: 11px;
+    direction: rtl;
+}
+.arrest-name-row input:focus { outline: none; border-color: var(--cyan); }
+
 .arrest-mode {
     display: flex;
     gap: 10px;
@@ -2879,6 +2900,10 @@ document.getElementById('loginInput').addEventListener('keydown', function(e) {
             </div>
             <div class="arrest-body">
                 <div id="arrestStep" class="arrest-step">לחץ על המפה לסימון <b style="color:#ff0040;">מטרה</b></div>
+                <div class="arrest-name-row">
+                    <label>שם המטרה:</label>
+                    <input type="text" id="arrestTargetName" placeholder="לדוגמה: בית המבוקש" oninput="arrestUpdateTargetName()">
+                </div>
                 <div class="arrest-mode">
                     <label><input type="radio" name="arrestTravelMode" value="foot" checked onchange="arrestSetTravelMode('foot')"> 🚶 רגלית</label>
                     <label><input type="radio" name="arrestTravelMode" value="vehicle" onchange="arrestSetTravelMode('vehicle')"> 🚗 רכובה</label>
@@ -2892,8 +2917,9 @@ document.getElementById('loginInput').addEventListener('keydown', function(e) {
                     <button onclick="arrestClear()">איפוס</button>
                 </div>
                 <div class="arrest-exports" id="arrestExports" style="display:none;">
-                    <a href="#" id="arrestGmaps" target="_blank">📍 Google Maps</a>
-                    <a href="#" id="arrestWhatsApp" target="_blank">📱 שלח ב-WhatsApp</a>
+                    <a href="#" id="arrestGmaps" target="_blank" title="פותח את המטרה בגוגל מפות עם השם לעריכה">📍 מטרה בגוגל</a>
+                    <a href="#" id="arrestGmapsDir" target="_blank" title="ניווט מלא מוצא→יעד">🧭 ניווט</a>
+                    <a href="#" id="arrestWhatsApp" target="_blank">📱 WhatsApp</a>
                     <button onclick="arrestCopyText()">📋 העתק תקציר</button>
                     <button onclick="arrestSaveLocal()">💾 שמור מקומי</button>
                 </div>
@@ -4049,6 +4075,7 @@ const arrestState = {
     targetEntrance: 6,      // תאימות לאחור: שעה (1-12)
     targetEntranceDeg: 180,  // כיוון מעלות 0-360 (0=צפון, 90=מזרח, 180=דרום, 270=מערב)
     travelMode: 'foot',     // 'foot' = רגלית (4 קמ"ש), 'vehicle' = רכובה (30 קמ"ש)
+    targetName: '',         // שם המטרה (לעריכה - נכנס ל-Google Maps link)
     startPoint: null,       // נקודת מוצא (יציאת הכוח)
     waypoints: [],          // נ״ד ביניים לניווט
     layers: [],
@@ -4435,17 +4462,18 @@ async function arrestFinish() {
     exports.style.display = 'flex';
     const tgt = arrestState.target;
     const start = arrestState.startPoint;
-    const wpStr = arrestState.waypoints.map(w => `/${w.lat},${w.lng}`).join('');
-    document.getElementById('arrestGmaps').href = `https://www.google.com/maps/dir/${start.lat},${start.lng}${wpStr}/${tgt.lat},${tgt.lng}`;
+    arrestUpdateExportLinks(); // מעדכן את arrestGmaps + arrestGmapsDir לפי targetName
 
     // WhatsApp briefing link — תוכנית מלאה כטקסט
+    const targetLabel = arrestState.targetName ? arrestState.targetName : `${tgt.lat.toFixed(5)}, ${tgt.lng.toFixed(5)}`;
     const waLines = [
         '🎯 *תכנון מעצר – מבט 443*',
-        `🏠 יעד: ${tgt.lat.toFixed(5)}, ${tgt.lng.toFixed(5)} (פתח שעה ${arrestState.targetEntrance || 6})`,
+        `🏠 יעד: *${targetLabel}* (${tgt.lat.toFixed(5)}, ${tgt.lng.toFixed(5)}, פתח שעה ${arrestState.targetEntrance || 6})`,
         `🟢 מוצא: ${start.lat.toFixed(5)}, ${start.lng.toFixed(5)}`,
-        `📏 ${(distanceM/1000).toFixed(2)} ק״מ · ⏱ ${Math.round(durationS/60)} דק׳`,
+        `📏 ${(distanceM/1000).toFixed(2)} ק״מ · ${arrestModeLabel()} · ⏱ ${Math.round(durationS/60)} דק׳`,
         ...arrestState.waypoints.map((w, i) => `${i+1}. ${w.lat.toFixed(5)},${w.lng.toFixed(5)}${w.note ? ' – ' + w.note : ''}`),
-        `\n🗺 ${document.getElementById('arrestGmaps').href}`
+        `\n📍 ${document.getElementById('arrestGmaps').href}`,
+        `🧭 ${document.getElementById('arrestGmapsDir').href}`
     ];
     const waText = encodeURIComponent(waLines.join('\n'));
     document.getElementById('arrestWhatsApp').href = `https://wa.me/?text=${waText}`;
@@ -4473,10 +4501,13 @@ function arrestClear(resetUI = true) {
     arrestState.waypointMarkers = [];
     arrestState.target = null;
     arrestState.targetEntrance = 6;
+    arrestState.targetName = '';
     arrestState.startPoint = null;
     arrestState.waypoints = [];
     arrestState.routeCoords = null;
     arrestState.routeMeta = null;
+    const nameInp = document.getElementById('arrestTargetName');
+    if (nameInp) nameInp.value = '';
     if (resetUI) {
         document.getElementById('arrestFinishBtn').disabled = true;
         document.getElementById('arrestExports').style.display = 'none';
@@ -4497,14 +4528,16 @@ function arrestCopyText() {
         const note = w.note ? ` — ${w.note}` : '';
         return `  ${i + 1}. ${w.lat.toFixed(5)}, ${w.lng.toFixed(5)}${note}`;
     });
+    const targetLabel = arrestState.targetName || 'מטרה';
+    const nameEnc = encodeURIComponent(targetLabel.replace(/\s+/g, '+'));
     const lines = [
         '🎯 תכנון מעצר - מבט 443',
-        `🏠 יעד: ${t.lat.toFixed(5)}, ${t.lng.toFixed(5)} (פתח שעה ${arrestState.targetEntrance || 6})`,
+        `🏠 יעד: ${targetLabel} (${t.lat.toFixed(5)}, ${t.lng.toFixed(5)}, פתח שעה ${arrestState.targetEntrance || 6})`,
         s ? `🟢 נקודת מוצא: ${s.lat.toFixed(5)}, ${s.lng.toFixed(5)}` : '',
         `📏 מרחק: ${(m.distanceM / 1000).toFixed(2)} ק״מ · ${arrestModeLabel()}`,
         `⏱ זמן משוער: ${Math.round(m.durationS / 60)} דק׳`,
         wpLines.length ? `📍 נ״ד (${wpLines.length}):\n${wpLines.join('\n')}` : '',
-        `Google Maps: https://www.google.com/maps?q=${t.lat},${t.lng}`,
+        `📍 מטרה בגוגל: https://www.google.com/maps/place/${nameEnc}/@${t.lat},${t.lng},18z`,
     ].filter(Boolean);
     navigator.clipboard.writeText(lines.join('\n')).then(() => {
         const step = document.getElementById('arrestStep');
@@ -4514,6 +4547,27 @@ function arrestCopyText() {
 }
 
 // החלפת מצב נסיעה — רגלית (4 קמ"ש) / רכובה (30 קמ"ש)
+function arrestUpdateTargetName() {
+    const inp = document.getElementById('arrestTargetName');
+    arrestState.targetName = inp ? inp.value.trim() : '';
+    // רענון הקישור ל-Google Maps
+    arrestUpdateExportLinks();
+}
+
+// מעדכן את ה-href של כפתור Google Maps + WhatsApp לפי השם הנוכחי
+function arrestUpdateExportLinks() {
+    if (!arrestState.target || !arrestState.startPoint) return;
+    const t = arrestState.target, s = arrestState.startPoint;
+    const name = arrestState.targetName || 'מטרה';
+    const nameEnc = encodeURIComponent(name.replace(/\s+/g, '+'));
+    const wpStr = arrestState.waypoints.map(w => `/${w.lat},${w.lng}`).join('');
+    // פורמט place/<name> - השם ניתן לעריכה ב-URL ומוצג ב-Google Maps
+    const gmaps = document.getElementById('arrestGmaps');
+    if (gmaps) gmaps.href = `https://www.google.com/maps/place/${nameEnc}/@${t.lat},${t.lng},18z/data=!3m1!1e3`;
+    const gmapsDir = document.getElementById('arrestGmapsDir');
+    if (gmapsDir) gmapsDir.href = `https://www.google.com/maps/dir/${s.lat},${s.lng}${wpStr}/${t.lat},${t.lng}`;
+}
+
 function arrestSetTravelMode(mode) {
     arrestState.travelMode = (mode === 'vehicle') ? 'vehicle' : 'foot';
     // אם קיים ציר — חשב מחדש את הזמן
@@ -4615,11 +4669,12 @@ function arrestShowSavedPlans() {
                 const wpCount = (p.waypoints || []).length;
                 const km = p.meta ? (p.meta.distanceM / 1000).toFixed(1) : '?';
                 const loc = `${p.target.lat.toFixed(4)}, ${p.target.lng.toFixed(4)}`;
+                const nm = p.targetName ? `<span style="color:var(--cyan);">${escapeHtml(p.targetName)}</span> · ` : '';
                 return `
                     <div class="arrest-saved-item" data-idx="${idx}">
                         <div class="arrest-saved-main">
                             <div class="arrest-saved-time">${dStr}</div>
-                            <div class="arrest-saved-meta">${loc} · ${km} ק״מ · ${wpCount} נ״ד · פתח ${p.targetEntrance || 6}</div>
+                            <div class="arrest-saved-meta">${nm}${loc} · ${km} ק״מ · ${wpCount} נ״ד · פתח ${p.targetEntrance || 6}</div>
                         </div>
                         <button class="arrest-saved-btn load" onclick="arrestLoadPlan(${idx})" title="טען">↩</button>
                         <button class="arrest-saved-btn del" onclick="arrestDeletePlan(${idx})" title="מחק">🗑</button>
@@ -4636,6 +4691,14 @@ function arrestLoadPlan(idx) {
     if (!plan) return;
     arrestClear(false);
     arrestState.targetEntrance = plan.targetEntrance || 6;
+    arrestState.targetName = plan.targetName || '';
+    arrestState.travelMode = plan.travelMode || 'foot';
+    const nameInp = document.getElementById('arrestTargetName');
+    if (nameInp) nameInp.value = arrestState.targetName;
+    // Update radio button state
+    document.querySelectorAll('input[name="arrestTravelMode"]').forEach(r => {
+        r.checked = (r.value === arrestState.travelMode);
+    });
     arrestAddTarget(plan.target.lat, plan.target.lng);
     if (plan.startPoint) arrestAddStart(plan.startPoint.lat, plan.startPoint.lng);
     (plan.waypoints || []).forEach(w => {
@@ -4669,8 +4732,10 @@ function arrestSaveLocal() {
         ts: Date.now(),
         target: arrestState.target,
         targetEntrance: arrestState.targetEntrance || 6,
+        targetName: arrestState.targetName || '',
         startPoint: arrestState.startPoint,
         waypoints: arrestState.waypoints,
+        travelMode: arrestState.travelMode,
         meta: arrestState.routeMeta,
     });
     localStorage.setItem('mabat443-arrest-plans', JSON.stringify(plans.slice(-20)));
