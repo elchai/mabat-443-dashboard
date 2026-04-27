@@ -8700,15 +8700,17 @@ const Auth = {
 
     async signIn() {
         if (typeof firebase === 'undefined' || !firebase.auth) {
-            alert('מערכת ההתחברות לא זמינה. צור קשר עם מנהל המערכת.');
+            if (window.tacticalAlert) await tacticalAlert('מערכת ההתחברות לא זמינה כעת', { title: 'שגיאה' });
             return;
         }
         const provider = new firebase.auth.GoogleAuthProvider();
+        provider.setCustomParameters({ prompt: 'select_account' });
         try {
-            await firebase.auth().signInWithPopup(provider);
+            // Use redirect for a native, in-page experience (no popup)
+            await firebase.auth().signInWithRedirect(provider);
         } catch (e) {
             console.error('Sign-in failed:', e);
-            alert('התחברות נכשלה: ' + e.message);
+            if (window.tacticalAlert) await tacticalAlert('התחברות נכשלה: ' + e.message, { title: 'שגיאה' });
         }
     },
 
@@ -8776,17 +8778,27 @@ const Auth = {
         }
     },
 
-    requireApproved(action) {
+    requireApproved() {
+        // Sync gate: returns true only if currentUser is approved.
+        // Side-effect: shows a styled prompt (fire-and-forget) when blocked.
+        if (this.currentUser && this.isApproved) return true;
+        this._showAuthPrompt().catch(e => console.error('Auth prompt error:', e));
+        return false;
+    },
+
+    async _showAuthPrompt() {
         if (!this.currentUser) {
-            const ok = confirm('🔐 תכנון מבצעי דורש התחברות עם חשבון Google מאושר.\n\nלהתחבר עכשיו?');
+            const ok = window.tacticalConfirm
+                ? await tacticalConfirm('תכנון מבצעי דורש התחברות עם חשבון Google מאושר. להתחבר?', { title: '🔐 גישה מוגבלת', okText: 'התחבר' })
+                : confirm('תכנון מבצעי דורש התחברות. להתחבר?');
             if (ok) this.signIn();
-            return false;
+            return;
         }
         if (!this.isApproved) {
-            alert('🚫 החשבון שלך (' + this.currentUser.email + ') אינו מאושר לגישה לתכנון מבצעי.\n\nצור קשר עם מנהל המערכת לאישור.');
-            return false;
+            const msg = `החשבון ${this.currentUser.email} אינו מאושר לגישה לתכנון מבצעי. צור קשר עם מנהל המערכת.`;
+            if (window.tacticalAlert) await tacticalAlert(msg, { title: '🚫 גישה נדחתה' });
+            else alert(msg);
         }
-        return true;
     }
 };
 
