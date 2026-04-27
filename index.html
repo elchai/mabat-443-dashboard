@@ -8706,11 +8706,16 @@ const Auth = {
         const provider = new firebase.auth.GoogleAuthProvider();
         provider.setCustomParameters({ prompt: 'select_account' });
         try {
-            // Use redirect for a native, in-page experience (no popup)
-            await firebase.auth().signInWithRedirect(provider);
+            // Popup is more reliable than redirect on GitHub Pages
+            // (third-party cookies block redirect persistence between firebase.app and github.io)
+            await firebase.auth().signInWithPopup(provider);
         } catch (e) {
             console.error('Sign-in failed:', e);
-            if (window.tacticalAlert) await tacticalAlert('התחברות נכשלה: ' + e.message, { title: 'שגיאה' });
+            if (e.code === 'auth/popup-blocked') {
+                if (window.tacticalAlert) await tacticalAlert('הדפדפן חסם את חלון ההתחברות. אפשר חלונות קופצים לאתר ונסה שוב.', { title: 'חלון נחסם' });
+            } else if (e.code !== 'auth/popup-closed-by-user' && e.code !== 'auth/cancelled-popup-request') {
+                if (window.tacticalAlert) await tacticalAlert('התחברות נכשלה: ' + e.message, { title: 'שגיאה' });
+            }
         }
     },
 
