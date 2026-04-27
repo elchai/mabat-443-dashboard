@@ -40,9 +40,9 @@
     --blue: #4488ff;
     --purple: #a855f7;
     --purple-dim: #a855f744;
-    --text-primary: #e0e8f0;
-    --text-secondary: #9ab0c8;
-    --text-dim: #6880a0;
+    --text-primary: #f0f5fb;
+    --text-secondary: #c0d0e5;
+    --text-dim: #94aac8;
     --font-display: 'Orbitron', 'Heebo', sans-serif;
     --font-body: 'Heebo', 'Rajdhani', sans-serif;
     --font-mono: 'Share Tech Mono', 'Heebo', monospace;
@@ -2349,7 +2349,7 @@ body {
         inset 0 0 0 1px rgba(0,0,0,0.8),
         0 2px 4px rgba(0,0,0,0.8),
         0 1px 0 rgba(255,255,255,0.05);
-    color: #7a95b0;
+    color: #a8c0d8;
     transition: all 0.2s ease;
 }
 /* Inner recessed "screen" where the icon sits */
@@ -3295,7 +3295,7 @@ body::after {
     font-weight: 700;
     text-transform: uppercase;
     letter-spacing: 1.5px;
-    color: rgba(154,176,200,0.4);
+    color: rgba(192,208,229,0.55);
     padding: 16px 18px 6px;
 }
 .sidebar-nav {
@@ -3607,9 +3607,9 @@ body::after {
             </svg>
         </div>
         <div style="font-family:'Orbitron',monospace;font-size:28px;font-weight:900;letter-spacing:6px;margin-bottom:8px;white-space:nowrap;background:linear-gradient(90deg,#00d4ff,#fff,#00d4ff);background-size:200% auto;-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;">MABAT 443</div>
-        <div style="font-family:'Heebo',sans-serif;font-size:13px;font-weight:300;color:#7088a0;letter-spacing:2px;margin-bottom:35px;">פלטפורמת מודיעין גזרתית</div>
+        <div style="font-family:'Heebo',sans-serif;font-size:13px;font-weight:300;color:#a0b8d0;letter-spacing:2px;margin-bottom:35px;">פלטפורמת מודיעין גזרתית</div>
         <div style="margin-bottom:20px;text-align:right;">
-            <label style="display:block;font-family:'Heebo',sans-serif;font-size:11px;font-weight:400;color:#3a4a5c;margin-bottom:6px;">קוד גישה</label>
+            <label style="display:block;font-family:'Heebo',sans-serif;font-size:11px;font-weight:400;color:#94aac8;margin-bottom:6px;">קוד גישה</label>
             <input id="loginInput" type="text" autocomplete="off" data-lpignore="true" data-1p-ignore maxlength="10" placeholder="••••"
                 style="width:100%;padding:12px 16px;background:rgba(0,0,0,0.4);border:1px solid #0f3460;border-radius:4px;color:#00d4ff;font-family:'Share Tech Mono',monospace;font-size:18px;letter-spacing:8px;text-align:center;outline:none;box-sizing:border-box;-webkit-text-security:disc;-moz-text-security:disc;text-security:disc;"
                 onfocus="this.style.borderColor='#00d4ff';this.style.boxShadow='0 0 20px rgba(0,212,255,0.15)'"
@@ -3618,7 +3618,7 @@ body::after {
         <button onclick="doLogin()" style="width:100%;padding:12px;background:linear-gradient(135deg,rgba(0,212,255,0.15),rgba(68,136,255,0.15));border:1px solid rgba(0,212,255,0.3);border-radius:4px;color:#00d4ff;font-family:'Heebo',sans-serif;font-size:14px;font-weight:700;letter-spacing:2px;cursor:pointer;">כניסה למערכת</button>
         <div id="loginError" style="font-family:'Share Tech Mono',monospace;font-size:11px;color:#ff0040;height:16px;margin-top:10px;letter-spacing:1px;"></div>
     </div>
-    <div style="position:absolute;bottom:15px;font-family:'Heebo',sans-serif;font-size:11px;color:#6880a0;pointer-events:auto;"><a href="https://wa.me/972542012000" target="_blank" style="color:#00ff88;text-decoration:none;">נבנה ע"י אלחי פיין | 054-201-2000</a></div>
+    <div style="position:absolute;bottom:15px;font-family:'Heebo',sans-serif;font-size:11px;color:#94aac8;pointer-events:auto;"><a href="https://wa.me/972542012000" target="_blank" style="color:#00ff88;text-decoration:none;">נבנה ע"י אלחי פיין | 054-201-2000</a></div>
 </div>
 <script>
 function doLogin() {
@@ -4044,7 +4044,7 @@ window.tacticalAlert = function(message, opts) {
             <button class="filter-chip blue" data-filter="2" onclick="setFilter(2, this)">חלש</button>
             <button class="filter-chip purple" data-filter="anarchist" onclick="setFilter('anarchist', this)">אנרכיסטים</button>
             <button class="filter-chip green" data-filter="field" onclick="setFilter('field', this)">שטח</button>
-            <button class="filter-chip" data-filter="false" onclick="setFilter('false', this)" style="border-color:#888;color:#888;">שגוי</button>
+            <button class="filter-chip" data-filter="false" onclick="setFilter('false', this)" style="border-color:#a8b8c8;color:#a8b8c8;">שגוי</button>
             <input type="text" class="search-input" id="searchInput" placeholder="חיפוש..." oninput="applyFilters(); saveUserPrefs && saveUserPrefs()">
         </div>
         <div class="timeline-graph">
@@ -4112,7 +4112,7 @@ window.tacticalAlert = function(message, opts) {
                 <button class="filter-chip orange" data-hfilter="4" onclick="setHistoryFilter(4, this)">חזק</button>
                 <button class="filter-chip yellow" data-hfilter="3" onclick="setHistoryFilter(3, this)">בינוני</button>
                 <button class="filter-chip blue" data-hfilter="2" onclick="setHistoryFilter(2, this)">חלש</button>
-                <button class="filter-chip" data-hfilter="false" onclick="setHistoryFilter('false', this)" style="border-color:#888;color:#888;">שגוי</button>
+                <button class="filter-chip" data-hfilter="false" onclick="setHistoryFilter('false', this)" style="border-color:#a8b8c8;color:#a8b8c8;">שגוי</button>
             </div>
             <div class="history-body" id="historyBodyInline" style="flex:1;overflow:auto;">
                 <div class="loading-state"><div class="loading-spinner"></div><span>טוען יומן...</span></div>
@@ -4245,7 +4245,7 @@ window.tacticalAlert = function(message, opts) {
         <button class="filter-chip orange" data-hfilter="4" onclick="setHistoryFilter(4, this)">חזק</button>
         <button class="filter-chip yellow" data-hfilter="3" onclick="setHistoryFilter(3, this)">בינוני</button>
         <button class="filter-chip blue" data-hfilter="2" onclick="setHistoryFilter(2, this)">חלש</button>
-        <button class="filter-chip" data-hfilter="false" onclick="setHistoryFilter('false', this)" style="border-color:#888;color:#888;">שגוי</button>
+        <button class="filter-chip" data-hfilter="false" onclick="setHistoryFilter('false', this)" style="border-color:#a8b8c8;color:#a8b8c8;">שגוי</button>
     </div>
     <div class="history-body" id="historyBody">
         <div class="loading-state"><div class="loading-spinner"></div><span>טוען יומן מבצעים...</span></div>
@@ -4713,7 +4713,7 @@ function buildLocationPopup(loc, priority, color) {
             `<b style="color:${color};font-size:13px;">${loc.he}</b>` +
             `<span style="font-size:9px;padding:1px 6px;border:1px solid ${color};border-radius:3px;color:${color};letter-spacing:1px;">${priority}</span>` +
         `</div>` +
-        `<div style="color:#9ab0c8;font-size:10px;margin-bottom:4px;">${loc.lat.toFixed(3)}N, ${loc.lng.toFixed(3)}E</div>` +
+        `<div style="color:#c0d0e5;font-size:10px;margin-bottom:4px;">${loc.lat.toFixed(3)}N, ${loc.lng.toFixed(3)}E</div>` +
         `<div style="text-align:center;margin-top:4px;">` +
             `<a href="${mapsLink}" target="_blank" style="color:#00d4ff;font-size:10px;text-decoration:none;">📍 פתח במפות Google</a>` +
         `</div>` +
@@ -5003,7 +5003,7 @@ async function loadClosures(targetLayer) {
                 marker.bindPopup(`
                     <div style="font-family:Heebo,sans-serif;direction:rtl;">
                         <b style="color:${style.color};">${style.label}</b><br>
-                        <span style="font-size:11px;color:#9ab0c8;">${p.Name || ''}</span><br>
+                        <span style="font-size:11px;color:#c0d0e5;">${p.Name || ''}</span><br>
                         <span style="font-size:10px;">מצב: ${p.Open_Close || '?'} | ${p.ClosureStatus || ''}</span>
                     </div>
                 `, { className: 'dark-tooltip' });
@@ -5247,7 +5247,7 @@ function openVideoModal(url) {
         const embedUrl = url.includes('?embed=1') ? url : url + '?embed=1';
         body = `<iframe src="${embedUrl}" frameborder="0" style="width:100%;height:100%;background:#000;"></iframe>`;
     } else {
-        body = `<div style="padding:20px;text-align:center;color:#ccc;">
+        body = `<div style="padding:20px;text-align:center;color:#d0d8e0;">
                 <p>לא ניתן להציג את הוידאו בתצוגה פנימית.</p>
                 <a href="${url}" target="_blank" style="color:#00d4ff;">פתח בטאב חדש ↗</a>
             </div>`;
@@ -5653,7 +5653,7 @@ function arrestBuildWpIcon(idx) {
 
 // Tooltip עם הוראה למחיקה + רמז לגרירה
 function arrestTooltipContent(label, deletable = true) {
-    return `<b>${label}</b>${deletable ? '<br><span style="font-size:9px;color:#9ab0c8;">גרור להזזה · ימני/דבל-קליק למחיקה</span>' : '<br><span style="font-size:9px;color:#9ab0c8;">גרור להזזה</span>'}`;
+    return `<b>${label}</b>${deletable ? '<br><span style="font-size:9px;color:#c0d0e5;">גרור להזזה · ימני/דבל-קליק למחיקה</span>' : '<br><span style="font-size:9px;color:#c0d0e5;">גרור להזזה</span>'}`;
 }
 
 function arrestAddTarget(lat, lng) {
@@ -6476,7 +6476,18 @@ const ARREST_SESSION_KEY = 'mabat443-arrest-session-v1';
 // Saves current plan to an ARRAY of session plans (multiple plans preserved),
 // then clears the canvas so the user can start a new activity immediately.
 function arrestSaveSession() {
-    if (!arrestState.target && !arrestState.startPoint) { showToast('⚠ אין פעילות לשמור'); return; }
+    const hasAny = arrestState.target || arrestState.startPoint || (arrestState.waypoints && arrestState.waypoints.length);
+    if (!hasAny) {
+        const type = arrestState.activityType || 'arrest';
+        const hints = {
+            arrest: 'סמן מטרה ונקודת זינוק לפני השמירה',
+            checkpoint: 'סמן את נקודת המחסום לפני השמירה',
+            observation: 'סמן לפחות נקודת כניסה לפני השמירה',
+            ambush: 'סמן את נקודת המארב לפני השמירה',
+        };
+        showToast('⚠ ' + (hints[type] || 'אין פעילות לשמור'));
+        return;
+    }
     const payload = {
         savedAt: Date.now(),
         activityType: arrestState.activityType || 'arrest',
@@ -6884,7 +6895,7 @@ function updateMapMarkers(news) {
                 <b style="color:${color};">[${item.urgencyLabel || 'ALERT'}]</b><br>
                 <b>${escapeHtml(item.title || '')}</b><br>
                 <small>${escapeHtml(item.snippet || '')}</small><br>
-                <small style="color:#888;">${escapeHtml(item.source)} | ${formatTime(item.timestamp)}</small>
+                <small style="color:#a8b8c8;">${escapeHtml(item.source)} | ${formatTime(item.timestamp)}</small>
             </div>
         `, { className: 'dark-tooltip', maxWidth: 280 }).addTo(map);
 
@@ -8096,7 +8107,7 @@ function renderKeywords() {
         <span class="keywords-stat"><strong style="color:var(--red);">${eventCount}</strong> אירועים</span>
         <span class="keywords-stat"><strong style="color:var(--orange);">${peopleCount}</strong> אנשים</span>
         <span class="keywords-stat"><strong style="color:var(--yellow);">${violenceCount}</strong> אלימות</span>
-        <span class="keywords-stat"><strong style="color:#888;">${noiseCount}</strong> מסננים</span>
+        <span class="keywords-stat"><strong style="color:#a8b8c8;">${noiseCount}</strong> מסננים</span>
         <span class="keywords-stat"><strong style="color:var(--blue);">${locationCount}</strong> מיקומים</span>
         <span class="keywords-stat"><strong style="color:#c084fc;">${persianCount}</strong> פרסית</span>
     `;
@@ -8158,7 +8169,7 @@ function renderKeywords() {
                     <span class="keyword-category-name" style="color:${nt.color};">${nt.label}</span>
                     <span class="keyword-category-count">${arr.length}</span>
                 </div>
-                <div class="keyword-tags">${arr.map(kw => `<span class="keyword-tag" style="border-color:#88888844;">${escapeHtml(kw)}</span>`).join('')}</div>
+                <div class="keyword-tags">${arr.map(kw => `<span class="keyword-tag" style="border-color:#a8b8c888844;">${escapeHtml(kw)}</span>`).join('')}</div>
             </div>`;
         }
     });
@@ -8255,7 +8266,7 @@ function showShortcutsHelp() {
                 <kbd style="font-family:Share Tech Mono,monospace;padding:2px 6px;background:rgba(0,212,255,.1);border:1px solid var(--cyan-dim);border-radius:3px;color:var(--cyan);">?</kbd><div>עזרה זו</div>
                 <kbd style="font-family:Share Tech Mono,monospace;padding:2px 6px;background:rgba(0,212,255,.1);border:1px solid var(--cyan-dim);border-radius:3px;color:var(--cyan);">Esc</kbd><div>סגור/חזור</div>
             </div>
-            <div style="margin-top:14px;text-align:center;font-size:10px;color:#6880a0;">לחץ שוב או Esc לסגירה</div>
+            <div style="margin-top:14px;text-align:center;font-size:10px;color:#94aac8;">לחץ שוב או Esc לסגירה</div>
         </div>
     `;
     el.onclick = () => el.remove();
