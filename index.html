@@ -9,6 +9,9 @@
 <title>מבט 443 | פלטפורמת מודיעין גזרתית</title>
 <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg viewBox='0 0 100 100' xmlns='http://www.w3.org/2000/svg'%3E%3Crect width='100' height='100' rx='12' fill='%23040810'/%3E%3Cpath d='M50 15 Q65 15 73 27 Q78 35 77 47 Q75 57 68 63 L50 75 L32 63 Q25 57 23 47 Q22 35 27 27 Q35 15 50 15Z' fill='none' stroke='%2300d4ff' stroke-width='2'/%3E%3Cpath d='M33 20 L27 7 L38 17' fill='%2300d4ff' opacity='.6'/%3E%3Cpath d='M67 20 L73 7 L62 17' fill='%2300d4ff' opacity='.6'/%3E%3Ccircle cx='40' cy='37' r='9' fill='none' stroke='%2300d4ff' stroke-width='1.5'/%3E%3Ccircle cx='60' cy='37' r='9' fill='none' stroke='%2300d4ff' stroke-width='1.5'/%3E%3Ccircle cx='40' cy='37' r='4' fill='%23ffd000'/%3E%3Ccircle cx='60' cy='37' r='4' fill='%23ffd000'/%3E%3Ccircle cx='40' cy='37' r='1.5' fill='%23040810'/%3E%3Ccircle cx='60' cy='37' r='1.5' fill='%23040810'/%3E%3Cpath d='M47 43 L50 49 L53 43' fill='%23ff8800' opacity='.7'/%3E%3Cline x1='50' y1='65' x2='50' y2='93' stroke='%2300d4ff' stroke-width='2.5' opacity='.6'/%3E%3Cpath d='M44 67 L50 65 L56 67 L50 69Z' fill='%2300d4ff' opacity='.5'/%3E%3Cline x1='43' y1='68' x2='57' y2='68' stroke='%2300d4ff' stroke-width='1.5' opacity='.5'/%3E%3Cpath d='M48 91 L50 97 L52 91' fill='%2300d4ff' opacity='.5'/%3E%3C/svg%3E">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css" />
+<!-- Firebase Auth for operational planning access control -->
+<script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js"></script>
 <style>
 /* ═══════════════════════════════════════
    MABAT 443 - CYBER DEFENSE DASHBOARD
@@ -3867,6 +3870,7 @@ window.tacticalAlert = function(message, opts) {
                 <span class="status-dot"></span>
                 <span id="sidebarStatusText">ONLINE</span>
             </div>
+            <div id="authStatus" style="margin-top:6px;"></div>
         </div>
     </aside>
     <div class="sidebar-overlay" id="sidebarOverlay" onclick="toggleSidebarMobile()"></div>
@@ -5372,6 +5376,11 @@ function switchView(name) {
     if (!views.includes(name)) return;
     if (window.__currentView === name) return;
 
+    // Gate operations behind Gmail approval
+    if (name === 'operations' && typeof Auth !== 'undefined' && Auth.ready) {
+        if (!Auth.requireApproved('open operations')) return;
+    }
+
     // Hide all views, deactivate sidebar items
     views.forEach(v => {
         const el = document.getElementById('view-' + v);
@@ -6319,9 +6328,9 @@ function arrestDeleteStart() {
     if (arrestState._deleteStart) arrestState._deleteStart();
 }
 
-function arrestShowSavedPlans() {
+async function arrestShowSavedPlans() {
     const list = document.getElementById('arrestSavedList');
-    const plans = JSON.parse(localStorage.getItem('mabat443-arrest-plans') || '[]');
+    const plans = await UserPlans.list();
     if (list.style.display === 'block') { list.style.display = 'none'; return; }
     if (!plans.length) {
         list.innerHTML = '<div class="arrest-saved-empty">אין תוכניות שמורות</div>';
@@ -6350,8 +6359,8 @@ function arrestShowSavedPlans() {
     list.style.display = 'block';
 }
 
-function arrestLoadPlan(idx) {
-    const plans = JSON.parse(localStorage.getItem('mabat443-arrest-plans') || '[]');
+async function arrestLoadPlan(idx) {
+    const plans = await UserPlans.list();
     const plan = plans[idx];
     if (!plan) return;
     arrestClear(false);
@@ -6384,10 +6393,10 @@ function arrestLoadPlan(idx) {
 
 async function arrestDeletePlan(idx) {
     if (!(await tacticalConfirm('למחוק תוכנית זו?', {danger:true}))) return;
-    const plans = JSON.parse(localStorage.getItem('mabat443-arrest-plans') || '[]');
-    plans.splice(idx, 1);
-    localStorage.setItem('mabat443-arrest-plans', JSON.stringify(plans));
-    arrestShowSavedPlans(); arrestShowSavedPlans(); // re-render
+    await UserPlans.remove(idx);
+    const list = document.getElementById('arrestSavedList');
+    if (list) list.style.display = 'none';
+    arrestShowSavedPlans(); // re-open with fresh data
 }
 
 // ═══════ ACTIVITY TYPE (mission kind) ═══════
@@ -6493,6 +6502,8 @@ function arrestSaveSession() {
         // Keep last 20 plans max
         if (plans.length > 20) plans = plans.slice(-20);
         sessionStorage.setItem(ARREST_SESSION_KEY, JSON.stringify(plans));
+        // Also persist to per-user archive (Firebase when signed in, else localStorage)
+        UserPlans.add(payload).catch(e => console.warn('Archive save failed:', e));
         const label = activityLabels(payload.activityType).title;
         showToast(`💾 ${label} נשמר · המערכת פנויה לתכנון חדש`);
         // Clear canvas for next plan
@@ -8612,6 +8623,212 @@ function toggleTgFeed() {
 }
 
 // ═══════ INIT ═══════
+// ═══════════════════════════════════════════════════════════
+// AUTH MODULE — Gmail sign-in + per-user plans + access gate
+// ═══════════════════════════════════════════════════════════
+// Configure FIREBASE_AUTH_CONFIG with values from Firebase Console:
+//   Project Settings → General → Web apps → SDK setup and configuration
+// Then in Firebase Console → Authentication → Sign-in method → enable Google
+const FIREBASE_AUTH_CONFIG = {
+    apiKey: 'AIzaSyCwj7jy1GaAdf1nGt3nBeLZgQlyOKWOM4o',
+    authDomain: 'project-8874611670473210078.firebaseapp.com',
+    projectId: 'project-8874611670473210078',
+    databaseURL: FIREBASE_URL,
+    appId: '1:59184814499:web:f108ceef2486f83c90e216',
+};
+
+const Auth = {
+    currentUser: null,
+    isApproved: false,
+    ready: false,
+    _readyResolvers: [],
+
+    init() {
+        try {
+            if (typeof firebase === 'undefined') {
+                console.warn('Firebase SDK not loaded — auth disabled');
+                this._markReady();
+                return;
+            }
+            if (FIREBASE_AUTH_CONFIG.apiKey === 'REPLACE_WITH_WEB_API_KEY') {
+                console.warn('⚠️ Firebase Auth API key not configured. Operational planning access is OPEN until configured.');
+                this.isApproved = true; // Fail-open during setup to avoid lockout
+                this._markReady();
+                this._updateUI();
+                return;
+            }
+            firebase.initializeApp(FIREBASE_AUTH_CONFIG);
+            firebase.auth().onAuthStateChanged(async user => {
+                this.currentUser = user;
+                if (user) {
+                    this.isApproved = await this._checkApproval(user);
+                    console.log(`🔐 Signed in: ${user.email} · approved: ${this.isApproved}`);
+                } else {
+                    this.isApproved = false;
+                    console.log('🔓 Signed out');
+                }
+                this._markReady();
+                this._updateUI();
+            });
+        } catch (e) {
+            console.error('Auth init failed:', e);
+            this._markReady();
+        }
+    },
+
+    async _checkApproval(user) {
+        if (!user?.email) return false;
+        const safeKey = this._emailKey(user.email);
+        try {
+            const res = await fetch(`${FIREBASE_URL}/approved-users/${safeKey}.json`);
+            const data = await res.json();
+            return data === true || (data && data.approved === true);
+        } catch (e) {
+            console.error('Approval check failed:', e);
+            return false;
+        }
+    },
+
+    _emailKey(email) {
+        return email.toLowerCase().replace(/[.#$[\]\/]/g, '_');
+    },
+
+    userKey() {
+        if (!this.currentUser?.email) return null;
+        return this._emailKey(this.currentUser.email);
+    },
+
+    async signIn() {
+        if (typeof firebase === 'undefined' || !firebase.auth) {
+            alert('מערכת ההתחברות לא זמינה. צור קשר עם מנהל המערכת.');
+            return;
+        }
+        const provider = new firebase.auth.GoogleAuthProvider();
+        try {
+            await firebase.auth().signInWithPopup(provider);
+        } catch (e) {
+            console.error('Sign-in failed:', e);
+            alert('התחברות נכשלה: ' + e.message);
+        }
+    },
+
+    async signOut() {
+        try { await firebase.auth().signOut(); } catch (e) { console.error(e); }
+    },
+
+    onReady(cb) {
+        if (this.ready) cb();
+        else this._readyResolvers.push(cb);
+    },
+
+    _markReady() {
+        this.ready = true;
+        this._readyResolvers.forEach(r => { try { r(); } catch(e){} });
+        this._readyResolvers = [];
+    },
+
+    _updateUI() {
+        // Sidebar ops button visibility
+        const opsBtn = document.querySelector('.sidebar-item[data-view="operations"]');
+        if (opsBtn) {
+            opsBtn.style.display = this.isApproved ? '' : 'none';
+        }
+        // If currently on operations view but not approved, bounce to dashboard
+        if (!this.isApproved && window.__currentView === 'operations') {
+            try { switchView('dashboard'); } catch(e){}
+        }
+        // Update auth status UI
+        const statusEl = document.getElementById('authStatus');
+        if (statusEl) {
+            if (this.currentUser) {
+                const name = this.currentUser.displayName || this.currentUser.email;
+                const badge = this.isApproved
+                    ? '<span style="color:var(--green);font-size:10px;">✓ מאושר</span>'
+                    : '<span style="color:var(--orange,#ff8800);font-size:10px;">ממתין לאישור</span>';
+                statusEl.innerHTML = `
+                    <div style="display:flex;align-items:center;gap:6px;font-size:11px;">
+                        <span style="color:var(--text-dim);">${escapeHtml(name)}</span>
+                        ${badge}
+                        <button onclick="Auth.signOut()" style="background:none;border:1px solid var(--border-primary);color:var(--text-dim);padding:2px 6px;font-size:10px;cursor:pointer;border-radius:3px;">יציאה</button>
+                    </div>
+                `;
+            } else {
+                statusEl.innerHTML = `
+                    <button onclick="Auth.signIn()" style="background:var(--bg-card);border:1px solid var(--cyan);color:var(--cyan);padding:4px 10px;font-size:11px;cursor:pointer;border-radius:4px;font-family:var(--font-mono);">
+                        🔐 התחבר עם Google
+                    </button>
+                `;
+            }
+        }
+    },
+
+    requireApproved(action) {
+        if (!this.currentUser) {
+            alert('נדרשת התחברות עם חשבון Google כדי לבצע פעולה זו');
+            this.signIn();
+            return false;
+        }
+        if (!this.isApproved) {
+            alert('החשבון שלך (' + this.currentUser.email + ') אינו מאושר לגישה לתכנון מבצעי.\nצור קשר עם מנהל המערכת.');
+            return false;
+        }
+        return true;
+    }
+};
+
+// ═══════════════════════════════════════════════════════════
+// PER-USER PLAN STORAGE — Firebase-backed when signed in,
+// falls back to localStorage for anonymous/unconfigured sessions
+// ═══════════════════════════════════════════════════════════
+const UserPlans = {
+    async list() {
+        const key = Auth.userKey();
+        if (!key) return JSON.parse(localStorage.getItem('mabat443-arrest-plans') || '[]');
+        try {
+            const res = await fetch(`${FIREBASE_URL}/user-plans/${key}/arrest-plans.json`);
+            const data = await res.json();
+            if (!data) return [];
+            return Array.isArray(data) ? data.filter(Boolean) : Object.values(data);
+        } catch (e) {
+            console.error('Load plans failed:', e);
+            return [];
+        }
+    },
+
+    async save(plans) {
+        const key = Auth.userKey();
+        if (!key) {
+            localStorage.setItem('mabat443-arrest-plans', JSON.stringify(plans));
+            return;
+        }
+        try {
+            await fetch(`${FIREBASE_URL}/user-plans/${key}/arrest-plans.json`, {
+                method: 'PUT',
+                body: JSON.stringify(plans),
+            });
+        } catch (e) {
+            console.error('Save plans failed:', e);
+            // Fallback to local so user doesn't lose work
+            localStorage.setItem('mabat443-arrest-plans', JSON.stringify(plans));
+        }
+    },
+
+    async add(plan) {
+        const plans = await this.list();
+        plans.push(plan);
+        if (plans.length > 50) plans.splice(0, plans.length - 50); // Cap at 50
+        await this.save(plans);
+        return plans;
+    },
+
+    async remove(idx) {
+        const plans = await this.list();
+        plans.splice(idx, 1);
+        await this.save(plans);
+        return plans;
+    }
+};
+
 document.addEventListener('DOMContentLoaded', () => {
     try { updateClock(); } catch(e) { console.error('Clock init error:', e); }
     setInterval(() => { try { updateClock(); } catch(e) { console.warn('Clock error:', e.message); } }, 1000);
@@ -8637,6 +8854,7 @@ document.addEventListener('DOMContentLoaded', () => {
     try { startRefreshCycle(); } catch(e) { console.error('Refresh init error:', e); }
     try { fetchWeatherDirect(); } catch(e) { console.error('Weather init error:', e); }
     try { checkCalendarLocal(); } catch(e) { console.error('Calendar init error:', e); }
+    try { Auth.init(); } catch(e) { console.error('Auth init error:', e); }
     // Restore saved arrest plan after map is ready (slight delay so all layers initialize)
     setTimeout(() => { try { arrestRestoreSession(); } catch(e) { console.warn('Arrest restore:', e.message); } }, 1200);
 });
