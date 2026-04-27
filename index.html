@@ -8728,10 +8728,24 @@ const Auth = {
     },
 
     _updateUI() {
-        // Sidebar ops button visibility
+        // Sidebar ops button — always visible. Show a small lock icon when not approved.
         const opsBtn = document.querySelector('.sidebar-item[data-view="operations"]');
         if (opsBtn) {
-            opsBtn.style.display = this.isApproved ? '' : 'none';
+            opsBtn.style.display = '';
+            const existingLock = opsBtn.querySelector('.ops-lock-icon');
+            if (!this.isApproved) {
+                if (!existingLock) {
+                    const lock = document.createElement('span');
+                    lock.className = 'ops-lock-icon';
+                    lock.textContent = '🔒';
+                    lock.style.cssText = 'margin-inline-start:auto;font-size:11px;opacity:.7;';
+                    opsBtn.appendChild(lock);
+                }
+                opsBtn.style.opacity = '0.7';
+            } else {
+                if (existingLock) existingLock.remove();
+                opsBtn.style.opacity = '';
+            }
         }
         // If currently on operations view but not approved, bounce to dashboard
         if (!this.isApproved && window.__currentView === 'operations') {
@@ -8764,12 +8778,12 @@ const Auth = {
 
     requireApproved(action) {
         if (!this.currentUser) {
-            alert('נדרשת התחברות עם חשבון Google כדי לבצע פעולה זו');
-            this.signIn();
+            const ok = confirm('🔐 תכנון מבצעי דורש התחברות עם חשבון Google מאושר.\n\nלהתחבר עכשיו?');
+            if (ok) this.signIn();
             return false;
         }
         if (!this.isApproved) {
-            alert('החשבון שלך (' + this.currentUser.email + ') אינו מאושר לגישה לתכנון מבצעי.\nצור קשר עם מנהל המערכת.');
+            alert('🚫 החשבון שלך (' + this.currentUser.email + ') אינו מאושר לגישה לתכנון מבצעי.\n\nצור קשר עם מנהל המערכת לאישור.');
             return false;
         }
         return true;
