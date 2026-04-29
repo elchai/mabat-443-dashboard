@@ -2287,6 +2287,89 @@ body {
     border-radius: 3px;
     font-size: 12px;
 }
+/* ═══ Wizard stepper (5 steps) ═══ */
+.arrest-stepper {
+    display: flex;
+    gap: 4px;
+    margin-bottom: 8px;
+    font-family: var(--font-mono);
+    font-size: 10px;
+    direction: ltr;
+}
+.arrest-stepper .step {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 2px;
+    padding: 5px 3px;
+    border: 1px solid var(--border-primary);
+    border-radius: 4px;
+    background: rgba(8,16,35,0.55);
+    color: var(--text-dim);
+    opacity: 0.55;
+    transition: all .2s;
+    text-align: center;
+    cursor: default;
+    user-select: none;
+}
+.arrest-stepper .step .num { font-size: 14px; font-weight: 700; line-height: 1; }
+.arrest-stepper .step small { font-size: 9px; letter-spacing: 0.5px; }
+.arrest-stepper .step.done {
+    color: var(--green);
+    border-color: rgba(0,255,136,0.45);
+    background: rgba(0,255,136,0.08);
+    opacity: 1;
+}
+.arrest-stepper .step.active {
+    color: var(--cyan);
+    border-color: var(--cyan);
+    background: rgba(0,212,255,0.14);
+    opacity: 1;
+    box-shadow: 0 0 8px rgba(0,212,255,0.35);
+}
+.arrest-stepper .step.hidden { display: none; }
+/* Step actions panel — appears below the step indicator */
+.arrest-step-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    margin-bottom: 8px;
+}
+.arrest-step-actions button {
+    flex: 1;
+    min-width: 0;
+    padding: 7px 10px;
+    background: linear-gradient(180deg, rgba(0,212,255,0.16), rgba(0,212,255,0.06));
+    border: 1px solid var(--cyan);
+    color: var(--cyan);
+    border-radius: 4px;
+    font-family: var(--font-body);
+    font-size: 12px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all .15s;
+}
+.arrest-step-actions button:hover {
+    background: linear-gradient(180deg, rgba(0,212,255,0.26), rgba(0,212,255,0.12));
+    box-shadow: 0 0 10px rgba(0,212,255,0.3);
+}
+.arrest-step-actions button.secondary {
+    background: linear-gradient(180deg, rgba(255,136,0,0.16), rgba(255,136,0,0.06));
+    border-color: #ff8800;
+    color: #ffb04d;
+}
+.arrest-step-actions button.secondary:hover {
+    background: linear-gradient(180deg, rgba(255,136,0,0.26), rgba(255,136,0,0.12));
+    box-shadow: 0 0 10px rgba(255,136,0,0.3);
+}
+.arrest-step-actions button.ghost {
+    background: transparent;
+    border-color: var(--border-primary);
+    color: var(--text-dim);
+}
+.arrest-step-actions button.ghost:hover { color: var(--text-primary); border-color: var(--cyan); }
+.arrest-step-actions:empty { display: none; }
 .arrest-name-row {
     display: flex;
     align-items: center;
@@ -3974,7 +4057,15 @@ window.tacticalAlert = function(message, opts) {
                 <div id="tusCircularRow" style="display:none;font-size:11px;margin-bottom:6px;padding:4px 8px;background:rgba(0,212,255,0.05);border:1px solid var(--cyan-dim);border-radius:3px;">
                     <label style="display:inline-flex;align-items:center;gap:6px;cursor:pointer;"><input type="checkbox" id="tusCircular" onchange="arrestSetCircular(this.checked)" style="accent-color:var(--cyan);"> מסלול מעגלי (חזרה לנקודת כניסה)</label>
                 </div>
+                <div class="arrest-stepper" id="arrestStepper">
+                    <span class="step active" data-step="1"><span class="num">①</span><small>מטרה</small></span>
+                    <span class="step" data-step="2"><span class="num">②</span><small>מוצא</small></span>
+                    <span class="step" data-step="3"><span class="num">③</span><small>מסלול</small></span>
+                    <span class="step" data-step="4"><span class="num">④</span><small>חזרה</small></span>
+                    <span class="step" data-step="5"><span class="num">⑤</span><small>חילוץ</small></span>
+                </div>
                 <div id="arrestStep" class="arrest-step">לחץ על המפה לסימון <b style="color:#ff0040;">מטרה</b></div>
+                <div id="arrestStepActions" class="arrest-step-actions"></div>
                 <div class="arrest-name-row">
                     <label id="arrestTargetLabel">שם המטרה:</label>
                     <input type="text" id="arrestTargetName" placeholder="לדוגמה: בית המבוקש" oninput="arrestUpdateTargetName()">
@@ -5341,6 +5432,14 @@ const arrestState = {
     routeLayers: [],
     routeCoords: null,
     routeMeta: null,
+    // ═══ Return route + extraction (multi-step wizard) ═══
+    returnMode: 'same',           // 'same' = חזרה באותו מסלול | 'separate' = יציאה נפרדת
+    returnDecided: false,         // האם המשתמש כבר בחר במצב החזרה (שלב 4)
+    exitWaypoints: [],            // {lat, lng, note}[] — נקודות מסלול ליציאה (כתום)
+    exitWaypointMarkers: [],
+    extractionPoint: null,        // {lat, lng} — נקודת חילוץ (תכלת + מגן דוד)
+    extractionMarker: null,
+    returnRouteLayers: [],        // קו מקווקו של מסלול החזרה
 };
 
 function toggleArrestPlanner() {
@@ -5362,6 +5461,7 @@ function activateArrestPlanning(on) {
         if (mp) mp.classList.add('map-planning-mode');
         if (map) map.on('click', arrestOnMapClick);
         arrestUpdateStep();
+        arrestUpdateStepperUI();
     } else {
         arrestState.active = false;
         panel.style.display = 'none';
@@ -5599,17 +5699,27 @@ async function loadKeywordsInline() {
     }
 }
 
+// 5-step wizard:
+// 1=target, 2=start, 3=outbound waypoints (optional), 4=return decision/exit waypoints, 5=extraction/finish
+function arrestCurrentStep() {
+    if (!arrestState.target) return 1;
+    if (!arrestState.startPoint) return 2;
+    if (!arrestState.returnDecided) return arrestState._step4Active ? 4 : 3;
+    if (arrestState.returnMode === 'separate' && !arrestState.extractionPoint) return 4;
+    return 5;
+}
+
 function arrestOnMapClick(e) {
     if (!arrestState.active) return;
     const { lat, lng } = e.latlng;
-    if (!arrestState.target) {
-        arrestAddTarget(lat, lng);
-    } else if (!arrestState.startPoint) {
-        arrestAddStart(lat, lng);
-    } else {
-        arrestAddWaypoint(lat, lng);
-    }
+    const step = arrestCurrentStep();
+    if (step === 1) arrestAddTarget(lat, lng);
+    else if (step === 2) arrestAddStart(lat, lng);
+    else if (step === 3) arrestAddWaypoint(lat, lng);
+    else if (step === 4 && arrestState.returnMode === 'separate') arrestAddExitWaypoint(lat, lng);
+    else if (step === 5 && arrestState.returnMode === 'separate' && !arrestState.extractionPoint) arrestSetExtraction(lat, lng);
     arrestUpdateStep();
+    arrestUpdateStepperUI();
     document.getElementById('arrestFinishBtn').disabled = !(arrestState.target && arrestState.startPoint);
 }
 
@@ -5650,6 +5760,38 @@ function arrestBuildWpIcon(idx) {
         className: 'arrest-wp-icon',
         html: html,
         iconSize: [18, 26], iconAnchor: [9, 26]
+    });
+}
+
+// סיכת יציאה — זהה ל-waypoint רגיל אבל בכתום
+function arrestBuildExitWpIcon(idx) {
+    const html = `
+        <div style="position:relative;width:18px;height:26px;filter:drop-shadow(0 1px 2px rgba(0,0,0,.7));">
+            <div style="position:absolute;top:0;left:0;width:18px;height:18px;background:#ff8800;border:1.5px solid #040810;border-radius:50%;display:flex;align-items:center;justify-content:center;font-family:'Share Tech Mono',monospace;font-size:10px;font-weight:700;color:#fff;line-height:1;">${idx}</div>
+            <div style="position:absolute;top:15px;left:8px;width:2px;height:11px;background:#040810;"></div>
+        </div>
+    `;
+    return L.divIcon({
+        className: 'arrest-exit-wp-icon',
+        html: html,
+        iconSize: [18, 26], iconAnchor: [9, 26]
+    });
+}
+
+// נקודת חילוץ — עיגול תכלת גדול עם מגן דוד
+function arrestBuildExtractionIcon() {
+    const html = `
+        <div style="width:30px;height:30px;border-radius:50%;background:rgba(0,212,255,0.22);border:2px solid #00d4ff;box-shadow:0 0 12px rgba(0,212,255,.65);display:flex;align-items:center;justify-content:center;">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#00d4ff" stroke-width="1.6" stroke-linejoin="round">
+                <polygon points="12,3 21.5,19.5 2.5,19.5"/>
+                <polygon points="12,21 2.5,4.5 21.5,4.5"/>
+            </svg>
+        </div>
+    `;
+    return L.divIcon({
+        className: 'arrest-extraction-icon',
+        html: html,
+        iconSize: [30, 30], iconAnchor: [15, 15]
     });
 }
 
@@ -5796,6 +5938,7 @@ function arrestAddStart(lat, lng) {
         arrestState.startPoint = null;
         arrestClearRouteOnly();
         arrestUpdateStep();
+        arrestUpdateStepperUI();
         const btn = document.getElementById('arrestDeleteStartBtn');
         if (btn) btn.style.display = 'none';
         document.getElementById('arrestFinishBtn').disabled = true;
@@ -5845,6 +5988,7 @@ function arrestAddWaypoint(lat, lng) {
         });
         arrestRefreshRoute();
         arrestUpdateStep();
+        arrestUpdateStepperUI();
     });
     // קליק רגיל = עריכת הערה
     m.on('click', (ev) => {
@@ -5862,6 +6006,77 @@ function arrestAddWaypoint(lat, lng) {
     arrestState.waypointMarkers.push(m);
 }
 
+// סיכת יציאה — מקבילה ל-arrestAddWaypoint, אבל לרשימת exitWaypoints (כתום)
+function arrestAddExitWaypoint(lat, lng) {
+    arrestState.exitWaypoints.push({ lat, lng, note: '' });
+    const idx = arrestState.exitWaypoints.length - 1;
+    const m = L.marker([lat, lng], {
+        icon: arrestBuildExitWpIcon(idx + 1),
+        draggable: true,
+        autoPan: true
+    }).bindTooltip(arrestTooltipContent(`יציאה ${idx + 1}`), { direction: 'top', className: 'dark-tooltip' }).addTo(map);
+    m.on('drag', (ev) => {
+        const ll = ev.target.getLatLng();
+        const i = arrestState.exitWaypointMarkers.indexOf(m);
+        if (i >= 0) arrestState.exitWaypoints[i] = { ...arrestState.exitWaypoints[i], lat: ll.lat, lng: ll.lng };
+    });
+    m.on('dragend', arrestRefreshRoute);
+    m.on('dblclick contextmenu', async (ev) => {
+        L.DomEvent.stopPropagation(ev);
+        if (ev.originalEvent) ev.originalEvent.preventDefault();
+        const i = arrestState.exitWaypointMarkers.indexOf(m);
+        if (i < 0) return;
+        if (!(await tacticalConfirm(`למחוק נקודת יציאה ${i + 1}?`, {danger:true}))) return;
+        map.removeLayer(m);
+        arrestState.exitWaypoints.splice(i, 1);
+        arrestState.exitWaypointMarkers.splice(i, 1);
+        arrestState.exitWaypointMarkers.forEach((mm, k) => {
+            mm.setIcon(arrestBuildExitWpIcon(k + 1));
+            mm.setTooltipContent(arrestTooltipContent(`יציאה ${k + 1}`));
+        });
+        arrestRefreshRoute();
+        arrestUpdateStep();
+        arrestUpdateStepperUI();
+    });
+    if (m.getElement()) m.getElement().oncontextmenu = (e) => { e.preventDefault(); return false; };
+    m.on('add', () => { if (m.getElement()) m.getElement().oncontextmenu = (e) => { e.preventDefault(); return false; }; });
+    arrestState.exitWaypointMarkers.push(m);
+}
+
+// נקודת חילוץ — עיגול תכלת גדול. קריאה חוזרת מחליפה את הקיים.
+function arrestSetExtraction(lat, lng) {
+    if (arrestState.extractionMarker) {
+        try { map.removeLayer(arrestState.extractionMarker); } catch(e){}
+        arrestState.extractionMarker = null;
+    }
+    arrestState.extractionPoint = { lat, lng };
+    const m = L.marker([lat, lng], {
+        icon: arrestBuildExtractionIcon(),
+        draggable: true,
+        autoPan: true
+    }).bindTooltip(arrestTooltipContent('נקודת חילוץ'), { direction: 'top', className: 'dark-tooltip' }).addTo(map);
+    m.on('drag', (ev) => {
+        const ll = ev.target.getLatLng();
+        arrestState.extractionPoint = { lat: ll.lat, lng: ll.lng };
+    });
+    m.on('dragend', arrestRefreshRoute);
+    m.on('dblclick contextmenu', async (ev) => {
+        L.DomEvent.stopPropagation(ev);
+        if (ev.originalEvent) ev.originalEvent.preventDefault();
+        if (!(await tacticalConfirm('למחוק את נקודת החילוץ?', {danger:true}))) return;
+        map.removeLayer(m);
+        arrestState.extractionMarker = null;
+        arrestState.extractionPoint = null;
+        arrestRefreshRoute();
+        arrestUpdateStep();
+        arrestUpdateStepperUI();
+    });
+    if (m.getElement()) m.getElement().oncontextmenu = (e) => { e.preventDefault(); return false; };
+    m.on('add', () => { if (m.getElement()) m.getElement().oncontextmenu = (e) => { e.preventDefault(); return false; }; });
+    arrestState.extractionMarker = m;
+    showToast('🔵 נקודת חילוץ סומנה');
+}
+
 // חישוב מחדש של הציר (נקרא אחרי drag/delete)
 function arrestRefreshRoute() {
     if (!arrestState.target || !arrestState.startPoint) return;
@@ -5872,6 +6087,10 @@ function arrestRefreshRoute() {
 function arrestClearRouteOnly() {
     arrestState.routeLayers.forEach(l => map.removeLayer(l));
     arrestState.routeLayers = [];
+    if (arrestState.returnRouteLayers) {
+        arrestState.returnRouteLayers.forEach(l => { try { map.removeLayer(l); } catch(e){} });
+    }
+    arrestState.returnRouteLayers = [];
     arrestState.routeCoords = null;
     arrestState.routeMeta = null;
     document.getElementById('arrestExports').style.display = 'none';
@@ -5880,17 +6099,174 @@ function arrestClearRouteOnly() {
 function arrestUpdateStep() {
     const step = document.getElementById('arrestStep');
     const info = document.getElementById('arrestInfo');
-    if (!arrestState.target) {
+    if (!step) return;
+    const cur = arrestCurrentStep();
+    if (cur === 1) {
         step.innerHTML = 'לחץ על המפה לסימון <b style="color:#ff0040;">מטרה</b>';
-        info.innerHTML = '';
-    } else if (!arrestState.startPoint) {
+        if (info) info.innerHTML = '';
+    } else if (cur === 2) {
         step.innerHTML = 'לחץ לסימון <b style="color:#00ff88;">נקודת מוצא</b>';
-        info.innerHTML = `🔴 מטרה: <b>${arrestState.target.lat.toFixed(5)}, ${arrestState.target.lng.toFixed(5)}</b>`;
-    } else {
-        step.innerHTML = 'הוסף <b>נעץ</b> ביניים (אופציונלי) או <b>"חשב ציר"</b> לסיום';
+        if (info) info.innerHTML = `🔴 מטרה: <b>${arrestState.target.lat.toFixed(5)}, ${arrestState.target.lng.toFixed(5)}</b>`;
+    } else if (cur === 3) {
         const wpsCount = arrestState.waypoints.length;
-        info.innerHTML = `🔴 מטרה מוגדרת<br>🟢 מוצא מוגדר<br>📍 ${wpsCount} נעץ ביניים`;
+        step.innerHTML = 'הוסף <b>נקודות מסלול</b> (אופציונלי) ולחץ <b>"המשך לחזרה ←"</b>';
+        if (info) info.innerHTML = `🔴 מטרה · 🟢 מוצא · 📍 ${wpsCount} נקודות מסלול`;
+    } else if (cur === 4) {
+        if (!arrestState.returnDecided) {
+            step.innerHTML = 'בחר אופן חזרה: <b>באותו מסלול</b> או <b style="color:#ff8800;">יציאה נפרדת</b>';
+        } else if (arrestState.returnMode === 'separate') {
+            step.innerHTML = 'סמן <b style="color:#ff8800;">נקודות יציאה</b> ולחץ <b>"המשך לחילוץ ←"</b>';
+            const exitCount = arrestState.exitWaypoints.length;
+            if (info) info.innerHTML = `🔴 מטרה · 🟢 מוצא · 📍 ${arrestState.waypoints.length} מסלול · 🟠 ${exitCount} יציאה`;
+        }
+    } else if (cur === 5) {
+        if (arrestState.returnMode === 'separate' && !arrestState.extractionPoint) {
+            step.innerHTML = 'לחץ לסימון <b style="color:#00d4ff;">נקודת חילוץ</b>';
+        } else {
+            step.innerHTML = '<span style="color:var(--green);">›› הכל מוכן · לחץ "סיים תוכנית"</span>';
+        }
     }
+}
+
+// Visual stepper update: highlight active, mark previous as done, hide step 5 if returnMode='same'
+function arrestUpdateStepperUI() {
+    const stepper = document.getElementById('arrestStepper');
+    if (!stepper) return;
+    const cur = arrestCurrentStep();
+    // Hide step 5 in 'same' mode (no extraction needed)
+    const step5el = stepper.querySelector('.step[data-step="5"]');
+    if (step5el) step5el.classList.toggle('hidden', arrestState.returnDecided && arrestState.returnMode === 'same');
+    stepper.querySelectorAll('.step').forEach(el => {
+        const n = parseInt(el.dataset.step, 10);
+        el.classList.remove('active', 'done');
+        if (n < cur) el.classList.add('done');
+        else if (n === cur) el.classList.add('active');
+    });
+    arrestRenderStepActions();
+}
+
+// Render the step-action buttons under the step indicator, dynamically by current step.
+function arrestRenderStepActions() {
+    const host = document.getElementById('arrestStepActions');
+    if (!host) return;
+    host.innerHTML = '';
+    const cur = arrestCurrentStep();
+    if (cur === 3) {
+        const btn = document.createElement('button');
+        btn.innerHTML = 'המשך לחזרה ←';
+        btn.onclick = () => { arrestPromptReturnMode(); };
+        host.appendChild(btn);
+    } else if (cur === 4 && !arrestState.returnDecided) {
+        // Decision moment: same vs separate
+        const same = document.createElement('button');
+        same.innerHTML = 'באותו מסלול';
+        same.title = 'כוח חוזר באותו מסלול שהגיע — אין צורך בחילוץ';
+        same.onclick = () => arrestSetReturnMode('same');
+        host.appendChild(same);
+        const sep = document.createElement('button');
+        sep.className = 'secondary';
+        sep.innerHTML = 'סמן יציאה נפרדת';
+        sep.title = 'כוח חוזר במסלול אחר — סימון נקודות יציאה ונקודת חילוץ';
+        sep.onclick = () => arrestSetReturnMode('separate');
+        host.appendChild(sep);
+        const back = document.createElement('button');
+        back.className = 'ghost';
+        back.innerHTML = '↶ חזור';
+        back.onclick = () => {
+            arrestState._step4Active = false;
+            arrestUpdateStep();
+            arrestUpdateStepperUI();
+        };
+        host.appendChild(back);
+    } else if (cur === 4 && arrestState.returnDecided && arrestState.returnMode === 'separate') {
+        // Placing exit waypoints
+        const next = document.createElement('button');
+        next.innerHTML = 'המשך לחילוץ ←';
+        next.disabled = arrestState.exitWaypoints.length === 0;
+        next.style.opacity = next.disabled ? 0.5 : 1;
+        next.onclick = () => {
+            if (arrestState.exitWaypoints.length === 0) { showToast('סמן לפחות נקודת יציאה אחת'); return; }
+            // Force advance to step 5 prompt by simulating "ready for extraction"
+            // arrestCurrentStep already returns 4 here; we just refresh the step text/UI
+            const step = document.getElementById('arrestStep');
+            if (step) step.innerHTML = 'לחץ לסימון <b style="color:#00d4ff;">נקודת חילוץ</b>';
+            // Stepper: visually advance to step 5
+            const stepper = document.getElementById('arrestStepper');
+            if (stepper) {
+                stepper.querySelectorAll('.step').forEach(el => {
+                    const n = parseInt(el.dataset.step, 10);
+                    el.classList.remove('active', 'done');
+                    if (n <= 4) el.classList.add('done');
+                    else if (n === 5) el.classList.add('active');
+                });
+            }
+        };
+        host.appendChild(next);
+        const back = document.createElement('button');
+        back.className = 'ghost';
+        back.innerHTML = '↶ שנה אופן חזרה';
+        back.onclick = () => arrestResetReturnDecision();
+        host.appendChild(back);
+    } else if (cur === 5) {
+        const finish = document.createElement('button');
+        finish.innerHTML = '✔ סיים תוכנית';
+        finish.onclick = () => arrestFinish();
+        host.appendChild(finish);
+        if (arrestState.returnMode === 'separate' && arrestState.extractionPoint) {
+            const back = document.createElement('button');
+            back.className = 'ghost';
+            back.innerHTML = '↶ הסר חילוץ';
+            back.onclick = () => {
+                if (arrestState.extractionMarker) { try { map.removeLayer(arrestState.extractionMarker); } catch(e){} }
+                arrestState.extractionMarker = null;
+                arrestState.extractionPoint = null;
+                arrestRefreshRoute();
+                arrestUpdateStep();
+                arrestUpdateStepperUI();
+            };
+            host.appendChild(back);
+        }
+    }
+}
+
+// Step 3 → step 4: open the return-mode decision prompt
+function arrestPromptReturnMode() {
+    if (!arrestState.target || !arrestState.startPoint) {
+        showToast('סמן מטרה ונקודת מוצא לפני המעבר לחזרה');
+        return;
+    }
+    arrestState._step4Active = true;
+    arrestUpdateStep();
+    arrestUpdateStepperUI();
+}
+
+function arrestSetReturnMode(mode) {
+    arrestState.returnMode = mode;
+    arrestState.returnDecided = true;
+    arrestState._step4Active = false;
+    if (mode === 'same') {
+        // Auto-finalize the plan (calculate route + show outputs)
+        arrestFinish();
+    } else {
+        showToast('🟠 סמן נקודות יציאה (כתום) על המפה');
+    }
+    arrestUpdateStep();
+    arrestUpdateStepperUI();
+}
+
+function arrestResetReturnDecision() {
+    // Wipe exit waypoints + extraction back to step 3
+    arrestState.exitWaypointMarkers.forEach(m => { try { map.removeLayer(m); } catch(e){} });
+    arrestState.exitWaypointMarkers = [];
+    arrestState.exitWaypoints = [];
+    if (arrestState.extractionMarker) { try { map.removeLayer(arrestState.extractionMarker); } catch(e){} }
+    arrestState.extractionMarker = null;
+    arrestState.extractionPoint = null;
+    arrestState.returnDecided = false;
+    arrestState.returnMode = 'same';
+    arrestClearRouteOnly();
+    arrestUpdateStep();
+    arrestUpdateStepperUI();
 }
 
 async function arrestFinish() {
@@ -5900,8 +6276,7 @@ async function arrestFinish() {
     // Clear any previously-drawn route (straight-line or snapped) before drawing fresh
     arrestClearRouteOnly();
 
-    // ציר ניווט = קווים ישרים בין הנקודות שסומנו (מוצא → נעץ → יעד)
-    // אין OSRM — המשתמש שולט בציר על ידי מיקום נעץ.
+    // ציר יציאה = קווים ישרים בין הנקודות שסומנו (מוצא → נעץ → יעד)
     const pts = [arrestState.startPoint, ...arrestState.waypoints, arrestState.target];
     // תו״ס מעגלי — מוסיף חזרה למוצא כקטע אחרון
     if (arrestState.activityType === 'observation' && arrestState.tusCircular && arrestState.startPoint) {
@@ -5910,7 +6285,18 @@ async function arrestFinish() {
     const routeCoords = pts.map(p => [p.lat, p.lng]);
     let distanceM = 0;
     for (let i = 1; i < pts.length; i++) distanceM += haversineMeters(pts[i - 1], pts[i]);
-    const durationS = distanceM / arrestSpeedMS();
+
+    // Return route distance — separate path or implicit reverse of outbound
+    let returnDistanceM = 0;
+    let returnPts = null;
+    if (arrestState.returnMode === 'separate' && arrestState.extractionPoint) {
+        returnPts = [arrestState.target, ...arrestState.exitWaypoints, arrestState.extractionPoint];
+        for (let i = 1; i < returnPts.length; i++) returnDistanceM += haversineMeters(returnPts[i - 1], returnPts[i]);
+    } else if (arrestState.returnDecided && arrestState.returnMode === 'same') {
+        returnDistanceM = distanceM; // implicit: same path back
+    }
+    const totalDistanceM = distanceM + returnDistanceM;
+    const durationS = totalDistanceM / arrestSpeedMS();
 
     // קו סגול דק יחיד בלבד — קליק עליו מוסיף נעץ חדש בנקודה המדויקת
     const routeInner = L.polyline(routeCoords, {
@@ -5944,11 +6330,45 @@ async function arrestFinish() {
         }).addTo(map);
         arrestState.routeLayers.push(lbl);
     }
-    arrestState.routeCoords = routeCoords;
-    arrestState.routeMeta = { distanceM, durationS };
+    // Return route — dashed cyan line if separate
+    if (returnPts && returnPts.length >= 2) {
+        const returnCoords = returnPts.map(p => [p.lat, p.lng]);
+        const returnLine = L.polyline(returnCoords, {
+            color: '#00d4ff',
+            weight: 3,
+            opacity: 0.85,
+            dashArray: '8,6',
+            lineCap: 'round',
+            className: 'arrest-return-route'
+        }).bindTooltip('מסלול חזרה', { sticky: true, className: 'dark-tooltip' }).addTo(map);
+        arrestState.returnRouteLayers.push(returnLine);
+        // Distance labels for return segments
+        for (let i = 1; i < returnPts.length; i++) {
+            const a = returnPts[i - 1], b = returnPts[i];
+            const segM = haversineMeters(a, b);
+            if (segM < 25) continue;
+            const segLabel = segM < 1000 ? `${Math.round(segM)}מ׳` : `${(segM / 1000).toFixed(2)}ק״מ`;
+            const lbl = L.marker([(a.lat + b.lat) / 2, (a.lng + b.lng) / 2], {
+                icon: L.divIcon({
+                    className: 'arrest-seg-label arrest-seg-label-return',
+                    html: `<span style="color:#00d4ff;">${segLabel}</span>`,
+                    iconSize: null,
+                    iconAnchor: [0, 0]
+                }),
+                interactive: false,
+                keyboard: false
+            }).addTo(map);
+            arrestState.returnRouteLayers.push(lbl);
+        }
+    }
 
-    // fit
-    const bounds = L.latLngBounds(routeCoords);
+    arrestState.routeCoords = routeCoords;
+    arrestState.routeMeta = { distanceM, returnDistanceM, totalDistanceM, durationS };
+
+    // fit — include return points in bounds
+    const allCoords = [...routeCoords];
+    if (returnPts) returnPts.forEach(p => allCoords.push([p.lat, p.lng]));
+    const bounds = L.latLngBounds(allCoords);
     map.fitBounds(bounds.pad(0.2));
 
     // update UI
@@ -5960,12 +6380,24 @@ async function arrestFinish() {
         time: '<svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" style="vertical-align:-1px;"><circle cx="12" cy="12" r="9"/><polyline points="12 7 12 12 15 14"/></svg>',
         wp: '<svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" style="vertical-align:-1px;"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>',
     };
+    const returnLine = arrestState.returnDecided && arrestState.returnMode === 'same'
+        ? `<div class="arrest-info-line">${ico.dist} <span class="ai-label">RETURN</span> <span class="ai-val" style="color:var(--text-secondary);">באותו מסלול · ${(returnDistanceM/1000).toFixed(2)} KM</span></div>`
+        : (returnPts ? `<div class="arrest-info-line">${ico.dist} <span class="ai-label" style="color:#00d4ff;">RETURN</span> <span class="ai-val">${(returnDistanceM/1000).toFixed(2)} KM · יציאה נפרדת</span></div>` : '');
+    const totalLine = (returnDistanceM > 0)
+        ? `<div class="arrest-info-line">${ico.dist} <span class="ai-label">TOTAL</span> <span class="ai-val" style="color:var(--cyan);">${(totalDistanceM/1000).toFixed(2)} KM</span></div>`
+        : '';
+    const extractionLine = arrestState.extractionPoint
+        ? `<div class="arrest-info-line">${ico.wp} <span class="ai-label" style="color:#00d4ff;">EXTRACT</span> <span class="ai-val">${arrestState.extractionPoint.lat.toFixed(5)}, ${arrestState.extractionPoint.lng.toFixed(5)}</span></div>`
+        : '';
     document.getElementById('arrestInfo').innerHTML = `
         <div class="arrest-info-line">${ico.tgt} <span class="ai-label">TGT</span> <span class="ai-val">${arrestState.target.lat.toFixed(5)}, ${arrestState.target.lng.toFixed(5)}</span></div>
         <div class="arrest-info-line">${ico.start} <span class="ai-label">START</span> <span class="ai-val">${arrestState.startPoint.lat.toFixed(5)}, ${arrestState.startPoint.lng.toFixed(5)}</span></div>
-        <div class="arrest-info-line">${ico.dist} <span class="ai-label">DIST</span> <span class="ai-val">${(distanceM / 1000).toFixed(2)} KM · ${arrestModeLabel()}</span></div>
-        <div class="arrest-info-line">${ico.time} <span class="ai-label">ETA</span> <span class="ai-val">${Math.round(durationS / 60)} MIN</span></div>
-        <div class="arrest-info-line">${ico.wp} <span class="ai-label">WP</span> <span class="ai-val">${arrestState.waypoints.length}</span></div>
+        ${extractionLine}
+        <div class="arrest-info-line">${ico.dist} <span class="ai-label">OUT</span> <span class="ai-val">${(distanceM / 1000).toFixed(2)} KM</span></div>
+        ${returnLine}
+        ${totalLine}
+        <div class="arrest-info-line">${ico.time} <span class="ai-label">ETA</span> <span class="ai-val">${Math.round(durationS / 60)} MIN · ${arrestModeLabel()}</span></div>
+        <div class="arrest-info-line">${ico.wp} <span class="ai-label">WP</span> <span class="ai-val">${arrestState.waypoints.length}${arrestState.exitWaypoints.length ? ` · יציאה: ${arrestState.exitWaypoints.length}` : ''}</span></div>
     `;
     document.getElementById('arrestFinishBtn').disabled = false;
     const snapBtn = document.getElementById('arrestSnapBtn');
@@ -5978,22 +6410,34 @@ async function arrestFinish() {
 
     // WhatsApp briefing link — תוכנית מלאה כטקסט
     const targetLabel = arrestState.targetName ? arrestState.targetName : `${tgt.lat.toFixed(5)}, ${tgt.lng.toFixed(5)}`;
+    const returnSummary = arrestState.returnDecided && arrestState.returnMode === 'same'
+        ? '↩️ חזרה: באותו מסלול'
+        : (arrestState.returnMode === 'separate' && arrestState.extractionPoint)
+            ? `↩️ חזרה: יציאה נפרדת (${(returnDistanceM/1000).toFixed(2)} ק״מ)\n🔵 חילוץ: ${arrestState.extractionPoint.lat.toFixed(5)}, ${arrestState.extractionPoint.lng.toFixed(5)}`
+            : null;
+    const exitWpLines = (arrestState.exitWaypoints || []).map((w, i) => `יציאה ${i+1}. ${w.lat.toFixed(5)},${w.lng.toFixed(5)}${w.note ? ' – ' + w.note : ''}`);
     const waLines = [
         '🎯 *תכנון מעצר – מבט 443*',
         `🏠 יעד: *${targetLabel}* (${tgt.lat.toFixed(5)}, ${tgt.lng.toFixed(5)}, פתח שעה ${arrestState.targetEntrance || 6})`,
         `🟢 מוצא: ${start.lat.toFixed(5)}, ${start.lng.toFixed(5)}`,
-        `📏 ${(distanceM/1000).toFixed(2)} ק״מ · ${arrestModeLabel()} · ⏱ ${Math.round(durationS/60)} דק׳`,
+        `📏 הליכה: ${(distanceM/1000).toFixed(2)} ק״מ · סה״כ: ${(totalDistanceM/1000).toFixed(2)} ק״מ · ${arrestModeLabel()} · ⏱ ${Math.round(durationS/60)} דק׳`,
         ...arrestState.waypoints.map((w, i) => `${i+1}. ${w.lat.toFixed(5)},${w.lng.toFixed(5)}${w.note ? ' – ' + w.note : ''}`),
+        ...(returnSummary ? [returnSummary] : []),
+        ...exitWpLines,
         `\n📍 ${document.getElementById('arrestGmaps').href}`,
         `🧭 ${document.getElementById('arrestGmapsDir').href}`
     ];
     const waText = encodeURIComponent(waLines.join('\n'));
     document.getElementById('arrestWhatsApp').href = `https://wa.me/?text=${waText}`;
+
+    // Refresh stepper visuals (route now drawn — mark all relevant steps done)
+    try { arrestUpdateStepperUI(); } catch(e){}
 }
 
 function arrestClear(resetUI = true) {
     arrestState.layers.forEach(l => map.removeLayer(l));
     arrestState.routeLayers.forEach(l => map.removeLayer(l));
+    if (arrestState.returnRouteLayers) arrestState.returnRouteLayers.forEach(l => { try { map.removeLayer(l); } catch(e){} });
     arrestState.targetRings.forEach(r => map.removeLayer(r));
     if (arrestState.targetMarker) map.removeLayer(arrestState.targetMarker);
     if (arrestState.targetWedge) {
@@ -6002,20 +6446,30 @@ function arrestClear(resetUI = true) {
     }
     if (arrestState.startMarker) map.removeLayer(arrestState.startMarker);
     arrestState.waypointMarkers.forEach(m => map.removeLayer(m));
+    if (arrestState.exitWaypointMarkers) arrestState.exitWaypointMarkers.forEach(m => { try { map.removeLayer(m); } catch(e){} });
+    if (arrestState.extractionMarker) { try { map.removeLayer(arrestState.extractionMarker); } catch(e){} }
     const picker = document.getElementById('arrestEntrancePicker');
     if (picker) picker.remove();
     arrestState.layers = [];
     arrestState.routeLayers = [];
+    arrestState.returnRouteLayers = [];
     arrestState.targetRings = [];
     arrestState.targetMarker = null;
     arrestState.targetWedge = null;
     arrestState.startMarker = null;
     arrestState.waypointMarkers = [];
+    arrestState.exitWaypointMarkers = [];
+    arrestState.extractionMarker = null;
     arrestState.target = null;
     arrestState.targetEntrance = 6;
     arrestState.targetName = '';
     arrestState.startPoint = null;
     arrestState.waypoints = [];
+    arrestState.exitWaypoints = [];
+    arrestState.extractionPoint = null;
+    arrestState.returnMode = 'same';
+    arrestState.returnDecided = false;
+    arrestState._step4Active = false;
     arrestState.routeCoords = null;
     arrestState.routeMeta = null;
     const nameInp = document.getElementById('arrestTargetName');
@@ -6028,6 +6482,7 @@ function arrestClear(resetUI = true) {
         const snapBtn = document.getElementById('arrestSnapBtn');
         if (snapBtn) snapBtn.disabled = true;
         arrestUpdateStep();
+        arrestUpdateStepperUI();
     }
 }
 
@@ -6381,7 +6836,18 @@ async function arrestLoadPlan(idx) {
         arrestAddWaypoint(w.lat, w.lng);
         if (w.note) arrestState.waypoints[arrestState.waypoints.length - 1].note = w.note;
     });
+    // Restore wizard state — return route + extraction (backwards-compatible defaults)
+    arrestState.returnMode = plan.returnMode || 'same';
+    arrestState.returnDecided = !!plan.returnDecided || !!plan.returnMode;
+    (plan.exitWaypoints || []).forEach(w => {
+        arrestAddExitWaypoint(w.lat, w.lng);
+        if (w.note) arrestState.exitWaypoints[arrestState.exitWaypoints.length - 1].note = w.note;
+    });
+    if (plan.extractionPoint) {
+        arrestSetExtraction(plan.extractionPoint.lat, plan.extractionPoint.lng);
+    }
     arrestUpdateStep();
+    arrestUpdateStepperUI();
     document.getElementById('arrestFinishBtn').disabled = !(arrestState.target && arrestState.startPoint);
     if (arrestState.target && arrestState.startPoint) arrestFinish();
     document.getElementById('arrestSavedList').style.display = 'none';
@@ -6459,6 +6925,7 @@ async function setActivityType(type) {
     } else {
         arrestUpdateStep();
     }
+    arrestUpdateStepperUI();
     // Refresh route/tooltips
     if (arrestState.targetMarker) {
         try { arrestState.targetMarker.setTooltipContent(arrestTooltipContent(L.targetLabel, false)); } catch(e){}
@@ -6501,6 +6968,11 @@ function arrestSaveSession() {
         startPoint: arrestState.startPoint,
         waypoints: arrestState.waypoints || [],
         travelMode: arrestState.travelMode || 'foot',
+        // Wizard return route + extraction
+        returnMode: arrestState.returnMode || 'same',
+        returnDecided: !!arrestState.returnDecided,
+        exitWaypoints: arrestState.exitWaypoints || [],
+        extractionPoint: arrestState.extractionPoint || null,
     };
     try {
         const raw = sessionStorage.getItem(ARREST_SESSION_KEY);
