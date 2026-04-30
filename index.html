@@ -2370,6 +2370,91 @@ body {
 }
 .arrest-step-actions button.ghost:hover { color: var(--text-primary); border-color: var(--cyan); }
 .arrest-step-actions:empty { display: none; }
+/* ═══ Closing method (corners) ═══ */
+.arrest-closing-section {
+    margin: 8px 0;
+    padding: 8px;
+    background: rgba(164, 222, 2, 0.06);
+    border: 1px solid rgba(164, 222, 2, 0.4);
+    border-radius: 4px;
+}
+.arrest-closing-title {
+    font-size: 11px;
+    font-weight: 600;
+    color: #a4de02;
+    letter-spacing: 0.5px;
+    margin-bottom: 6px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+.arrest-closing-method {
+    display: flex;
+    gap: 4px;
+    margin-bottom: 6px;
+}
+.arrest-closing-method button {
+    flex: 1;
+    padding: 4px 6px;
+    background: rgba(8,16,35,0.5);
+    border: 1px solid var(--border-primary);
+    color: var(--text-dim);
+    font-size: 10px;
+    border-radius: 3px;
+    cursor: pointer;
+}
+.arrest-closing-method button.active {
+    background: rgba(164,222,2,0.18);
+    border-color: #a4de02;
+    color: #d3ff3a;
+}
+.arrest-closing-method button:disabled {
+    opacity: 0.45;
+    cursor: not-allowed;
+}
+.arrest-corner-row {
+    display: grid;
+    grid-template-columns: 60px 1fr 1fr;
+    gap: 5px;
+    align-items: center;
+    margin-bottom: 4px;
+}
+.arrest-corner-row .label {
+    font-size: 10px;
+    font-family: var(--font-mono);
+    color: #a4de02;
+    text-align: center;
+    padding: 3px 4px;
+    border: 1px solid rgba(164,222,2,0.4);
+    border-radius: 3px;
+    background: rgba(164,222,2,0.08);
+}
+.arrest-corner-row input[type="text"] {
+    background: rgba(8,16,35,0.55);
+    border: 1px solid var(--border-primary);
+    color: var(--text-primary);
+    font-size: 11px;
+    padding: 4px 6px;
+    border-radius: 3px;
+    font-family: var(--font-body);
+    outline: none;
+    direction: rtl;
+}
+.arrest-corner-row input[type="text"]:focus { border-color: #a4de02; }
+.arrest-corner-row input[type="text"]::placeholder { color: var(--text-dim); }
+/* Corner map labels */
+.arrest-corner-label {
+    background: rgba(4,8,16,0.85);
+    border: 1px solid #a4de02;
+    color: #d3ff3a;
+    font-family: var(--font-body);
+    font-size: 11px;
+    font-weight: 500;
+    padding: 2px 6px;
+    border-radius: 3px;
+    white-space: nowrap;
+    box-shadow: 0 0 6px rgba(164,222,2,0.4);
+}
 .arrest-name-row {
     display: flex;
     align-items: center;
@@ -4066,6 +4151,17 @@ window.tacticalAlert = function(message, opts) {
                 </div>
                 <div id="arrestStep" class="arrest-step">לחץ על המפה לסימון <b style="color:#ff0040;">מטרה</b></div>
                 <div id="arrestStepActions" class="arrest-step-actions"></div>
+                <div id="arrestClosingSection" class="arrest-closing-section" style="display:none;">
+                    <div class="arrest-closing-title">
+                        <span>🟢 שיטת סגירה — חוליות</span>
+                    </div>
+                    <div class="arrest-closing-method">
+                        <button type="button" class="active" data-method="corners" onclick="arrestSetClosingMethod('corners')">פינות</button>
+                        <button type="button" data-method="faces" disabled title="בקרוב">פאות</button>
+                        <button type="button" data-method="vertices" disabled title="בקרוב">קודקודים</button>
+                    </div>
+                    <div id="arrestCornersInputs"></div>
+                </div>
                 <div class="arrest-name-row">
                     <label id="arrestTargetLabel">שם המטרה:</label>
                     <input type="text" id="arrestTargetName" placeholder="לדוגמה: בית המבוקש" oninput="arrestUpdateTargetName()">
@@ -5440,6 +5536,9 @@ const arrestState = {
     extractionPoint: null,        // {lat, lng} — נקודת חילוץ (תכלת + מגן דוד)
     extractionMarker: null,
     returnRouteLayers: [],        // קו מקווקו של מסלול החזרה
+    // ═══ Closing method (arrest doctrine §5ד) ═══
+    closingMethod: 'corners',     // 'corners' | 'faces' | 'vertices' (only 'corners' implemented for now)
+    corners: [],                  // [{lat, lng, rightName, leftName, marker, lineLayer, labelRight, labelLeft}] x4
 };
 
 function toggleArrestPlanner() {
@@ -5813,6 +5912,8 @@ function arrestAddTarget(lat, lng) {
         const ll = ev.target.getLatLng();
         arrestState.target = { lat: ll.lat, lng: ll.lng };
         arrestRenderTargetWedge();
+        // Re-aim corner lines toward new target center
+        try { arrestRenderAllCorners(); } catch(e){}
     });
     m.on('dragend', arrestRefreshRoute);
     // קליק על המטרה — פתיחה/סגירה של הציר (לא בשימוש כרגע; סיבוב כיוון בגרירה של הראש)
@@ -5826,6 +5927,8 @@ function arrestAddTarget(lat, lng) {
     m.on('add', () => { if (m.getElement()) m.getElement().oncontextmenu = (e) => { e.preventDefault(); return false; }; });
     arrestState.targetMarker = m;
     arrestRenderTargetWedge();
+    // Init corner-closing UI for arrest activity (default doctrine)
+    try { arrestInitCorners(); } catch(e) { console.warn('Corner init:', e); }
 }
 
 // חץ כיוון הפתח - 4 כיוונים (12/3/6/9) סביב המטרה
@@ -6075,6 +6178,205 @@ function arrestSetExtraction(lat, lng) {
     m.on('add', () => { if (m.getElement()) m.getElement().oncontextmenu = (e) => { e.preventDefault(); return false; }; });
     arrestState.extractionMarker = m;
     showToast('🔵 נקודת חילוץ סומנה');
+}
+
+// ═══════════════════════════════════════════════════════════
+// CLOSING METHOD — corners (סגירת פינות, doctrine §5ד)
+// 4 חוליות סביב המבנה, 2 שמות לכל פינה, קו ירוק תפוח החוצה.
+// ═══════════════════════════════════════════════════════════
+const ARREST_CORNER_LABELS = ['NW', 'NE', 'SE', 'SW'];
+const ARREST_CORNER_HE = ['צפ"מ', 'צפ"מז', 'דר"מז', 'דר"מ'];
+const ARREST_CORNER_OFFSET_M = 12; // ברירת מחדל: 12 מ' מהמטרה לכל כיוון
+
+function arrestMetersToLatLng(centerLat, centerLng, dxM, dyM) {
+    // dxM: east+, dyM: north+
+    const dLat = dyM / 111111;
+    const dLng = dxM / (111111 * Math.cos(centerLat * Math.PI / 180));
+    return { lat: centerLat + dLat, lng: centerLng + dLng };
+}
+
+function arrestInitCorners() {
+    // Only meaningful for arrest activity
+    if ((arrestState.activityType || 'arrest') !== 'arrest') {
+        arrestHideClosingSection();
+        return;
+    }
+    if (!arrestState.target) return;
+    // Skip if already initialized
+    if (arrestState.corners && arrestState.corners.length === 4) {
+        arrestRenderAllCorners();
+        arrestRenderCornerInputs();
+        arrestShowClosingSection();
+        return;
+    }
+    const t = arrestState.target;
+    const off = ARREST_CORNER_OFFSET_M;
+    // NW=(-off, +off), NE=(+off, +off), SE=(+off, -off), SW=(-off, -off)
+    const positions = [
+        arrestMetersToLatLng(t.lat, t.lng, -off,  off), // NW
+        arrestMetersToLatLng(t.lat, t.lng,  off,  off), // NE
+        arrestMetersToLatLng(t.lat, t.lng,  off, -off), // SE
+        arrestMetersToLatLng(t.lat, t.lng, -off, -off), // SW
+    ];
+    arrestState.corners = positions.map((p, i) => ({
+        lat: p.lat, lng: p.lng,
+        rightName: '',
+        leftName: '',
+        marker: null,
+        lineLayer: null,
+        labelRight: null,
+        labelLeft: null,
+        idx: i,
+    }));
+    arrestRenderAllCorners();
+    arrestRenderCornerInputs();
+    arrestShowClosingSection();
+}
+
+function arrestShowClosingSection() {
+    const sec = document.getElementById('arrestClosingSection');
+    if (sec) sec.style.display = 'block';
+}
+function arrestHideClosingSection() {
+    const sec = document.getElementById('arrestClosingSection');
+    if (sec) sec.style.display = 'none';
+}
+
+function arrestSetClosingMethod(method) {
+    if (method !== 'corners') return; // others not implemented yet
+    arrestState.closingMethod = method;
+    document.querySelectorAll('.arrest-closing-method button').forEach(b => {
+        b.classList.toggle('active', b.dataset.method === method);
+    });
+}
+
+function arrestCornerIcon() {
+    return L.divIcon({
+        className: 'arrest-corner-icon',
+        html: `<div style="width:14px;height:14px;border-radius:50%;background:#a4de02;border:2px solid #1a2a05;box-shadow:0 0 6px rgba(164,222,2,.7);"></div>`,
+        iconSize: [14, 14], iconAnchor: [7, 7]
+    });
+}
+
+// Render a single corner — marker + radial line outward from target + 2 name labels
+function arrestRenderCorner(idx) {
+    const c = arrestState.corners[idx];
+    if (!c) return;
+    // Cleanup previous layers for this corner
+    if (c.marker) { try { map.removeLayer(c.marker); } catch(e){} c.marker = null; }
+    if (c.lineLayer) { try { map.removeLayer(c.lineLayer); } catch(e){} c.lineLayer = null; }
+    if (c.labelRight) { try { map.removeLayer(c.labelRight); } catch(e){} c.labelRight = null; }
+    if (c.labelLeft) { try { map.removeLayer(c.labelLeft); } catch(e){} c.labelLeft = null; }
+
+    // Draggable corner marker
+    const m = L.marker([c.lat, c.lng], {
+        icon: arrestCornerIcon(),
+        draggable: true,
+        autoPan: true,
+        zIndexOffset: 800
+    }).bindTooltip(`פינה ${ARREST_CORNER_HE[idx]} · גרור להזזה`, { direction: 'top', className: 'dark-tooltip' }).addTo(map);
+    m.on('drag', (ev) => {
+        const ll = ev.target.getLatLng();
+        c.lat = ll.lat; c.lng = ll.lng;
+        arrestRenderCorner(idx); // re-draw line+labels
+    });
+    m.on('dragend', () => arrestRenderCorner(idx));
+    c.marker = m;
+
+    // Radial line: from target center → through corner → 15m beyond
+    if (!arrestState.target) return;
+    const t = arrestState.target;
+    // Vector from target to corner (in meters)
+    const dxM = (c.lng - t.lng) * 111111 * Math.cos(t.lat * Math.PI / 180);
+    const dyM = (c.lat - t.lat) * 111111;
+    const distM = Math.sqrt(dxM * dxM + dyM * dyM) || 1;
+    const ux = dxM / distM, uy = dyM / distM;
+    // Extend 15m beyond the corner
+    const extM = 15;
+    const endPt = arrestMetersToLatLng(t.lat, t.lng, dxM + ux * extM, dyM + uy * extM);
+
+    const line = L.polyline([[c.lat, c.lng], [endPt.lat, endPt.lng]], {
+        color: '#a4de02',
+        weight: 3,
+        opacity: 0.95,
+        lineCap: 'round',
+        className: 'arrest-corner-line'
+    }).addTo(map);
+    c.lineLayer = line;
+
+    // Two perpendicular name labels (right + left of the line, at line midpoint)
+    const midLat = (c.lat + endPt.lat) / 2;
+    const midLng = (c.lng + endPt.lng) / 2;
+    // Perpendicular vector (rotate 90°): (-uy, ux) for left, (uy, -ux) for right
+    const sideOffM = 4;
+    const rightPos = arrestMetersToLatLng(midLat, midLng, uy * sideOffM, -ux * sideOffM);
+    const leftPos  = arrestMetersToLatLng(midLat, midLng, -uy * sideOffM, ux * sideOffM);
+
+    if (c.rightName && c.rightName.trim()) {
+        c.labelRight = L.marker([rightPos.lat, rightPos.lng], {
+            icon: L.divIcon({
+                className: 'arrest-corner-label-wrap',
+                html: `<div class="arrest-corner-label">${escapeHtml(c.rightName)}</div>`,
+                iconSize: null, iconAnchor: [0, 0]
+            }),
+            interactive: false,
+            keyboard: false
+        }).addTo(map);
+    }
+    if (c.leftName && c.leftName.trim()) {
+        c.labelLeft = L.marker([leftPos.lat, leftPos.lng], {
+            icon: L.divIcon({
+                className: 'arrest-corner-label-wrap',
+                html: `<div class="arrest-corner-label">${escapeHtml(c.leftName)}</div>`,
+                iconSize: null, iconAnchor: [0, 0]
+            }),
+            interactive: false,
+            keyboard: false
+        }).addTo(map);
+    }
+}
+
+function arrestRenderAllCorners() {
+    if (!arrestState.corners) return;
+    arrestState.corners.forEach((_, i) => arrestRenderCorner(i));
+}
+
+function arrestRenderCornerInputs() {
+    const host = document.getElementById('arrestCornersInputs');
+    if (!host) return;
+    host.innerHTML = '';
+    (arrestState.corners || []).forEach((c, idx) => {
+        const row = document.createElement('div');
+        row.className = 'arrest-corner-row';
+        row.innerHTML = `
+            <span class="label">${ARREST_CORNER_HE[idx]}</span>
+            <input type="text" placeholder="שם ימין" value="${(c.rightName || '').replace(/"/g, '&quot;')}" data-side="right" data-idx="${idx}">
+            <input type="text" placeholder="שם שמאל" value="${(c.leftName || '').replace(/"/g, '&quot;')}" data-side="left" data-idx="${idx}">
+        `;
+        host.appendChild(row);
+    });
+    host.querySelectorAll('input[type="text"]').forEach(inp => {
+        inp.addEventListener('input', () => {
+            const i = parseInt(inp.dataset.idx, 10);
+            const side = inp.dataset.side;
+            if (!arrestState.corners[i]) return;
+            arrestState.corners[i][side === 'right' ? 'rightName' : 'leftName'] = inp.value;
+            arrestRenderCorner(i);
+        });
+    });
+}
+
+function arrestClearCorners() {
+    (arrestState.corners || []).forEach(c => {
+        if (c.marker) { try { map.removeLayer(c.marker); } catch(e){} }
+        if (c.lineLayer) { try { map.removeLayer(c.lineLayer); } catch(e){} }
+        if (c.labelRight) { try { map.removeLayer(c.labelRight); } catch(e){} }
+        if (c.labelLeft) { try { map.removeLayer(c.labelLeft); } catch(e){} }
+    });
+    arrestState.corners = [];
+    const host = document.getElementById('arrestCornersInputs');
+    if (host) host.innerHTML = '';
+    arrestHideClosingSection();
 }
 
 // חישוב מחדש של הציר (נקרא אחרי drag/delete)
@@ -6416,6 +6718,9 @@ async function arrestFinish() {
             ? `↩️ חזרה: יציאה נפרדת (${(returnDistanceM/1000).toFixed(2)} ק״מ)\n🔵 חילוץ: ${arrestState.extractionPoint.lat.toFixed(5)}, ${arrestState.extractionPoint.lng.toFixed(5)}`
             : null;
     const exitWpLines = (arrestState.exitWaypoints || []).map((w, i) => `יציאה ${i+1}. ${w.lat.toFixed(5)},${w.lng.toFixed(5)}${w.note ? ' – ' + w.note : ''}`);
+    const cornerLines = (arrestState.corners || [])
+        .filter(c => (c.rightName && c.rightName.trim()) || (c.leftName && c.leftName.trim()))
+        .map((c, i) => `🟢 ${ARREST_CORNER_HE[i]}: ${c.rightName || '—'} / ${c.leftName || '—'}`);
     const waLines = [
         '🎯 *תכנון מעצר – מבט 443*',
         `🏠 יעד: *${targetLabel}* (${tgt.lat.toFixed(5)}, ${tgt.lng.toFixed(5)}, פתח שעה ${arrestState.targetEntrance || 6})`,
@@ -6424,6 +6729,7 @@ async function arrestFinish() {
         ...arrestState.waypoints.map((w, i) => `${i+1}. ${w.lat.toFixed(5)},${w.lng.toFixed(5)}${w.note ? ' – ' + w.note : ''}`),
         ...(returnSummary ? [returnSummary] : []),
         ...exitWpLines,
+        ...(cornerLines.length ? ['─── שיטת סגירה: פינות ───', ...cornerLines] : []),
         `\n📍 ${document.getElementById('arrestGmaps').href}`,
         `🧭 ${document.getElementById('arrestGmapsDir').href}`
     ];
@@ -6472,6 +6778,9 @@ function arrestClear(resetUI = true) {
     arrestState._step4Active = false;
     arrestState.routeCoords = null;
     arrestState.routeMeta = null;
+    // Closing method (corners)
+    try { arrestClearCorners(); } catch(e){}
+    arrestState.closingMethod = 'corners';
     const nameInp = document.getElementById('arrestTargetName');
     if (nameInp) nameInp.value = '';
     if (resetUI) {
@@ -6846,6 +7155,20 @@ async function arrestLoadPlan(idx) {
     if (plan.extractionPoint) {
         arrestSetExtraction(plan.extractionPoint.lat, plan.extractionPoint.lng);
     }
+    // Restore closing corners (arrest only)
+    if ((plan.activityType || arrestState.activityType) === 'arrest' && Array.isArray(plan.corners) && plan.corners.length === 4) {
+        arrestState.closingMethod = plan.closingMethod || 'corners';
+        arrestState.corners = plan.corners.map((c, i) => ({
+            lat: c.lat, lng: c.lng,
+            rightName: c.rightName || '',
+            leftName: c.leftName || '',
+            marker: null, lineLayer: null, labelRight: null, labelLeft: null,
+            idx: i,
+        }));
+        arrestRenderAllCorners();
+        arrestRenderCornerInputs();
+        arrestShowClosingSection();
+    }
     arrestUpdateStep();
     arrestUpdateStepperUI();
     document.getElementById('arrestFinishBtn').disabled = !(arrestState.target && arrestState.startPoint);
@@ -6918,6 +7241,12 @@ async function setActivityType(type) {
         arrestState.targetWedge = null;
     }
     if (type === 'arrest' && arrestState.target) arrestRenderTargetWedge();
+    // Show closing-method section only for arrest type
+    if (type === 'arrest') {
+        if (arrestState.target) { try { arrestInitCorners(); } catch(e){} }
+    } else {
+        try { arrestClearCorners(); } catch(e){}
+    }
     // Update step message if at initial state
     if (!arrestState.target) {
         const step = document.getElementById('arrestStep');
@@ -6973,6 +7302,13 @@ function arrestSaveSession() {
         returnDecided: !!arrestState.returnDecided,
         exitWaypoints: arrestState.exitWaypoints || [],
         extractionPoint: arrestState.extractionPoint || null,
+        // Closing method (corners)
+        closingMethod: arrestState.closingMethod || 'corners',
+        corners: (arrestState.corners || []).map(c => ({
+            lat: c.lat, lng: c.lng,
+            rightName: c.rightName || '',
+            leftName: c.leftName || '',
+        })),
     };
     try {
         const raw = sessionStorage.getItem(ARREST_SESSION_KEY);
