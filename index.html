@@ -6,12 +6,22 @@
 <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
 <meta http-equiv="Pragma" content="no-cache">
 <meta http-equiv="Expires" content="0">
+<!-- Defense-in-depth: tighten what scripts/connects/frames the page allows. -->
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' https://www.gstatic.com https://cdnjs.cloudflare.com; style-src 'self' 'unsafe-inline' https://cdnjs.cloudflare.com https://fonts.googleapis.com; font-src 'self' data: https://fonts.gstatic.com; img-src 'self' data: blob: https:; connect-src 'self' https://*.firebasedatabase.app https://*.firebaseio.com https://*.googleapis.com https://identitytoolkit.googleapis.com https://securetoken.googleapis.com https://overpass-api.de https://router.project-osrm.org https://graph.mapillary.com https://images.mapillary.com https://www.gstatic.com; frame-src https://www.youtube-nocookie.com https://www.youtube.com https://www.mapillary.com https://*.firebaseapp.com https://accounts.google.com; object-src 'none'; base-uri 'self'; form-action 'self';">
+<meta name="referrer" content="strict-origin-when-cross-origin">
 <title>מבט 443 | פלטפורמת מודיעין גזרתית</title>
 <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg viewBox='0 0 100 100' xmlns='http://www.w3.org/2000/svg'%3E%3Crect width='100' height='100' rx='12' fill='%23040810'/%3E%3Cpath d='M50 15 Q65 15 73 27 Q78 35 77 47 Q75 57 68 63 L50 75 L32 63 Q25 57 23 47 Q22 35 27 27 Q35 15 50 15Z' fill='none' stroke='%2300d4ff' stroke-width='2'/%3E%3Cpath d='M33 20 L27 7 L38 17' fill='%2300d4ff' opacity='.6'/%3E%3Cpath d='M67 20 L73 7 L62 17' fill='%2300d4ff' opacity='.6'/%3E%3Ccircle cx='40' cy='37' r='9' fill='none' stroke='%2300d4ff' stroke-width='1.5'/%3E%3Ccircle cx='60' cy='37' r='9' fill='none' stroke='%2300d4ff' stroke-width='1.5'/%3E%3Ccircle cx='40' cy='37' r='4' fill='%23ffd000'/%3E%3Ccircle cx='60' cy='37' r='4' fill='%23ffd000'/%3E%3Ccircle cx='40' cy='37' r='1.5' fill='%23040810'/%3E%3Ccircle cx='60' cy='37' r='1.5' fill='%23040810'/%3E%3Cpath d='M47 43 L50 49 L53 43' fill='%23ff8800' opacity='.7'/%3E%3Cline x1='50' y1='65' x2='50' y2='93' stroke='%2300d4ff' stroke-width='2.5' opacity='.6'/%3E%3Cpath d='M44 67 L50 65 L56 67 L50 69Z' fill='%2300d4ff' opacity='.5'/%3E%3Cline x1='43' y1='68' x2='57' y2='68' stroke='%2300d4ff' stroke-width='1.5' opacity='.5'/%3E%3Cpath d='M48 91 L50 97 L52 91' fill='%2300d4ff' opacity='.5'/%3E%3C/svg%3E">
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css" />
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css"
+      integrity="sha384-c6Rcwz4e4CITMbu/NBmnNS8yN2sC3cUElMEMfP3vqqKFp7GOYaaBBCqmaWBjmkjb"
+      crossorigin="anonymous"
+      referrerpolicy="no-referrer" />
 <!-- Firebase Auth for operational planning access control -->
-<script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"
+        integrity="sha384-yuGdyIzzYtOBlBG6JOWn+Ey9kpq7HocusNuxEGyyohr1eEyXpeEyehIIXC/hznw4"
+        crossorigin="anonymous"></script>
+<script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js"
+        integrity="sha384-lI+CxEx/bCvWP1b0OK13j5HTrTZP7yf1xle8TVOFq2smz6KC1RChTarRV/RHP5PP"
+        crossorigin="anonymous"></script>
 <style>
 /* ═══════════════════════════════════════
    MABAT 443 - CYBER DEFENSE DASHBOARD
@@ -28,7 +38,14 @@
     --border-primary: #0f3460;
     --border-glow: #00d4ff;
     --cyan: #00d4ff;
-    --cyan-dim: #00d4ff44;
+    --cyan-dim: #00d4ff44;     /* decorative only — fails WCAG 3:1 on dark bg */
+    --cyan-soft: #00d4ff80;    /* 50% — use for state-conveying borders to meet AA */
+    /* Z-index scale — use these instead of magic numbers in new code */
+    --z-base: 0;
+    --z-overlay: 100;
+    --z-modal: 200;
+    --z-toast: 300;
+    --z-tooltip: 400;
     --green: #00ff88;
     --green-dim: #00ff8844;
     --red: #ff0040;
@@ -59,6 +76,7 @@ body {
     overflow-y: auto;
     overflow-x: hidden;
     min-height: 100vh;
+    min-height: 100dvh; /* iOS Safari URL-bar safe */
     width: 100vw;
 }
 
@@ -183,6 +201,7 @@ body {
         "header  sidebar"
         "main    sidebar";
     min-height: 100vh;
+    min-height: 100dvh;
     gap: 2px;
     padding: 8px;
     position: relative;
@@ -192,6 +211,7 @@ body {
     position: sticky;
     top: 8px;
     height: calc(100vh - 16px);
+    height: calc(100dvh - 16px);
     align-self: start;
 }
 .dashboard .header {
@@ -1722,6 +1742,7 @@ body {
         flex-direction: column;
         height: auto;
         min-height: 100vh;
+        min-height: 100dvh;
         padding: 4px;
         gap: 4px;
     }
@@ -2251,7 +2272,8 @@ body {
 .arrest-panel {
     position: absolute;
     top: 60px;
-    left: 12px;
+    /* Logical: visual-start in RTL → visual-right; same as map-btn-row alignment */
+    inset-inline-start: 12px;
     z-index: 1100;
     background: rgba(4,8,16,.96);
     border: 1px solid var(--red-dim);
@@ -3122,8 +3144,11 @@ body {
         display: block !important;
         padding: 0 !important;
         min-height: 100vh;
+        min-height: 100dvh;
         height: auto;
     }
+    /* iOS auto-zooms inputs <16px on focus and never zooms back — force 16px on all form fields */
+    input, textarea, select { font-size: 16px !important; }
     .dashboard .header {
         position: sticky !important; top: 0; z-index: 50;
         padding: 6px 10px !important;
@@ -3184,6 +3209,7 @@ body {
         transition: transform 0.3s cubic-bezier(0.4,0,0.2,1);
         z-index: 200;
         height: 100vh !important;
+        height: 100dvh !important;
     }
     .sidebar.open { transform: translateX(0); }
     .sidebar-overlay { display: block; }
@@ -3612,6 +3638,7 @@ body::after {
 #view-dashboard .map-panel {
     grid-row: 1 / 2; grid-column: 2 / 3;
     min-height: calc(100vh - 80px);
+    min-height: calc(100dvh - 80px);
 }
 #view-dashboard .right-panel { display: none; }
 #view-dashboard .alert-feed {
@@ -3678,11 +3705,13 @@ body::after {
 /* Operations view — docked arrest planner + full map */
 #view-operations.active {
     min-height: calc(100vh - 80px);
+    min-height: calc(100dvh - 80px);
 }
 #view-operations .ops-layout {
     display: flex;
     flex: 1;
     min-height: calc(100vh - 120px);
+    min-height: calc(100dvh - 120px);
     gap: 2px;
 }
 #view-operations .ops-planner-dock {
@@ -3751,6 +3780,39 @@ body::after {
         grid-template-rows: auto auto auto auto;
     }
 }
+
+/* ═══════ ACCESSIBILITY: reduced motion ═══════ */
+/* Disable continuous animations for users with vestibular issues, battery-saver, etc. */
+@media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+        scroll-behavior: auto !important;
+    }
+}
+
+/* ═══════ RTL FIXES — margin-right:auto pushes wrong way in RTL flex ═══════ */
+/* Original `margin-right: auto` in RTL flex pushed to the visual start. Use logical props. */
+.sidebar-item-badge { margin-right: 0 !important; margin-inline-start: auto !important; }
+.vote-buttons { margin-right: 0 !important; margin-inline-start: auto !important; }
+
+/* ═══════ MOBILE: 44px touch targets + Leaflet zoom enlarged ═══════ */
+@media (max-width: 768px) {
+    /* Apple HIG 44px / Material 48dp — fingers and gloves need real targets */
+    button, .map-btn, .filter-chip, input[type="radio"]+span, .sidebar-item,
+    .vote-btn, .alert-check {
+        min-width: 44px !important;
+        min-height: 44px !important;
+    }
+    /* Leaflet default zoom is 30px; promote to 44px on touch */
+    .leaflet-touch .leaflet-bar a {
+        width: 44px !important;
+        height: 44px !important;
+        line-height: 44px !important;
+        font-size: 22px !important;
+    }
+}
 </style>
 </head>
 <body>
@@ -3778,8 +3840,8 @@ body::after {
         <div style="font-family:'Heebo',sans-serif;font-size:13px;font-weight:300;color:#a0b8d0;letter-spacing:2px;margin-bottom:35px;">פלטפורמת מודיעין גזרתית</div>
         <div style="margin-bottom:20px;text-align:right;">
             <label style="display:block;font-family:'Heebo',sans-serif;font-size:11px;font-weight:400;color:#94aac8;margin-bottom:6px;">קוד גישה</label>
-            <input id="loginInput" type="text" autocomplete="off" data-lpignore="true" data-1p-ignore maxlength="10" placeholder="••••"
-                style="width:100%;padding:12px 16px;background:rgba(0,0,0,0.4);border:1px solid #0f3460;border-radius:4px;color:#00d4ff;font-family:'Share Tech Mono',monospace;font-size:18px;letter-spacing:8px;text-align:center;outline:none;box-sizing:border-box;-webkit-text-security:disc;-moz-text-security:disc;text-security:disc;"
+            <input id="loginInput" type="password" autocomplete="off" data-lpignore="true" data-1p-ignore maxlength="10" placeholder="••••" inputmode="numeric" aria-label="קוד גישה"
+                style="width:100%;padding:12px 16px;background:rgba(0,0,0,0.4);border:1px solid #0f3460;border-radius:4px;color:#00d4ff;font-family:'Share Tech Mono',monospace;font-size:18px;letter-spacing:8px;text-align:center;outline:none;box-sizing:border-box;"
                 onfocus="this.style.borderColor='#00d4ff';this.style.boxShadow='0 0 20px rgba(0,212,255,0.15)'"
                 onblur="this.style.borderColor='#0f3460';this.style.boxShadow='none'">
         </div>
@@ -4005,8 +4067,8 @@ window.tacticalAlert = function(message, opts) {
                 <div class="clock" id="clock">00:00:00</div>
                 <div class="date-display" id="dateDisplay"></div>
             </div>
-            <button class="sidebar-mobile-toggle" onclick="toggleSidebarMobile()" title="תפריט" style="margin-right:10px;">
-                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
+            <button class="sidebar-mobile-toggle" onclick="toggleSidebarMobile()" title="תפריט" aria-label="פתח תפריט ניווט" aria-expanded="false" aria-controls="sidebar" style="margin-right:10px;">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
             </button>
         </div>
     </header>
@@ -4450,7 +4512,10 @@ window.tacticalAlert = function(message, opts) {
 </div>
 
 <!-- SCRIPTS -->
-<script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"
+        integrity="sha384-NElt3Op+9NBMCYaef5HxeJmU4Xeard/Lku8ek6hoPTvYkQPh3zLIrJP7KiRocsxO"
+        crossorigin="anonymous"
+        referrerpolicy="no-referrer"></script>
 <script src="fence-inline.js"></script>
 <script>
 // ═══════════════════════════════════════
@@ -4687,13 +4752,14 @@ async function loadAlertVotes() {
 async function toggleVote(alertId, voteType, event) {
     event.stopPropagation();
     const current = alertVotes[alertId];
+    const auth = await (Auth && Auth._authParam ? Auth._authParam() : '');
     if (current && current.vote === voteType) {
         delete alertVotes[alertId];
-        try { await fetch(`${FIREBASE_URL}/alert-votes/${alertId}.json`, { method: 'DELETE' }); } catch (e) { console.error('Error removing vote:', e); }
+        try { await fetch(`${FIREBASE_URL}/alert-votes/${alertId}.json${auth}`, { method: 'DELETE' }); } catch (e) { console.error('Error removing vote:', e); }
     } else {
         const voteData = { vote: voteType, votedAt: Date.now() };
         alertVotes[alertId] = voteData;
-        try { await fetch(`${FIREBASE_URL}/alert-votes/${alertId}.json`, { method: 'PUT', body: JSON.stringify(voteData) }); } catch (e) { console.error('Error saving vote:', e); }
+        try { await fetch(`${FIREBASE_URL}/alert-votes/${alertId}.json${auth}`, { method: 'PUT', body: JSON.stringify(voteData) }); } catch (e) { console.error('Error saving vote:', e); }
     }
     renderAlerts();
 }
@@ -4718,7 +4784,8 @@ async function saveJournalNote(itemId) {
     const note = { reporter, details, savedAt: Date.now() };
     journalNotes[itemId] = note;
     try {
-        await fetch(`${FIREBASE_URL}/journal-notes/${itemId}.json`, {
+        const auth = await (Auth && Auth._authParam ? Auth._authParam() : '');
+        await fetch(`${FIREBASE_URL}/journal-notes/${itemId}.json${auth}`, {
             method: 'PUT',
             body: JSON.stringify(note)
         });
@@ -4729,7 +4796,8 @@ async function saveJournalNote(itemId) {
 async function deleteJournalNote(itemId) {
     delete journalNotes[itemId];
     try {
-        await fetch(`${FIREBASE_URL}/journal-notes/${itemId}.json`, { method: 'DELETE' });
+        const auth = await (Auth && Auth._authParam ? Auth._authParam() : '');
+        await fetch(`${FIREBASE_URL}/journal-notes/${itemId}.json${auth}`, { method: 'DELETE' });
     } catch (e) { console.error('Error deleting note:', e); }
     renderHistory();
 }
@@ -4804,10 +4872,15 @@ async function submitFieldReport() {
         reporter: reporter || 'לא צוין'
     };
 
-    const reportId = 'field_' + Date.now();
+    // Collision-resistant id (crypto.randomUUID where available, else timestamp+random fallback)
+    const rid = (typeof crypto !== 'undefined' && crypto.randomUUID)
+        ? crypto.randomUUID().slice(0, 8)
+        : Math.random().toString(36).slice(2, 10);
+    const reportId = 'field_' + Date.now() + '_' + rid;
 
     try {
-        await fetch(`${FIREBASE_URL}/auto-news/${reportId}.json`, {
+        const auth = await (Auth && Auth._authParam ? Auth._authParam() : '');
+        await fetch(`${FIREBASE_URL}/auto-news/${reportId}.json${auth}`, {
             method: 'PUT',
             body: JSON.stringify(report)
         });
@@ -5300,7 +5373,10 @@ document.addEventListener('DOMContentLoaded', () => {
 
 // ═══════ MAPILLARY GRAPH API ═══════
 // בגלל מגבלת bbox (0.01 sq-deg), קוראים לפי נקודה+רדיוס
-const MAPILLARY_TOKEN_CLIENT = 'MLY|26636963299290715|555a2cc2563d0e534e9b49896c447f93';
+// Token resolved at runtime: set `window.__MLY_TOKEN__` in a deploy-time shim
+// (e.g. GitHub Pages secret + small script before this file). Hard-coding the
+// token in a public repo lets anyone burn the quota — see docs/audits/.
+const MAPILLARY_TOKEN_CLIENT = window.__MLY_TOKEN__ || '';
 const MAPILLARY_CREATORS = [
     // יוצרים שיש להם כיסוי מוכר בגזרה — יקבלו צבע ייחודי
     { id: '110481147852897', username: '360ms', color: '#05CB63' },
@@ -5415,30 +5491,36 @@ async function loadMapillaryAt(lat, lng, radiusM = 1200) {
 
 // Video modal — מזהה את סוג ה-URL ומרנדר בהתאם (mp4, YouTube, Twitter, Telegram embed)
 function openVideoModal(url) {
+    // Allowlist URL protocol — rejects javascript:, data:, etc.
+    url = safeUrl(url);
     if (!url) return;
     const existing = document.getElementById('videoModalOverlay');
     if (existing) existing.remove();
 
+    const safeAttr = escapeHtml(url);
     let body = '';
     if (/\.mp4(\?|$)/i.test(url)) {
         // HTML5 video
-        body = `<video src="${url}" controls autoplay style="width:100%;height:100%;background:#000;"></video>`;
+        body = `<video src="${safeAttr}" controls autoplay style="width:100%;height:100%;background:#000;"></video>`;
     } else if (/youtube\.com\/watch\?v=|youtu\.be\//i.test(url)) {
         const m = url.match(/(?:v=|youtu\.be\/|shorts\/|embed\/)([A-Za-z0-9_-]{6,20})/);
         const vid = m ? m[1] : '';
-        body = `<iframe src="https://www.youtube.com/embed/${vid}?autoplay=1" frameborder="0" allow="autoplay;fullscreen;encrypted-media" allowfullscreen style="width:100%;height:100%;"></iframe>`;
+        // Use youtube-nocookie.com to avoid setting tracking cookies on operator browsers
+        const safeVid = String(vid).replace(/[^a-zA-Z0-9_-]/g, '');
+        body = `<iframe src="https://www.youtube-nocookie.com/embed/${safeVid}?autoplay=1" frameborder="0" allow="autoplay;fullscreen;encrypted-media" allowfullscreen style="width:100%;height:100%;"></iframe>`;
     } else if (/twitter\.com|x\.com/i.test(url)) {
         // Twitter embed via blog card
-        body = `<iframe src="${url.replace('x.com','twitter.com')}" frameborder="0" style="width:100%;height:100%;background:#000;"></iframe>
-                <div style="position:absolute;bottom:8px;right:8px;z-index:10;"><a href="${url}" target="_blank" style="color:#00d4ff;font-size:10px;">פתח ב-X ↗</a></div>`;
+        const twUrl = escapeHtml(url.replace('x.com','twitter.com'));
+        body = `<iframe src="${twUrl}" frameborder="0" style="width:100%;height:100%;background:#000;"></iframe>
+                <div style="position:absolute;bottom:8px;right:8px;z-index:10;"><a href="${safeAttr}" target="_blank" rel="noopener noreferrer" style="color:#00d4ff;font-size:10px;">פתח ב-X ↗</a></div>`;
     } else if (/t\.me\//i.test(url)) {
         // Telegram embed
-        const embedUrl = url.includes('?embed=1') ? url : url + '?embed=1';
+        const embedUrl = escapeHtml(url.includes('?embed=1') ? url : url + '?embed=1');
         body = `<iframe src="${embedUrl}" frameborder="0" style="width:100%;height:100%;background:#000;"></iframe>`;
     } else {
         body = `<div style="padding:20px;text-align:center;color:#d0d8e0;">
                 <p>לא ניתן להציג את הוידאו בתצוגה פנימית.</p>
-                <a href="${url}" target="_blank" style="color:#00d4ff;">פתח בטאב חדש ↗</a>
+                <a href="${safeAttr}" target="_blank" rel="noopener noreferrer" style="color:#00d4ff;">פתח בטאב חדש ↗</a>
             </div>`;
     }
 
@@ -5720,10 +5802,27 @@ function toggleSidebarMobile() {
     if (!sb) return;
     const open = sb.classList.toggle('open');
     if (ov) ov.classList.toggle('active', open);
+    // a11y + UX: lock body scroll, sync aria-expanded, focus first nav item,
+    // bind one-shot ESC handler to close
+    document.body.style.overflow = open ? 'hidden' : '';
+    const toggleBtn = document.querySelector('.sidebar-mobile-toggle');
+    if (toggleBtn) toggleBtn.setAttribute('aria-expanded', String(open));
+    if (open) {
+        setTimeout(() => {
+            try { sb.querySelector('.sidebar-item.active, .sidebar-item')?.focus(); } catch(e){}
+        }, 200);
+        const onKey = (e) => {
+            if (e.key === 'Escape') {
+                document.removeEventListener('keydown', onKey);
+                if (sb.classList.contains('open')) toggleSidebarMobile();
+            }
+        };
+        document.addEventListener('keydown', onKey);
+    }
 }
 
 // Inline field report submit — mirrors submitFieldReport but reads Inline IDs
-function submitFieldReportInline() {
+async function submitFieldReportInline() {
     const origTitle = document.getElementById('reportTitle');
     const origDetails = document.getElementById('reportDetails');
     const origLoc = document.getElementById('reportLocation');
@@ -5755,12 +5854,18 @@ function submitFieldReportInline() {
             }
         }
     }
-    if (typeof submitFieldReport === 'function') submitFieldReport();
-    // Clear inline inputs
-    if (tIn) tIn.value = '';
-    if (dIn) dIn.value = '';
-    if (rIn) rIn.value = '';
-    if (lIn) lIn.value = '';
+    if (typeof submitFieldReport === 'function') {
+        try {
+            await submitFieldReport();
+            // Clear inline inputs only on success
+            if (tIn) tIn.value = '';
+            if (dIn) dIn.value = '';
+            if (rIn) rIn.value = '';
+            if (lIn) lIn.value = '';
+        } catch (e) {
+            console.warn('Field report submit failed:', e);
+        }
+    }
 }
 
 // Sync history rendering to inline
@@ -5956,7 +6061,7 @@ function offsetFromTarget(deg, distM) {
 // Only for 'arrest' activity type — checkpoint/ambush/observation don't use entrance markers
 function arrestRenderTargetWedge() {
     if (arrestState.targetWedge) {
-        arrestState.targetWedge.forEach(l => map.removeLayer(l));
+        if (Array.isArray(arrestState.targetWedge)) arrestState.targetWedge.forEach(l => map.removeLayer(l));
         arrestState.targetWedge = null;
     }
     if (!arrestState.target) return;
@@ -6981,6 +7086,11 @@ function buildWaypointMarker(wp, idx) {
 
 async function arrestSnapToRoads() {
     if (!arrestState.target || !arrestState.startPoint) return;
+    // Prevent double-click from racing two OSRM requests where the later response wins
+    if (arrestSnapToRoads._inFlight) return;
+    arrestSnapToRoads._inFlight = true;
+    const snapBtn = document.querySelector('[onclick*="arrestSnapToRoads"]');
+    if (snapBtn) snapBtn.disabled = true;
     const step = document.getElementById('arrestStep');
     step.innerHTML = '⏳ מחשב התאמה לכבישים...';
 
@@ -7087,6 +7197,9 @@ async function arrestSnapToRoads() {
         console.warn('OSRM snap failed:', e.message);
         step.innerHTML = '⚠️ התאמה לכבישים נכשלה (ציר קו-ישר נשאר)';
         showToast('⚠️ התאמה נכשלה: ' + e.message);
+    } finally {
+        arrestSnapToRoads._inFlight = false;
+        if (snapBtn) snapBtn.disabled = false;
     }
 }
 
@@ -7104,11 +7217,18 @@ async function arrestShowSavedPlans() {
         list.innerHTML = '<div class="arrest-saved-title">תוכניות (' + plans.length + ')</div>' +
             plans.slice().reverse().map((p, revIdx) => {
                 const idx = plans.length - 1 - revIdx;
-                const d = new Date(p.ts);
-                const dStr = `${String(d.getDate()).padStart(2,'0')}/${String(d.getMonth()+1).padStart(2,'0')} ${String(d.getHours()).padStart(2,'0')}:${String(d.getMinutes()).padStart(2,'0')}`;
+                // Accept both `savedAt` (current schema) and legacy `ts` (older saves)
+                const tsMs = p.savedAt || p.ts || 0;
+                const d = new Date(tsMs);
+                const dStr = tsMs
+                    ? `${String(d.getDate()).padStart(2,'0')}/${String(d.getMonth()+1).padStart(2,'0')} ${String(d.getHours()).padStart(2,'0')}:${String(d.getMinutes()).padStart(2,'0')}`
+                    : '--';
                 const wpCount = (p.waypoints || []).length;
                 const km = p.meta ? (p.meta.distanceM / 1000).toFixed(1) : '?';
-                const loc = `${p.target.lat.toFixed(4)}, ${p.target.lng.toFixed(4)}`;
+                // Non-arrest plans (observation/checkpoint/ambush) may legitimately have no target
+                const loc = (p.target && typeof p.target.lat === 'number')
+                    ? `${p.target.lat.toFixed(4)}, ${p.target.lng.toFixed(4)}`
+                    : (p.startPoint ? `מ-${p.startPoint.lat.toFixed(4)},${p.startPoint.lng.toFixed(4)}` : '—');
                 const nm = p.targetName ? `<span style="color:var(--cyan);">${escapeHtml(p.targetName)}</span> · ` : '';
                 return `
                     <div class="arrest-saved-item" data-idx="${idx}">
@@ -7139,7 +7259,9 @@ async function arrestLoadPlan(idx) {
     document.querySelectorAll('input[name="arrestTravelMode"]').forEach(r => {
         r.checked = (r.value === arrestState.travelMode);
     });
-    arrestAddTarget(plan.target.lat, plan.target.lng);
+    if (plan.target && typeof plan.target.lat === 'number') {
+        arrestAddTarget(plan.target.lat, plan.target.lng);
+    }
     if (plan.startPoint) arrestAddStart(plan.startPoint.lat, plan.startPoint.lng);
     (plan.waypoints || []).forEach(w => {
         arrestAddWaypoint(w.lat, w.lng);
@@ -7174,12 +7296,16 @@ async function arrestLoadPlan(idx) {
     document.getElementById('arrestFinishBtn').disabled = !(arrestState.target && arrestState.startPoint);
     if (arrestState.target && arrestState.startPoint) arrestFinish();
     document.getElementById('arrestSavedList').style.display = 'none';
-    // zoom
-    const pts = [plan.target];
+    // zoom — handle plans saved without a target (observation/checkpoint/ambush)
+    const pts = [];
+    if (plan.target && typeof plan.target.lat === 'number') pts.push(plan.target);
     if (plan.startPoint) pts.push(plan.startPoint);
     pts.push(...(plan.waypoints || []));
-    if (pts.length > 1) map.fitBounds(L.latLngBounds(pts.map(p => [p.lat, p.lng])).pad(0.2));
-    else map.setView([plan.target.lat, plan.target.lng], 16);
+    if (pts.length > 1) {
+        map.fitBounds(L.latLngBounds(pts.map(p => [p.lat, p.lng])).pad(0.2));
+    } else if (pts.length === 1) {
+        map.setView([pts[0].lat, pts[0].lng], 16);
+    }
 }
 
 async function arrestDeletePlan(idx) {
@@ -7237,7 +7363,7 @@ async function setActivityType(type) {
     if (tusRow) tusRow.style.display = (type === 'observation') ? 'block' : 'none';
     // Re-render markers: entrance wedge only for arrest
     if (arrestState.targetWedge) {
-        arrestState.targetWedge.forEach(l => map.removeLayer(l));
+        if (Array.isArray(arrestState.targetWedge)) arrestState.targetWedge.forEach(l => map.removeLayer(l));
         arrestState.targetWedge = null;
     }
     if (type === 'arrest' && arrestState.target) arrestRenderTargetWedge();
@@ -7273,7 +7399,13 @@ const ARREST_SESSION_KEY = 'mabat443-arrest-session-v1';
 
 // Saves current plan to an ARRAY of session plans (multiple plans preserved),
 // then clears the canvas so the user can start a new activity immediately.
-function arrestSaveSession() {
+async function arrestSaveSession() {
+    // Prevent double-submit while a save is in flight
+    if (arrestSaveSession._inFlight) return;
+    arrestSaveSession._inFlight = true;
+    const saveBtn = document.getElementById('arrestSaveBtn');
+    if (saveBtn) saveBtn.disabled = true;
+    try {
     const hasAny = arrestState.target || arrestState.startPoint || (arrestState.waypoints && arrestState.waypoints.length);
     if (!hasAny) {
         const type = arrestState.activityType || 'arrest';
@@ -7322,15 +7454,37 @@ function arrestSaveSession() {
         plans.push(payload);
         // Keep last 20 plans max
         if (plans.length > 20) plans = plans.slice(-20);
-        sessionStorage.setItem(ARREST_SESSION_KEY, JSON.stringify(plans));
-        // Also persist to per-user archive (Firebase when signed in, else localStorage)
-        UserPlans.add(payload).catch(e => console.warn('Archive save failed:', e));
+        try {
+            sessionStorage.setItem(ARREST_SESSION_KEY, JSON.stringify(plans));
+        } catch (qe) {
+            // Quota — drop oldest until it fits
+            while (plans.length > 5) {
+                plans.shift();
+                try { sessionStorage.setItem(ARREST_SESSION_KEY, JSON.stringify(plans)); break; }
+                catch (e2) { continue; }
+            }
+        }
+        // Also persist to per-user archive (Firebase when signed in, else localStorage).
+        // Await so failures surface to the user instead of clearing the canvas on a silent error.
         const label = activityLabels(payload.activityType).title;
-        showToast(`💾 ${label} נשמר · המערכת פנויה לתכנון חדש`);
-        // Clear canvas for next plan
+        let archiveOk = true;
+        try {
+            await UserPlans.add(payload);
+        } catch (e) {
+            archiveOk = false;
+            console.warn('Archive save failed:', e);
+        }
+        showToast(archiveOk
+            ? `💾 ${label} נשמר · המערכת פנויה לתכנון חדש`
+            : `⚠ ${label} נשמר מקומית בלבד · נסה שוב להעלות לענן`);
+        // Clear canvas for next plan only if at least one persistence layer succeeded
         arrestClear(true);
     } catch (e) {
         showToast('⚠ שמירה נכשלה: ' + e.message);
+    }
+    } finally {
+        arrestSaveSession._inFlight = false;
+        if (saveBtn) saveBtn.disabled = false;
     }
 }
 
@@ -7364,7 +7518,8 @@ function _arrestDownload(content, filename, mime) {
     document.body.appendChild(a);
     a.click();
     document.body.removeChild(a);
-    setTimeout(() => URL.revokeObjectURL(url), 1000);
+    // 5s gives slow devices time to start reading the blob before we revoke
+    setTimeout(() => URL.revokeObjectURL(url), 5000);
 }
 function arrestDownloadJSON() {
     if (!arrestState.target) return;
@@ -7716,24 +7871,26 @@ function updateMapMarkers(news) {
 // ═══════ FETCH DATA ═══════
 async function fetchData() {
     if (isDemoMode) return; // Don't overwrite demo data
+    // Prevent overlapping fetches when refresh tick fires before previous one finishes
+    if (fetchData._inFlight) return;
+    fetchData._inFlight = true;
     try {
-        const [newsRes, summaryRes, metaRes, weatherRes, calendarRes, sentimentRes, trendsRes] = await Promise.all([
+        // Promise.allSettled so one slow/failed node doesn't tank the entire refresh.
+        const results = await Promise.allSettled([
             fetch(`${FIREBASE_URL}/auto-news.json`),
             fetch(`${FIREBASE_URL}/world-news-summary/current.json`),
             fetch(`${FIREBASE_URL}/metadata.json`),
-            fetch(`${FIREBASE_URL}/weather/current.json`).catch(() => new Response('null')),
-            fetch(`${FIREBASE_URL}/calendar/current.json`).catch(() => new Response('null')),
-            fetch(`${FIREBASE_URL}/sentiment/current.json`).catch(() => new Response('null')),
-            fetch(`${FIREBASE_URL}/trends/current.json`).catch(() => new Response('null')),
+            fetch(`${FIREBASE_URL}/weather/current.json`),
+            fetch(`${FIREBASE_URL}/calendar/current.json`),
+            fetch(`${FIREBASE_URL}/sentiment/current.json`),
+            fetch(`${FIREBASE_URL}/trends/current.json`),
         ]);
-
-        const news = await newsRes.json();
-        const summary = await summaryRes.json();
-        const meta = await metaRes.json();
-        const weather = await weatherRes.json();
-        const calendar = await calendarRes.json();
-        const sentimentData = await sentimentRes.json();
-        const trendsData = await trendsRes.json();
+        const parseOrNull = async (r) => {
+            if (r.status !== 'fulfilled' || !r.value.ok) return null;
+            try { return await r.value.json(); } catch (e) { return null; }
+        };
+        const [news, summary, meta, weather, calendar, sentimentData, trendsData] =
+            await Promise.all(results.map(parseOrNull));
 
         // Update intel layers
         updateIntelLayers(weather, calendar, sentimentData, trendsData);
@@ -7793,6 +7950,8 @@ async function fetchData() {
         console.error('Fetch error:', error);
         document.getElementById('statusDot').className = 'status-dot offline';
         document.getElementById('statusText').textContent = 'שגיאה';
+    } finally {
+        fetchData._inFlight = false;
     }
 }
 
@@ -8038,10 +8197,10 @@ function renderAlerts() {
             </div>
             ${alertExpandedDetails(item)}
             <div class="alert-meta-row" style="display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin-top:6px;padding-top:6px;border-top:1px solid var(--border-primary);">
-                <a href="javascript:void(0)" onclick="openPublisherProfile('${escapeHtml(srcIdForProfile)}',event)" class="source-link-clickable" style="color:#00d4ff;font-size:10px;text-decoration:none;">&#128225; ${escapeHtml(item.source || 'N/A')}</a>
-                ${item.videoUrl ? '<a href="javascript:void(0)" onclick="event.stopPropagation();openVideoModal(\'' + escapeHtml(item.videoUrl).replace(/'/g,'\\\'') + '\')" style="color:#ff0040;font-size:10px;text-decoration:none;font-weight:700;">▶️ סרטון</a>' : ''}
-                ${tgLinkFull ? '<a href="' + escapeHtml(tgLinkFull) + '" target="_blank" onclick="event.stopPropagation();" style="color:#00d4ff;font-size:10px;text-decoration:none;">✈️ טלגרם</a>' : ''}
-                ${sourceUrl ? '<a href="' + escapeHtml(sourceUrl) + '" target="_blank" onclick="event.stopPropagation();" style="color:var(--cyan);font-size:10px;text-decoration:none;font-weight:600;">&#128279; לידיעה המקורית ↗</a>' : ''}
+                <a href="javascript:void(0)" data-src-id="${escapeHtml(srcIdForProfile)}" class="source-link-clickable js-open-publisher" style="color:#00d4ff;font-size:10px;text-decoration:none;">&#128225; ${escapeHtml(item.source || 'N/A')}</a>
+                ${item.videoUrl ? '<a href="javascript:void(0)" data-video-url="' + escapeHtml(item.videoUrl) + '" class="js-open-video" style="color:#ff0040;font-size:10px;text-decoration:none;font-weight:700;">▶️ סרטון</a>' : ''}
+                ${safeUrl(tgLinkFull) ? '<a href="' + escapeHtml(safeUrl(tgLinkFull)) + '" target="_blank" rel="noopener noreferrer" onclick="event.stopPropagation();" style="color:#00d4ff;font-size:10px;text-decoration:none;">✈️ טלגרם</a>' : ''}
+                ${safeUrl(sourceUrl) ? '<a href="' + escapeHtml(safeUrl(sourceUrl)) + '" target="_blank" rel="noopener noreferrer" onclick="event.stopPropagation();" style="color:var(--cyan);font-size:10px;text-decoration:none;font-weight:600;">&#128279; לידיעה המקורית ↗</a>' : ''}
                 <div class="vote-buttons">
                     <button class="vote-btn vote-like${isLiked ? ' active' : ''}" onclick="toggleVote('${alertId}','like',event)" title="אמין" style="opacity:${isLiked ? '1' : '0.8'};">&#128077;</button>
                     <button class="vote-btn vote-dislike${isDisliked ? ' active' : ''}" onclick="toggleVote('${alertId}','dislike',event)" title="שגוי" style="opacity:${isDisliked ? '1' : '0.8'};">&#128078;</button>
@@ -8698,11 +8857,65 @@ function formatDateTime(ts) {
 }
 
 function escapeHtml(text) {
-    if (!text) return '';
-    const div = document.createElement('div');
-    div.textContent = text;
-    return div.innerHTML;
+    if (text === null || text === undefined) return '';
+    return String(text)
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#39;')
+        .replace(/`/g, '&#96;');
 }
+
+// Allowlist for href/src — rejects javascript:, data: (except images), vbscript:, file:
+function safeUrl(url) {
+    if (!url) return '';
+    const s = String(url).trim();
+    if (/^(https?:|mailto:|tel:|geo:|\/|#|\.\.?\/)/i.test(s)) return s;
+    if (/^data:image\/(png|jpe?g|gif|webp|svg\+xml);/i.test(s)) return s;
+    return '';
+}
+
+// A11y polyfill: copy `title=` → `aria-label=` on icon-only buttons/links
+// that lack one. Saves having to edit each occurrence by hand.
+function applyA11yLabels(root) {
+    const scope = root || document;
+    scope.querySelectorAll('button[title]:not([aria-label]), a[title]:not([aria-label])').forEach(el => {
+        const txt = (el.textContent || '').replace(/[\s ]/g, '');
+        // Icon-only if no readable text content (only SVG / HTML entity chars)
+        if (txt.length < 3 || /^[✀-➿-☀-⛿⌀-⏿ -⁯&#;←-⇿︎-️]+$/.test(txt)) {
+            el.setAttribute('aria-label', el.getAttribute('title'));
+        }
+    });
+}
+document.addEventListener('DOMContentLoaded', () => {
+    applyA11yLabels();
+    // Re-apply after dynamic renders (renderAll is defined later in the file)
+    if (typeof window.renderAll === 'function') {
+        const _origRenderAll = window.renderAll;
+        window.renderAll = function() { _origRenderAll.apply(this, arguments); applyA11yLabels(); };
+    }
+});
+
+// Delegated handlers — replace inline onclick="…" with data-* + safe handler
+// so user-controlled values can't break out of attribute strings.
+document.addEventListener('click', (e) => {
+    const pub = e.target.closest('.js-open-publisher');
+    if (pub) {
+        e.preventDefault();
+        e.stopPropagation();
+        try { openPublisherProfile(pub.dataset.srcId, e); } catch (err) { console.warn(err); }
+        return;
+    }
+    const vid = e.target.closest('.js-open-video');
+    if (vid) {
+        e.preventDefault();
+        e.stopPropagation();
+        const url = safeUrl(vid.dataset.videoUrl);
+        if (url) try { openVideoModal(url); } catch (err) { console.warn(err); }
+        return;
+    }
+});
 
 // ═══════ PUBLISHER PROFILE ═══════
 const DEFAULT_PROFILES = {
@@ -8727,8 +8940,23 @@ async function loadPublisherProfiles() {
         const res = await fetch(`${FIREBASE_URL}/publisher-profiles.json`);
         const data = await res.json();
         if (data && !data.error) {
-            // Merge Firebase data over defaults
-            Object.keys(data).forEach(k => { publisherProfiles[k] = { ...publisherProfiles[k], ...data[k] }; });
+            // Merge Firebase data over defaults — strip prototype keys to prevent prototype pollution
+            // (Firebase RTDB is writable; an attacker could inject `__proto__`/`constructor`.)
+            const FORBIDDEN = new Set(['__proto__', 'constructor', 'prototype']);
+            Object.keys(data).forEach(k => {
+                if (FORBIDDEN.has(k)) return;
+                const incoming = data[k];
+                if (!incoming || typeof incoming !== 'object') return;
+                const clean = {};
+                for (const f of Object.keys(incoming)) {
+                    if (!FORBIDDEN.has(f)) clean[f] = incoming[f];
+                }
+                publisherProfiles[k] = Object.assign(
+                    Object.create(null),
+                    publisherProfiles[k] || {},
+                    clean
+                );
+            });
         }
     } catch (e) {
         console.error('Error loading publisher profiles:', e);
@@ -8758,14 +8986,18 @@ function openPublisherProfile(sourceId, event) {
     const srcType = srcObj ? ({ local:'מקומי', regional:'אזורי', national:'ארצי', news:'חדשות' }[srcObj.type] || srcObj.type) : '';
     const tgLink = srcObj && srcObj.tg ? `https://t.me/${srcObj.tg}` : '';
 
+    // Photo: only allow https:// or data:image/* — drops javascript:, data:text/html, etc.
+    const photoUrl = profile.photo && /^(https:\/\/|data:image\/)/i.test(profile.photo)
+        ? safeUrl(profile.photo) : '';
+    const safeTg = safeUrl(tgLink);
     card.innerHTML = `
         <div class="publisher-card-header">
-            ${profile.photo
-                ? `<img src="${escapeHtml(profile.photo)}" class="publisher-photo" onerror="this.outerHTML='<div class=\\'publisher-photo-placeholder\\'>📡</div>'">`
+            ${photoUrl
+                ? `<img src="${escapeHtml(photoUrl)}" class="publisher-photo" onerror="this.outerHTML='<div class=\\'publisher-photo-placeholder\\'>📡</div>'">`
                 : '<div class="publisher-photo-placeholder">📡</div>'}
             <div>
                 <div class="publisher-name">${escapeHtml(srcName)}</div>
-                <div class="publisher-subtitle">${escapeHtml(srcType)}${tgLink ? ' | <a href="' + escapeHtml(tgLink) + '" target="_blank" style="color:var(--cyan);text-decoration:none;" onclick="event.stopPropagation();">Telegram ↗</a>' : ''}</div>
+                <div class="publisher-subtitle">${escapeHtml(srcType)}${safeTg ? ' | <a href="' + escapeHtml(safeTg) + '" target="_blank" rel="noopener noreferrer" style="color:var(--cyan);text-decoration:none;" onclick="event.stopPropagation();">Telegram ↗</a>' : ''}</div>
             </div>
         </div>
         <div class="publisher-stats">
@@ -8847,7 +9079,8 @@ async function savePublisherProfile() {
     };
     publisherProfiles[currentPublisherId] = profileData;
     try {
-        await fetch(`${FIREBASE_URL}/publisher-profiles/${currentPublisherId}.json`, {
+        const auth = await (Auth && Auth._authParam ? Auth._authParam() : '');
+        await fetch(`${FIREBASE_URL}/publisher-profiles/${currentPublisherId}.json${auth}`, {
             method: 'PUT',
             body: JSON.stringify(profileData)
         });
@@ -8859,10 +9092,27 @@ async function savePublisherProfile() {
 function handlePhotoUpload(input) {
     const file = input.files[0];
     if (!file) return;
-    if (file.size > 500000) { tacticalAlert('תמונה גדולה מדי (מקסימום 500KB)'); return; }
+    // Validate MIME — reject e.g. .exe renamed to .jpg
+    if (!file.type || !file.type.startsWith('image/')) {
+        tacticalAlert('סוג קובץ לא נתמך — נדרשת תמונה');
+        input.value = '';
+        return;
+    }
+    if (file.size > 500 * 1024) {
+        tacticalAlert('תמונה גדולה מדי (מקסימום 500KB)');
+        input.value = '';
+        return;
+    }
     const reader = new FileReader();
     reader.onload = function(e) {
-        document.getElementById('pe_photo').value = e.target.result;
+        const result = String(e.target.result || '');
+        // Defense-in-depth: only accept image data URLs
+        if (!/^data:image\//i.test(result)) {
+            tacticalAlert('שגיאה בקריאת התמונה');
+            input.value = '';
+            return;
+        }
+        document.getElementById('pe_photo').value = result;
     };
     reader.readAsDataURL(file);
 }
@@ -9472,13 +9722,14 @@ const Auth = {
                 return;
             }
             if (FIREBASE_AUTH_CONFIG.apiKey === 'REPLACE_WITH_WEB_API_KEY') {
-                console.warn('⚠️ Firebase Auth API key not configured. Operational planning access is OPEN until configured.');
-                this.isApproved = true; // Fail-open during setup to avoid lockout
+                console.error('🚫 Firebase Auth API key not configured. Operational planning is LOCKED until apiKey is set.');
+                this.isApproved = false; // Fail closed — never default-true on missing config
                 this._markReady();
                 this._updateUI();
                 return;
             }
-            firebase.initializeApp(FIREBASE_AUTH_CONFIG);
+            // Guard against double-init (HMR / second call from console)
+            if (!firebase.apps.length) firebase.initializeApp(FIREBASE_AUTH_CONFIG);
             firebase.auth().onAuthStateChanged(async user => {
                 this.currentUser = user;
                 if (user) {
@@ -9511,10 +9762,17 @@ const Auth = {
     },
 
     _emailKey(email) {
-        return email.toLowerCase().replace(/[.#$[\]\/]/g, '_');
+        // Strip Gmail "+suffix" aliases so `a+ops@gmail.com` and `a@gmail.com` resolve to one entry
+        const normalized = email.toLowerCase().replace(/\+[^@]+(?=@)/, '');
+        return normalized.replace(/[.#$[\]\/]/g, '_');
     },
 
     userKey() {
+        // TODO: migrate to Firebase UID (collision-free, matches `auth.uid` in RTDB rules).
+        // Currently email-key for backwards-compat with existing saved plans.
+        // Migration plan: on first sign-in with new code, copy /user-plans/<emailKey>
+        // → /user-plans/<uid> and switch reads to uid. Plus-alias stripping below
+        // prevents `a+ops@gmail.com` from getting a separate namespace from `a@gmail.com`.
         if (!this.currentUser?.email) return null;
         return this._emailKey(this.currentUser.email);
     },
@@ -9541,7 +9799,30 @@ const Auth = {
     },
 
     async signOut() {
+        // Clear UI state synchronously so a slow Firebase response can't leave the
+        // operations view visible after the user has clicked sign-out.
+        this.currentUser = null;
+        this.isApproved = false;
+        try {
+            if (typeof arrestClear === 'function') arrestClear(true);
+            sessionStorage.removeItem(ARREST_SESSION_KEY);
+            const savedList = document.getElementById('arrestSavedList');
+            if (savedList) { savedList.innerHTML = ''; savedList.style.display = 'none'; }
+            // Bounce off operations view immediately
+            if (window.__currentView === 'operations' && typeof switchView === 'function') switchView('dashboard');
+            this._updateUI();
+        } catch (e) { console.warn('signOut cleanup:', e.message); }
         try { await firebase.auth().signOut(); } catch (e) { console.error(e); }
+    },
+
+    // Returns ?auth=<idToken> suffix when signed in, empty string otherwise.
+    // Use on every Firebase REST write so rules can evaluate `auth != null`.
+    async _authParam() {
+        try {
+            if (!this.currentUser || typeof firebase === 'undefined' || !firebase.auth) return '';
+            const t = await firebase.auth().currentUser?.getIdToken();
+            return t ? `?auth=${encodeURIComponent(t)}` : '';
+        } catch (e) { return ''; }
     },
 
     onReady(cb) {
@@ -9633,11 +9914,15 @@ const Auth = {
 // falls back to localStorage for anonymous/unconfigured sessions
 // ═══════════════════════════════════════════════════════════
 const UserPlans = {
+    // Serialize add/remove so two rapid clicks can't read-modify-write race.
+    _queue: Promise.resolve(),
+
     async list() {
         const key = Auth.userKey();
         if (!key) return JSON.parse(localStorage.getItem('mabat443-arrest-plans') || '[]');
         try {
-            const res = await fetch(`${FIREBASE_URL}/user-plans/${key}/arrest-plans.json`);
+            const auth = await Auth._authParam();
+            const res = await fetch(`${FIREBASE_URL}/user-plans/${key}/arrest-plans.json${auth}`);
             const data = await res.json();
             if (!data) return [];
             return Array.isArray(data) ? data.filter(Boolean) : Object.values(data);
@@ -9653,31 +9938,38 @@ const UserPlans = {
             localStorage.setItem('mabat443-arrest-plans', JSON.stringify(plans));
             return;
         }
-        try {
-            await fetch(`${FIREBASE_URL}/user-plans/${key}/arrest-plans.json`, {
-                method: 'PUT',
-                body: JSON.stringify(plans),
-            });
-        } catch (e) {
-            console.error('Save plans failed:', e);
-            // Fallback to local so user doesn't lose work
+        const auth = await Auth._authParam();
+        const res = await fetch(`${FIREBASE_URL}/user-plans/${key}/arrest-plans.json${auth}`, {
+            method: 'PUT',
+            body: JSON.stringify(plans),
+        });
+        if (!res.ok) {
+            // Mirror to localStorage so user doesn't lose work, then surface the failure
             localStorage.setItem('mabat443-arrest-plans', JSON.stringify(plans));
+            throw new Error('Cloud save failed: HTTP ' + res.status);
         }
     },
 
-    async add(plan) {
-        const plans = await this.list();
-        plans.push(plan);
-        if (plans.length > 50) plans.splice(0, plans.length - 50); // Cap at 50
-        await this.save(plans);
-        return plans;
+    add(plan) {
+        // Serialize: each add waits for previous queued op to complete.
+        this._queue = this._queue.then(async () => {
+            const plans = await this.list();
+            plans.push(plan);
+            if (plans.length > 50) plans.splice(0, plans.length - 50); // Cap at 50
+            await this.save(plans);
+            return plans;
+        });
+        return this._queue;
     },
 
-    async remove(idx) {
-        const plans = await this.list();
-        plans.splice(idx, 1);
-        await this.save(plans);
-        return plans;
+    remove(idx) {
+        this._queue = this._queue.then(async () => {
+            const plans = await this.list();
+            plans.splice(idx, 1);
+            await this.save(plans);
+            return plans;
+        });
+        return this._queue;
     }
 };
 
@@ -9707,8 +9999,8 @@ document.addEventListener('DOMContentLoaded', () => {
     try { fetchWeatherDirect(); } catch(e) { console.error('Weather init error:', e); }
     try { checkCalendarLocal(); } catch(e) { console.error('Calendar init error:', e); }
     try { Auth.init(); } catch(e) { console.error('Auth init error:', e); }
-    // Restore saved arrest plan after map is ready (slight delay so all layers initialize)
-    setTimeout(() => { try { arrestRestoreSession(); } catch(e) { console.warn('Arrest restore:', e.message); } }, 1200);
+    // (arrestRestoreSession was a no-op stub — removed. Saved plans are accessed
+    // explicitly via "תוכניות שמורות" button, not auto-restored on load.)
 });
 </script>
 </body>
