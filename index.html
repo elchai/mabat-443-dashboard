@@ -9752,7 +9752,15 @@ const Auth = {
         if (!user?.email) return false;
         const safeKey = this._emailKey(user.email);
         try {
-            const res = await fetch(`${FIREBASE_URL}/approved-users/${safeKey}.json`);
+            // Attach idToken so Rules can require `auth != null` on /approved-users
+            // (the user is already signed-in at this point — _checkApproval runs from
+            // inside onAuthStateChanged with `user` non-null).
+            let auth = '';
+            try {
+                const t = await user.getIdToken();
+                if (t) auth = `?auth=${encodeURIComponent(t)}`;
+            } catch (_) {}
+            const res = await fetch(`${FIREBASE_URL}/approved-users/${safeKey}.json${auth}`);
             const data = await res.json();
             return data === true || (data && data.approved === true);
         } catch (e) {
