@@ -1,0 +1,11 @@
+# Local secrets — never commit
+mly-token.local.js
+service-account.json
+*.local.js
+*.local.json
+.env
+.env.*
+
+# OS
+Thumbs.db
+.DS_Store
