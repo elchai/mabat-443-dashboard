@@ -6126,6 +6126,8 @@ function arrestRenderTargetWedge() {
             markers[f.label].setLatLng([la, lo]);
         });
         six.setTooltipContent(`כניסה לבית — גרור לסיבוב (שעה 6 · ${Math.round(newDeg)}°)`);
+        // הפינות תלויות בכיוון הכניסה — רענון שמות פינות (12-9, 6-3 וכו')
+        arrestRefreshCornerLabels();
     });
 
     arrestState.targetWedge = layers;
@@ -6293,9 +6295,44 @@ function arrestSetExtraction(lat, lng) {
 // CLOSING METHOD — corners (סגירת פינות, doctrine §5ד)
 // 4 חוליות סביב המבנה, 2 שמות לכל פינה, קו ירוק תפוח החוצה.
 // ═══════════════════════════════════════════════════════════
+// Geographic corner positions (fixed by lat/lng grid)
 const ARREST_CORNER_LABELS = ['NW', 'NE', 'SE', 'SW'];
-const ARREST_CORNER_HE = ['צפ"מ', 'צפ"מז', 'דר"מז', 'דר"מ'];
 const ARREST_CORNER_OFFSET_M = 12; // ברירת מחדל: 12 מ' מהמטרה לכל כיוון
+
+// Clock-pair name for a corner — derived from entrance direction.
+// Each corner sits between 2 walls (one front/back = 6 or 12, one side = 3 or 9).
+// Output canonical order: front/back first, side second  →  "6-9", "6-3", "12-3", "12-9".
+// When the user rotates the entrance ("6" drag handle), call arrestRefreshCornerLabels()
+// to re-render markers/inputs/tooltips with updated names.
+function cornerClockLabel(geoIdx, entranceDeg) {
+    const cornerBearings = [315, 45, 135, 225]; // NW, NE, SE, SW
+    const ent = (entranceDeg == null) ? 180 : entranceDeg;
+    const walls = {
+        '6':  ent,
+        '3':  (ent - 90 + 360) % 360,
+        '12': (ent + 180) % 360,
+        '9':  (ent + 90) % 360,
+    };
+    const cornerBearing = cornerBearings[geoIdx];
+    const ranked = Object.entries(walls)
+        .map(([clock, deg]) => ({
+            clock,
+            absDiff: Math.abs(((deg - cornerBearing + 540) % 360) - 180),
+        }))
+        .sort((a, b) => a.absDiff - b.absDiff)
+        .slice(0, 2)
+        .map(w => w.clock);
+    const frontBack = ranked.find(c => c === '6' || c === '12') || ranked[0];
+    const side      = ranked.find(c => c === '3' || c === '9') || ranked[1];
+    return `${frontBack}-${side}`;
+}
+
+// Re-render corner markers + inputs + tooltips after the entrance is rotated
+function arrestRefreshCornerLabels() {
+    if (!arrestState.corners || arrestState.corners.length !== 4) return;
+    try { arrestRenderAllCorners(); } catch (e) {}
+    try { arrestRenderCornerInputs(); } catch (e) {}
+}
 
 function arrestMetersToLatLng(centerLat, centerLng, dxM, dyM) {
     // dxM: east+, dyM: north+
@@ -6383,7 +6420,7 @@ function arrestRenderCorner(idx) {
         draggable: true,
         autoPan: true,
         zIndexOffset: 800
-    }).bindTooltip(`פינה ${ARREST_CORNER_HE[idx]} · גרור להזזה`, { direction: 'top', className: 'dark-tooltip' }).addTo(map);
+    }).bindTooltip(`פינה ${cornerClockLabel(idx, arrestState.targetEntranceDeg)} · גרור להזזה`, { direction: 'top', className: 'dark-tooltip' }).addTo(map);
     m.on('drag', (ev) => {
         const ll = ev.target.getLatLng();
         c.lat = ll.lat; c.lng = ll.lng;
@@ -6458,9 +6495,9 @@ function arrestRenderCornerInputs() {
         const row = document.createElement('div');
         row.className = 'arrest-corner-row';
         row.innerHTML = `
-            <span class="label">${ARREST_CORNER_HE[idx]}</span>
-            <input type="text" placeholder="שם ימין" value="${(c.rightName || '').replace(/"/g, '&quot;')}" data-side="right" data-idx="${idx}">
-            <input type="text" placeholder="שם שמאל" value="${(c.leftName || '').replace(/"/g, '&quot;')}" data-side="left" data-idx="${idx}">
+            <span class="label">${cornerClockLabel(idx, arrestState.targetEntranceDeg)}</span>
+            <input type="text" placeholder="שם אחד" value="${(c.rightName || '').replace(/"/g, '&quot;')}" data-side="right" data-idx="${idx}">
+            <input type="text" placeholder="שם שני" value="${(c.leftName || '').replace(/"/g, '&quot;')}" data-side="left" data-idx="${idx}">
         `;
         host.appendChild(row);
     });
@@ -6829,7 +6866,7 @@ async function arrestFinish() {
     const exitWpLines = (arrestState.exitWaypoints || []).map((w, i) => `יציאה ${i+1}. ${w.lat.toFixed(5)},${w.lng.toFixed(5)}${w.note ? ' – ' + w.note : ''}`);
     const cornerLines = (arrestState.corners || [])
         .filter(c => (c.rightName && c.rightName.trim()) || (c.leftName && c.leftName.trim()))
-        .map((c, i) => `🟢 ${ARREST_CORNER_HE[i]}: ${c.rightName || '—'} / ${c.leftName || '—'}`);
+        .map((c, i) => `🟢 ${cornerClockLabel(i, arrestState.targetEntranceDeg)}: ${c.rightName || '—'} / ${c.leftName || '—'}`);
     const waLines = [
         '🎯 *תכנון מעצר – מבט 443*',
         `🏠 יעד: *${targetLabel}* (${tgt.lat.toFixed(5)}, ${tgt.lng.toFixed(5)}, פתח שעה ${arrestState.targetEntrance || 6})`,
