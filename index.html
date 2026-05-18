@@ -4514,8 +4514,6 @@ window.tacticalAlert = function(message, opts) {
 </div>
 
 <!-- SCRIPTS -->
-<!-- Local secrets injection (gitignored). Falls back silently if absent. -->
-<script src="mly-token.local.js" onerror="this.remove();"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"
         integrity="sha384-NElt3Op+9NBMCYaef5HxeJmU4Xeard/Lku8ek6hoPTvYkQPh3zLIrJP7KiRocsxO"
         crossorigin="anonymous"
@@ -5377,10 +5375,11 @@ document.addEventListener('DOMContentLoaded', () => {
 
 // ═══════ MAPILLARY GRAPH API ═══════
 // בגלל מגבלת bbox (0.01 sq-deg), קוראים לפי נקודה+רדיוס
-// Token resolved at runtime: set `window.__MLY_TOKEN__` in a deploy-time shim
-// (e.g. GitHub Pages secret + small script before this file). Hard-coding the
-// token in a public repo lets anyone burn the quota — see docs/audits/.
-const MAPILLARY_TOKEN_CLIENT = window.__MLY_TOKEN__ || '';
+// Mapillary CLIENT tokens are read-only and meant to live in frontend code —
+// like Google Maps / Mapbox public keys. No write access, no billing risk.
+// (Optional: override at runtime via window.__MLY_TOKEN__ for local dev or rotation
+// without re-deploy. Defaults to the published app token if no override.)
+const MAPILLARY_TOKEN_CLIENT = window.__MLY_TOKEN__ || 'MLY|26636963299290715|555a2cc2563d0e534e9b49896c447f93';
 const MLY_BBOX_MAX_DEG = 0.01;     // Mapillary hard cap per request (sq-deg actually, but using per-axis 0.1 is safe)
 const MLY_PAGE_LIMIT = 2000;        // max images per page
 const MLY_MAX_PAGES_PER_CELL = 6;   // safety cap: up to 12k images per cell
