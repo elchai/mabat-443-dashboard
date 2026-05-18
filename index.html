@@ -5381,6 +5381,57 @@ document.addEventListener('DOMContentLoaded', () => {
 // (e.g. GitHub Pages secret + small script before this file). Hard-coding the
 // token in a public repo lets anyone burn the quota — see docs/audits/.
 const MAPILLARY_TOKEN_CLIENT = window.__MLY_TOKEN__ || '';
+const MLY_BBOX_MAX_DEG = 0.01;     // Mapillary hard cap per request (sq-deg actually, but using per-axis 0.1 is safe)
+const MLY_PAGE_LIMIT = 2000;        // max images per page
+const MLY_MAX_PAGES_PER_CELL = 6;   // safety cap: up to 12k images per cell
+const MLY_TOTAL_CAP = 20000;        // safety cap: stop after this many overall (UI perf)
+
+// Split a bbox into N×N cells where each cell ≤ MLY_BBOX_MAX_DEG on its longer side.
+// Returns "minLng,minLat,maxLng,maxLat" strings ready for the API.
+function mlySplitBbox(minLat, maxLat, minLng, maxLng) {
+    const dLat = maxLat - minLat;
+    const dLng = maxLng - minLng;
+    const longest = Math.max(dLat, dLng);
+    // Choose N so each cell side ≤ 0.09° (leaves room under Mapillary's 0.01 sq-deg limit)
+    const N = Math.max(3, Math.ceil(longest / 0.09));
+    const tiles = [];
+    for (let i = 0; i < N; i++) {
+        for (let j = 0; j < N; j++) {
+            const a = minLng + dLng * j / N;
+            const c = minLng + dLng * (j + 1) / N;
+            const s = minLat + dLat * i / N;
+            const n = minLat + dLat * (i + 1) / N;
+            tiles.push(`${a},${s},${c},${n}`);
+        }
+    }
+    return { tiles, N };
+}
+
+// Fetch one cell, paginating through all results (up to MLY_MAX_PAGES_PER_CELL).
+async function mlyFetchAllPages(bbox, fields) {
+    const out = [];
+    let cursor = null;
+    for (let page = 0; page < MLY_MAX_PAGES_PER_CELL; page++) {
+        const params = new URLSearchParams({
+            bbox, limit: String(MLY_PAGE_LIMIT), fields,
+            access_token: MAPILLARY_TOKEN_CLIENT,
+        });
+        if (cursor) params.set('after', cursor);
+        const url = `https://graph.mapillary.com/images?${params.toString()}`;
+        try {
+            const res = await fetch(url, { signal: AbortSignal.timeout(20000) });
+            if (!res.ok) break;
+            const data = await res.json();
+            const items = data?.data || [];
+            out.push(...items);
+            const nextCursor = data?.paging?.cursors?.after;
+            // Stop if no more or the last page wasn't full (no point asking for another)
+            if (!nextCursor || items.length < MLY_PAGE_LIMIT) break;
+            cursor = nextCursor;
+        } catch (e) { break; }
+    }
+    return out;
+}
 const MAPILLARY_CREATORS = [
     // יוצרים שיש להם כיסוי מוכר בגזרה — יקבלו צבע ייחודי
     { id: '110481147852897', username: '360ms', color: '#05CB63' },
@@ -5429,40 +5480,25 @@ function clearMapillaryPins() {
 
 async function loadMapillaryAt(lat, lng, radiusM = 1200) {
     if (!mlyState.layer) mlyState.layer = L.layerGroup().addTo(map);
-    // Tile בגלל מגבלת Mapillary: 0.01 sq-deg/bbox. לכל tile limit=2000.
-    // רדיוס 1.2km = ~2.4km × 2.4km ≈ 0.022×0.025 sq-deg → מחלקים 3×3 = 9 tiles.
-    const dLatTotal = radiusM / 111000;
-    const dLngTotal = radiusM / (111000 * Math.cos(lat * Math.PI / 180));
-    const GRID = 3;
-    const dLat = dLatTotal / GRID * 2; // רוחב של כל tile
-    const dLng = dLngTotal / GRID * 2;
+    // Compute outer bbox from center+radius, then let mlySplitBbox figure out
+    // how many cells we need (adaptive based on bbox size).
+    const dLat = radiusM / 111000;
+    const dLng = radiusM / (111000 * Math.cos(lat * Math.PI / 180));
+    const { tiles, N } = mlySplitBbox(lat - dLat, lat + dLat, lng - dLng, lng + dLng);
 
-    const tiles = [];
-    for (let i = 0; i < GRID; i++) {
-        for (let j = 0; j < GRID; j++) {
-            const cLat = lat - dLatTotal + dLat * (i + 0.5);
-            const cLng = lng - dLngTotal + dLng * (j + 0.5);
-            tiles.push(`${cLng - dLng/2},${cLat - dLat/2},${cLng + dLng/2},${cLat + dLat/2}`);
-        }
-    }
-
-    showToast('⏳ טוען תמונות Mapillary...');
-    const results = await Promise.all(tiles.map(async bbox => {
-        const url = `https://graph.mapillary.com/images?bbox=${bbox}&limit=2000&fields=id,computed_geometry,creator,captured_at,is_pano&access_token=${MAPILLARY_TOKEN_CLIENT}`;
-        try {
-            const res = await fetch(url, { signal: AbortSignal.timeout(15000) });
-            if (!res.ok) return [];
-            const data = await res.json();
-            return data.data || [];
-        } catch (e) { return []; }
-    }));
+    showToast(`⏳ סורק ${N}×${N} תאים, עד ${MLY_PAGE_LIMIT * MLY_MAX_PAGES_PER_CELL} תמונות/תא...`);
+    // Fetch all cells in parallel, each with pagination
+    const fields = 'id,computed_geometry,creator,captured_at,is_pano';
+    const results = await Promise.all(tiles.map(bbox => mlyFetchAllPages(bbox, fields)));
     const allImgs = results.flat();
     const seen = new Set();
-    const uniqueImgs = allImgs.filter(img => {
-        if (!img.id || seen.has(img.id)) return false;
+    const uniqueImgs = [];
+    for (const img of allImgs) {
+        if (!img.id || seen.has(img.id)) continue;
         seen.add(img.id);
-        return true;
-    });
+        uniqueImgs.push(img);
+        if (uniqueImgs.length >= MLY_TOTAL_CAP) break;
+    }
 
     if (!uniqueImgs.length) {
         showToast('❌ לא נמצאו תמונות בטווח');
@@ -7672,44 +7708,37 @@ function initMap() {
     });
     async function fetchMapillaryInViewport() {
         if (_mlyFetching) return;
-        if (map.getZoom() < 13) {
+        // Allow lower zooms now that we have pagination + adaptive grid;
+        // refuse only extreme zoom-out where the bbox would explode.
+        if (map.getZoom() < 11) {
             mapillaryCoverage.clearLayers();
-            showToast('זום פנימה יותר לטעינת Mapillary (z≥13)');
+            showToast('זום פנימה יותר לטעינת Mapillary (z≥11)');
             return;
         }
         _mlyFetching = true;
         try {
             const b = map.getBounds();
-            const minLat = b.getSouth(), maxLat = b.getNorth();
-            const minLng = b.getWest(),  maxLng = b.getEast();
-            const GRID = 3;
-            const tiles = [];
-            for (let i = 0; i < GRID; i++) {
-                for (let j = 0; j < GRID; j++) {
-                    const a = minLng + (maxLng - minLng) * j / GRID;
-                    const c = minLng + (maxLng - minLng) * (j + 1) / GRID;
-                    const s = minLat + (maxLat - minLat) * i / GRID;
-                    const n = minLat + (maxLat - minLat) * (i + 1) / GRID;
-                    tiles.push(`${a},${s},${c},${n}`);
-                }
-            }
+            const { tiles, N } = mlySplitBbox(b.getSouth(), b.getNorth(), b.getWest(), b.getEast());
+            // Progress: show running toast while cells stream in
+            const fields = 'id,computed_geometry,creator,captured_at,is_pano';
+            let cellsDone = 0;
             const results = await Promise.all(tiles.map(async bbox => {
-                const url = `https://graph.mapillary.com/images?bbox=${bbox}&limit=2000&fields=id,computed_geometry,creator,captured_at,is_pano&access_token=${MAPILLARY_TOKEN_CLIENT}`;
-                try {
-                    const res = await fetch(url, { signal: AbortSignal.timeout(15000) });
-                    if (!res.ok) return [];
-                    const d = await res.json();
-                    return d.data || [];
-                } catch (e) { return []; }
+                const items = await mlyFetchAllPages(bbox, fields);
+                cellsDone++;
+                if (cellsDone % Math.max(1, Math.floor(tiles.length / 4)) === 0) {
+                    showToast(`📷 Mapillary: ${cellsDone}/${tiles.length} תאים`);
+                }
+                return items;
             }));
             const all = results.flat();
             const seen = new Set();
             mapillaryCoverage.clearLayers();
             let plotted = 0;
-            all.forEach(img => {
-                if (!img.id || seen.has(img.id)) return;
+            for (const img of all) {
+                if (!img.id || seen.has(img.id)) continue;
                 seen.add(img.id);
-                if (!img.computed_geometry) return;
+                if (!img.computed_geometry) continue;
+                if (plotted >= MLY_TOTAL_CAP) break;
                 const [clng, clat] = img.computed_geometry.coordinates;
                 const when = img.captured_at ? new Date(img.captured_at).toISOString().slice(0, 10) : '';
                 const m = L.circleMarker([clat, clng], {
@@ -7720,8 +7749,13 @@ function initMap() {
                 m.on('click', () => openMapillaryViewer(img.id, img));
                 m.addTo(mapillaryCoverage);
                 plotted++;
-            });
-            if (plotted > 0) showToast(`📷 ${plotted} תמונות Mapillary`);
+            }
+            if (plotted > 0) {
+                const capped = plotted >= MLY_TOTAL_CAP ? ' (כיסוי מקסימלי — זום פנימה למידע נוסף)' : '';
+                showToast(`📷 ${plotted} תמונות Mapillary${capped}`);
+            } else {
+                showToast('Mapillary: אין כיסוי באזור הנוכחי');
+            }
         } finally { _mlyFetching = false; }
     }
 
