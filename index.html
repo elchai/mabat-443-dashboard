@@ -7711,7 +7711,7 @@ function initMap() {
         // refuse only extreme zoom-out where the bbox would explode.
         if (map.getZoom() < 11) {
             mapillaryCoverage.clearLayers();
-            showToast('זום פנימה יותר לטעינת Mapillary (z≥11)');
+            showToast('בצע זום פנימה כדי לראות את תוצאות Mapillary');
             return;
         }
         _mlyFetching = true;
