@@ -1,0 +1,828 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Crazy CRM | המערכת שתעיף לך את העסק קדימה</title>
+<meta name="description" content="Crazy CRM — מערכת ניהול לקוחות חכמה עם AI, אוטומציות, ופייפליין שמסגור עסקאות בשבילך. צפו בסרטון וקבעו שיחת אסטרטגיה ללא עלות.">
+<meta property="og:title" content="Crazy CRM | המערכת שמכפילה לך את ההכנסות">
+<meta property="og:description" content="גלו איך CRM אחד חכם מחליף את כל הגיליונות, השכחות והפגישות שמתפספסות.">
+<link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg viewBox='0 0 100 100' xmlns='http://www.w3.org/2000/svg'%3E%3Crect width='100' height='100' rx='22' fill='%230b0118'/%3E%3Ctext x='50' y='66' font-family='Arial Black,sans-serif' font-size='58' font-weight='900' text-anchor='middle' fill='url(%23g)'%3EC%3C/text%3E%3Cdefs%3E%3ClinearGradient id='g' x1='0' y1='0' x2='1' y2='1'%3E%3Cstop offset='0' stop-color='%23ff3da6'/%3E%3Cstop offset='1' stop-color='%237b2bff'/%3E%3C/linearGradient%3E%3C/defs%3E%3C/svg%3E">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Heebo:wght@400;500;700;800;900&family=Rubik:wght@500;700;900&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg-0:#070014;
+  --bg-1:#0d0322;
+  --bg-2:#15082f;
+  --panel:rgba(20,8,46,.85);
+  --panel-line:rgba(255,255,255,.08);
+  --text:#f4f1ff;
+  --text-dim:#c9c0e3;
+  --text-muted:#8b80a8;
+  --pink:#ff3da6;
+  --purple:#7b2bff;
+  --cyan:#22d3ee;
+  --lime:#a3ff3d;
+  --yellow:#ffd400;
+  --red:#ff2e63;
+  --green:#22c55e;
+  --grad-1:linear-gradient(135deg,#ff3da6 0%,#7b2bff 100%);
+  --grad-2:linear-gradient(135deg,#7b2bff 0%,#22d3ee 100%);
+  --grad-cta:linear-gradient(135deg,#ffd400 0%,#ff7a00 50%,#ff2e63 100%);
+  --grad-text:linear-gradient(135deg,#ff3da6,#7b2bff 60%,#22d3ee);
+  --shadow-cta:0 18px 40px -10px rgba(255,122,0,.55), 0 6px 18px -4px rgba(255,46,99,.4);
+  --shadow-card:0 20px 50px -20px rgba(0,0,0,.7), inset 0 1px 0 rgba(255,255,255,.05);
+  --radius:18px;
+  --max:1180px;
+}
+
+*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
+html,body{background:var(--bg-0);color:var(--text);font-family:'Heebo','Rubik',system-ui,sans-serif;-webkit-font-smoothing:antialiased;line-height:1.55;overflow-x:hidden;}
+img,svg{display:block;max-width:100%;}
+a{color:inherit;text-decoration:none;}
+button{font-family:inherit;cursor:pointer;border:0;background:none;color:inherit;}
+::selection{background:var(--pink);color:#fff;}
+
+/* ─── ANIMATED BACKGROUND ───────────────────────────────── */
+.bg-wrap{position:fixed;inset:0;z-index:0;overflow:hidden;pointer-events:none;}
+.bg-wrap::before{
+  content:"";position:absolute;inset:-20%;
+  background:
+    radial-gradient(60% 50% at 20% 10%,rgba(255,61,166,.35),transparent 60%),
+    radial-gradient(50% 60% at 85% 30%,rgba(123,43,255,.4),transparent 65%),
+    radial-gradient(70% 60% at 50% 100%,rgba(34,211,238,.22),transparent 60%),
+    radial-gradient(40% 40% at 90% 80%,rgba(163,255,61,.18),transparent 60%);
+  filter:blur(20px);
+  animation:float 18s ease-in-out infinite;
+}
+.bg-wrap::after{
+  content:"";position:absolute;inset:0;
+  background-image:
+    linear-gradient(rgba(255,255,255,.04) 1px,transparent 1px),
+    linear-gradient(90deg,rgba(255,255,255,.04) 1px,transparent 1px);
+  background-size:60px 60px;
+  mask-image:radial-gradient(ellipse at center,#000 30%,transparent 75%);
+  opacity:.5;
+}
+@keyframes float{
+  0%,100%{transform:translate3d(0,0,0) scale(1);}
+  50%{transform:translate3d(-2%,3%,0) scale(1.05);}
+}
+
+main{position:relative;z-index:1;}
+.container{max-width:var(--max);margin:0 auto;padding:0 22px;}
+
+/* ─── TOP BAR ───────────────────────────────────────────── */
+.topbar{
+  position:sticky;top:0;z-index:50;
+  background:rgba(7,0,20,.7);
+  backdrop-filter:blur(14px);
+  border-bottom:1px solid var(--panel-line);
+}
+.topbar-inner{display:flex;align-items:center;justify-content:space-between;padding:14px 22px;max-width:var(--max);margin:0 auto;gap:14px;}
+.logo{display:flex;align-items:center;gap:10px;font-weight:900;letter-spacing:.5px;font-size:20px;}
+.logo-mark{
+  width:38px;height:38px;border-radius:11px;
+  background:var(--grad-1);
+  display:grid;place-items:center;
+  font-family:'Rubik',sans-serif;font-weight:900;color:#fff;font-size:22px;
+  box-shadow:0 8px 24px -6px rgba(255,61,166,.6);
+}
+.logo-text{background:var(--grad-text);-webkit-background-clip:text;background-clip:text;color:transparent;}
+.topbar a.cta-mini{
+  background:var(--grad-cta);
+  color:#15082f;font-weight:800;
+  padding:11px 18px;border-radius:999px;font-size:14px;
+  box-shadow:var(--shadow-cta);
+  transition:transform .2s ease, box-shadow .2s ease;
+}
+.topbar a.cta-mini:hover{transform:translateY(-2px) scale(1.03);}
+
+/* ─── ATTENTION BAR ─────────────────────────────────────── */
+.attention{
+  background:linear-gradient(90deg,#ff2e63,#ff7a00,#ffd400,#ff7a00,#ff2e63);
+  background-size:300% 100%;
+  animation:slide 6s linear infinite;
+  color:#15082f;font-weight:800;text-align:center;
+  padding:10px 14px;font-size:14px;letter-spacing:.2px;
+}
+@keyframes slide{0%{background-position:0% 50%}100%{background-position:300% 50%}}
+
+/* ─── HERO ──────────────────────────────────────────────── */
+.hero{padding:54px 0 30px;text-align:center;}
+.kicker{
+  display:inline-flex;align-items:center;gap:8px;
+  background:rgba(255,61,166,.12);
+  border:1px solid rgba(255,61,166,.35);
+  color:#ffb1d8;font-weight:700;font-size:13.5px;
+  padding:7px 14px;border-radius:999px;margin-bottom:18px;
+}
+.kicker .dot{width:8px;height:8px;border-radius:50%;background:#ff3da6;box-shadow:0 0 0 5px rgba(255,61,166,.25);animation:pulse 1.6s infinite;}
+@keyframes pulse{50%{box-shadow:0 0 0 10px rgba(255,61,166,0);}}
+
+h1.hero-title{
+  font-family:'Rubik','Heebo',sans-serif;
+  font-weight:900;
+  font-size:clamp(32px,5.2vw,62px);
+  line-height:1.08;letter-spacing:-.5px;
+  margin:0 auto 18px;max-width:980px;
+}
+h1.hero-title .grad{background:var(--grad-text);-webkit-background-clip:text;background-clip:text;color:transparent;}
+h1.hero-title .hl{
+  display:inline-block;padding:0 .25em;border-radius:8px;
+  background:linear-gradient(180deg,transparent 55%,rgba(255,212,0,.45) 55%);
+}
+
+.hero-sub{
+  font-size:clamp(16px,2vw,20px);color:var(--text-dim);
+  max-width:780px;margin:0 auto 28px;
+}
+
+/* video frame */
+.video-wrap{
+  position:relative;
+  max-width:920px;margin:0 auto;
+  border-radius:24px;
+  padding:8px;
+  background:linear-gradient(135deg,rgba(255,61,166,.7),rgba(123,43,255,.7),rgba(34,211,238,.7));
+  box-shadow:0 30px 80px -20px rgba(123,43,255,.5);
+}
+.video-wrap::before{
+  content:"";position:absolute;inset:-2px;border-radius:26px;
+  background:linear-gradient(135deg,#ff3da6,#7b2bff,#22d3ee,#ff3da6);
+  background-size:300% 300%;
+  z-index:-1;filter:blur(18px);opacity:.6;
+  animation:slide 7s linear infinite;
+}
+.video-frame{
+  position:relative;border-radius:18px;overflow:hidden;
+  background:#000;aspect-ratio:16/9;
+}
+.video-frame iframe,
+.video-frame .poster{position:absolute;inset:0;width:100%;height:100%;border:0;}
+.poster{
+  background:
+    radial-gradient(60% 60% at 50% 45%,rgba(123,43,255,.5),transparent 60%),
+    linear-gradient(135deg,#1a0640,#3b0a8a 60%,#0b0118);
+  display:grid;place-items:center;cursor:pointer;
+}
+.poster .play{
+  width:96px;height:96px;border-radius:50%;
+  background:var(--grad-cta);
+  display:grid;place-items:center;
+  box-shadow:0 20px 50px -10px rgba(255,122,0,.7);
+  transition:transform .25s ease;
+}
+.poster .play:hover{transform:scale(1.07);}
+.poster .play svg{margin-inline-start:6px;}
+.poster .label{position:absolute;bottom:18px;left:50%;transform:translateX(-50%);font-weight:800;font-size:15px;background:rgba(0,0,0,.5);padding:8px 16px;border-radius:999px;}
+
+/* CTA */
+.cta-row{margin:30px auto 6px;display:flex;flex-wrap:wrap;gap:14px;justify-content:center;align-items:center;}
+.btn-cta{
+  display:inline-flex;align-items:center;gap:10px;
+  background:var(--grad-cta);
+  color:#15082f;font-weight:900;font-size:18px;letter-spacing:.2px;
+  padding:18px 30px;border-radius:14px;
+  box-shadow:var(--shadow-cta);
+  transition:transform .2s ease, box-shadow .2s ease, filter .2s ease;
+  position:relative;overflow:hidden;
+}
+.btn-cta::after{
+  content:"";position:absolute;inset:0;
+  background:linear-gradient(120deg,transparent 35%,rgba(255,255,255,.55) 50%,transparent 65%);
+  transform:translateX(-100%);
+}
+.btn-cta:hover{transform:translateY(-3px) scale(1.02);}
+.btn-cta:hover::after{transform:translateX(100%);transition:transform .8s ease;}
+.btn-cta .arrow{font-size:22px;line-height:1;}
+
+.cta-meta{color:var(--text-muted);font-size:13.5px;display:flex;align-items:center;gap:8px;}
+.cta-meta .check{color:var(--lime);font-weight:900;}
+
+/* social proof strip */
+.proof{margin:36px auto 0;max-width:920px;display:flex;flex-wrap:wrap;gap:24px;justify-content:center;align-items:center;color:var(--text-muted);font-size:14px;}
+.proof .stars{color:#ffd400;letter-spacing:2px;font-size:18px;}
+.proof .divider{width:1px;height:18px;background:rgba(255,255,255,.15);}
+
+/* ─── SECTIONS BASE ─────────────────────────────────────── */
+section{padding:70px 0;position:relative;}
+.eyebrow{
+  text-align:center;color:#ffb1d8;font-weight:800;letter-spacing:3px;
+  text-transform:uppercase;font-size:12.5px;margin-bottom:14px;
+}
+h2.section-title{
+  text-align:center;font-family:'Rubik','Heebo',sans-serif;
+  font-weight:900;font-size:clamp(28px,3.8vw,46px);line-height:1.12;
+  max-width:880px;margin:0 auto 16px;
+}
+h2.section-title .grad{background:var(--grad-text);-webkit-background-clip:text;background-clip:text;color:transparent;}
+.section-sub{text-align:center;color:var(--text-dim);max-width:720px;margin:0 auto 44px;font-size:17px;}
+
+/* ─── PAIN SECTION ──────────────────────────────────────── */
+.pain-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:18px;}
+.pain-card{
+  background:var(--panel);
+  border:1px solid var(--panel-line);
+  border-radius:var(--radius);
+  padding:24px;
+  position:relative;
+  box-shadow:var(--shadow-card);
+  transition:transform .25s ease,border-color .25s ease;
+}
+.pain-card:hover{transform:translateY(-4px);border-color:rgba(255,61,166,.4);}
+.pain-icon{
+  width:48px;height:48px;border-radius:12px;display:grid;place-items:center;
+  background:rgba(255,46,99,.15);color:#ff7a8a;font-size:24px;margin-bottom:14px;
+}
+.pain-card h3{font-size:18px;font-weight:800;margin-bottom:8px;}
+.pain-card p{color:var(--text-dim);font-size:15px;}
+
+/* ─── SOLUTION / FEATURES ───────────────────────────────── */
+.features{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:18px;}
+.feature{
+  background:linear-gradient(180deg,rgba(123,43,255,.16),rgba(255,61,166,.04));
+  border:1px solid rgba(123,43,255,.35);
+  border-radius:var(--radius);padding:26px;
+  box-shadow:var(--shadow-card);
+  position:relative;overflow:hidden;
+}
+.feature::before{
+  content:"";position:absolute;inset:auto -40% -60% auto;width:200px;height:200px;border-radius:50%;
+  background:radial-gradient(circle,rgba(34,211,238,.25),transparent 70%);
+}
+.feature .ic{
+  width:52px;height:52px;border-radius:14px;
+  background:var(--grad-1);
+  display:grid;place-items:center;color:#fff;font-size:24px;font-weight:900;
+  margin-bottom:14px;box-shadow:0 12px 30px -10px rgba(255,61,166,.6);
+}
+.feature h3{font-size:20px;font-weight:800;margin-bottom:8px;}
+.feature p{color:var(--text-dim);font-size:15.5px;}
+
+/* ─── DEMO MOCKUP ───────────────────────────────────────── */
+.demo{
+  margin-top:48px;
+  background:linear-gradient(135deg,rgba(123,43,255,.18),rgba(255,61,166,.08));
+  border:1px solid rgba(255,255,255,.08);
+  border-radius:24px;padding:22px;
+  box-shadow:0 30px 80px -30px rgba(123,43,255,.55);
+}
+.demo-window{
+  background:#0a0220;border-radius:14px;overflow:hidden;border:1px solid rgba(255,255,255,.07);
+}
+.demo-bar{
+  display:flex;align-items:center;gap:10px;padding:12px 16px;
+  background:#11052b;border-bottom:1px solid rgba(255,255,255,.06);
+}
+.demo-bar .dot{width:11px;height:11px;border-radius:50%;}
+.demo-bar .dot.r{background:#ff5f57;}
+.demo-bar .dot.y{background:#febc2e;}
+.demo-bar .dot.g{background:#28c840;}
+.demo-bar .url{
+  margin-inline-start:auto;font-family:monospace;font-size:13px;color:var(--text-muted);
+  background:#0a0220;padding:5px 14px;border-radius:999px;border:1px solid rgba(255,255,255,.08);
+}
+.demo-body{display:grid;grid-template-columns:220px 1fr;min-height:380px;}
+.demo-side{background:#0c0226;padding:16px;border-inline-end:1px solid rgba(255,255,255,.06);}
+.demo-side .li{display:flex;align-items:center;gap:10px;padding:10px 12px;border-radius:10px;color:var(--text-dim);font-size:14px;font-weight:600;}
+.demo-side .li.active{background:linear-gradient(135deg,rgba(255,61,166,.2),rgba(123,43,255,.2));color:#fff;}
+.demo-side .li::before{content:"";width:7px;height:7px;border-radius:50%;background:#7b2bff;opacity:.6;}
+.demo-side .li.active::before{background:#ff3da6;opacity:1;box-shadow:0 0 0 4px rgba(255,61,166,.2);}
+.demo-main{padding:22px;}
+.demo-kpis{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:18px;}
+.kpi{background:#0e0428;border:1px solid rgba(255,255,255,.06);border-radius:12px;padding:14px;}
+.kpi .lbl{font-size:12px;color:var(--text-muted);font-weight:700;letter-spacing:.5px;text-transform:uppercase;}
+.kpi .val{font-size:24px;font-weight:900;margin-top:4px;}
+.kpi .val.a{background:var(--grad-text);-webkit-background-clip:text;background-clip:text;color:transparent;}
+.kpi .delta{font-size:12px;color:var(--green);font-weight:700;margin-top:4px;}
+.kpi .delta.red{color:#ff7a8a;}
+.pipeline{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;}
+.col-h{font-size:12.5px;font-weight:800;color:var(--text-muted);text-transform:uppercase;letter-spacing:.5px;margin-bottom:8px;display:flex;justify-content:space-between;}
+.col-h .num{color:#ff3da6;}
+.lead{
+  background:#0e0428;border:1px solid rgba(255,255,255,.06);border-radius:10px;
+  padding:10px;margin-bottom:8px;font-size:13.5px;
+}
+.lead .nm{font-weight:800;}
+.lead .v{color:var(--lime);font-weight:800;font-size:13px;margin-top:4px;}
+.lead .tag{display:inline-block;font-size:11px;background:rgba(123,43,255,.25);color:#d6c4ff;padding:3px 7px;border-radius:6px;margin-top:6px;}
+
+/* ─── COMPARISON TABLE ──────────────────────────────────── */
+.compare{
+  background:var(--panel);border:1px solid var(--panel-line);
+  border-radius:var(--radius);overflow:hidden;box-shadow:var(--shadow-card);
+}
+.compare table{width:100%;border-collapse:collapse;}
+.compare th,.compare td{padding:16px 18px;text-align:start;border-bottom:1px solid rgba(255,255,255,.06);font-size:15.5px;}
+.compare th{font-weight:800;background:#11052b;font-size:14.5px;}
+.compare th.you{background:linear-gradient(135deg,rgba(255,61,166,.2),rgba(123,43,255,.2));color:#fff;}
+.compare .yes{color:var(--lime);font-weight:900;}
+.compare .no{color:#ff7a8a;font-weight:900;}
+.compare tr:last-child td{border-bottom:0;}
+
+/* ─── TESTIMONIALS ─────────────────────────────────────── */
+.testimonials{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:18px;}
+.testi{
+  background:var(--panel);border:1px solid var(--panel-line);
+  border-radius:var(--radius);padding:24px;box-shadow:var(--shadow-card);
+  display:flex;flex-direction:column;gap:14px;
+}
+.testi .stars{color:#ffd400;letter-spacing:2px;}
+.testi .quote{font-size:15.5px;color:var(--text-dim);}
+.testi .who{display:flex;align-items:center;gap:12px;margin-top:auto;}
+.avatar{width:44px;height:44px;border-radius:50%;background:var(--grad-1);display:grid;place-items:center;font-weight:900;color:#fff;}
+.who .meta b{display:block;font-size:14.5px;}
+.who .meta span{font-size:12.5px;color:var(--text-muted);}
+
+/* ─── RESULTS / STATS ───────────────────────────────────── */
+.stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:18px;}
+.stat{
+  background:linear-gradient(180deg,rgba(255,61,166,.1),rgba(123,43,255,.04));
+  border:1px solid rgba(255,61,166,.25);
+  border-radius:var(--radius);padding:24px;text-align:center;
+}
+.stat .big{font-family:'Rubik',sans-serif;font-weight:900;font-size:48px;background:var(--grad-text);-webkit-background-clip:text;background-clip:text;color:transparent;line-height:1;}
+.stat .lbl{margin-top:8px;color:var(--text-dim);font-size:14.5px;font-weight:600;}
+
+/* ─── HOST / ABOUT ─────────────────────────────────────── */
+.host{
+  display:grid;grid-template-columns:280px 1fr;gap:36px;align-items:center;
+  background:var(--panel);border:1px solid var(--panel-line);
+  border-radius:24px;padding:36px;box-shadow:var(--shadow-card);
+}
+.host-photo{
+  aspect-ratio:1;border-radius:24px;
+  background:
+    radial-gradient(circle at 30% 30%,#ff3da6,transparent 60%),
+    radial-gradient(circle at 70% 70%,#7b2bff,transparent 60%),
+    #1a0640;
+  display:grid;place-items:center;font-family:'Rubik',sans-serif;font-weight:900;font-size:84px;color:#fff;
+  box-shadow:inset 0 0 0 1px rgba(255,255,255,.1),0 20px 50px -10px rgba(123,43,255,.5);
+}
+.host h3{font-size:26px;font-weight:900;margin-bottom:10px;}
+.host p{color:var(--text-dim);font-size:16px;margin-bottom:10px;}
+
+/* ─── PRICE / OFFER ─────────────────────────────────────── */
+.offer{
+  background:linear-gradient(135deg,rgba(255,61,166,.15),rgba(123,43,255,.1));
+  border:1px solid rgba(255,61,166,.4);
+  border-radius:24px;padding:42px;text-align:center;
+  box-shadow:0 30px 80px -30px rgba(255,61,166,.5);
+  max-width:780px;margin:0 auto;position:relative;overflow:hidden;
+}
+.offer .badge{
+  display:inline-block;background:var(--yellow);color:#15082f;font-weight:900;
+  padding:7px 14px;border-radius:999px;font-size:13px;margin-bottom:14px;letter-spacing:.5px;
+}
+.offer .price{font-family:'Rubik',sans-serif;font-weight:900;font-size:64px;line-height:1;margin:14px 0 6px;background:var(--grad-text);-webkit-background-clip:text;background-clip:text;color:transparent;}
+.offer .price-sub{color:var(--text-muted);font-size:14px;margin-bottom:18px;}
+.offer .list{text-align:start;max-width:520px;margin:24px auto 28px;display:grid;gap:10px;}
+.offer .list li{display:flex;align-items:flex-start;gap:10px;color:var(--text-dim);font-size:15.5px;list-style:none;}
+.offer .list li::before{content:"✓";color:#15082f;background:var(--lime);width:22px;height:22px;border-radius:50%;display:inline-grid;place-items:center;font-weight:900;flex-shrink:0;font-size:13px;}
+.offer .guarantee{margin-top:18px;color:var(--text-muted);font-size:13.5px;}
+
+/* ─── FAQ ───────────────────────────────────────────────── */
+.faq{max-width:820px;margin:0 auto;display:grid;gap:12px;}
+.faq details{
+  background:var(--panel);border:1px solid var(--panel-line);
+  border-radius:14px;padding:0;overflow:hidden;
+}
+.faq summary{
+  list-style:none;cursor:pointer;padding:18px 22px;font-weight:700;font-size:16.5px;
+  display:flex;align-items:center;justify-content:space-between;gap:12px;
+}
+.faq summary::-webkit-details-marker{display:none;}
+.faq summary::after{
+  content:"+";font-size:24px;font-weight:900;color:#ff3da6;transition:transform .2s ease;line-height:1;
+}
+.faq details[open] summary::after{transform:rotate(45deg);}
+.faq .a{padding:0 22px 20px;color:var(--text-dim);font-size:15.5px;}
+
+/* ─── FINAL CTA ────────────────────────────────────────── */
+.final-cta{
+  text-align:center;padding:80px 22px;
+  background:
+    radial-gradient(50% 80% at 50% 0%,rgba(255,61,166,.25),transparent 60%),
+    radial-gradient(60% 80% at 50% 100%,rgba(123,43,255,.3),transparent 60%);
+}
+.final-cta h2{font-family:'Rubik',sans-serif;font-weight:900;font-size:clamp(28px,4vw,46px);line-height:1.1;max-width:820px;margin:0 auto 18px;}
+.final-cta p{color:var(--text-dim);font-size:17px;max-width:680px;margin:0 auto 28px;}
+
+/* ─── FOOTER ───────────────────────────────────────────── */
+footer{padding:36px 0 28px;border-top:1px solid var(--panel-line);background:#04000c;}
+.footer-inner{display:flex;flex-wrap:wrap;gap:18px;justify-content:space-between;align-items:center;color:var(--text-muted);font-size:13.5px;}
+.footer-inner a{color:var(--text-muted);}
+.footer-inner a:hover{color:#fff;}
+
+/* ─── STICKY MOBILE CTA ────────────────────────────────── */
+.sticky-cta{
+  display:none;
+  position:fixed;left:12px;right:12px;bottom:12px;z-index:60;
+  background:var(--grad-cta);color:#15082f;font-weight:900;
+  padding:16px;border-radius:14px;text-align:center;font-size:16px;
+  box-shadow:var(--shadow-cta);
+}
+
+/* ─── RESPONSIVE ────────────────────────────────────────── */
+@media (max-width:900px){
+  .host{grid-template-columns:1fr;text-align:center;padding:24px;}
+  .host-photo{max-width:220px;margin:0 auto;}
+  .demo-body{grid-template-columns:1fr;}
+  .demo-side{display:flex;flex-wrap:wrap;gap:6px;border-inline-end:0;border-bottom:1px solid rgba(255,255,255,.06);}
+  .demo-side .li{flex:1 1 40%;}
+  .pipeline{grid-template-columns:repeat(2,1fr);}
+  section{padding:50px 0;}
+}
+@media (max-width:640px){
+  .topbar a.cta-mini{padding:9px 14px;font-size:13px;}
+  .demo-kpis{grid-template-columns:1fr;}
+  .offer{padding:26px 18px;}
+  .offer .price{font-size:50px;}
+  .sticky-cta{display:block;}
+  main{padding-bottom:88px;}
+  .btn-cta{padding:16px 22px;font-size:16px;}
+}
+</style>
+</head>
+<body>
+<div class="bg-wrap" aria-hidden="true"></div>
+
+<!-- ATTENTION BAR -->
+<div class="attention">⚡ הצעת השקה: 30 ימי ניסיון ללא עלות + הקמה חינם — נשארו מקומות מוגבלים</div>
+
+<!-- TOP BAR -->
+<header class="topbar">
+  <div class="topbar-inner">
+    <a class="logo" href="#">
+      <span class="logo-mark">C</span>
+      <span class="logo-text">Crazy CRM</span>
+    </a>
+    <a href="#cta" class="cta-mini">קביעת שיחה חינם ←</a>
+  </div>
+</header>
+
+<main>
+
+<!-- HERO -->
+<section class="hero">
+  <div class="container">
+    <span class="kicker"><span class="dot"></span> CRM חכם עם AI שעובד במקומך 24/7</span>
+    <h1 class="hero-title">
+      איך <span class="hl">להכפיל את ההכנסות</span> בעסק שלך<br>
+      בלי <span class="grad">להוסיף שעות עבודה</span> ובלי לשכוח אף לקוח
+    </h1>
+    <p class="hero-sub">
+      Crazy CRM היא מערכת ניהול הלקוחות החכמה בישראל — היא מנהלת לך את הלידים, שולחת המשכים אוטומטיים, כותבת לך תזכורות בוואטסאפ ומסגור לך עסקאות בזמן שאתה ישן.
+    </p>
+
+    <div class="video-wrap">
+      <div class="video-frame" id="videoFrame">
+        <div class="poster" id="poster" role="button" aria-label="הפעל סרטון">
+          <div class="play" aria-hidden="true">
+            <svg width="38" height="38" viewBox="0 0 24 24" fill="#15082f"><path d="M8 5v14l11-7z"/></svg>
+          </div>
+          <div class="label">▶ צפו בסרטון (4 דקות) — וגלו את הסוד</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="cta-row">
+      <a href="#cta" class="btn-cta">
+        <span>אני רוצה לקבוע שיחת אסטרטגיה חינם</span>
+        <span class="arrow">←</span>
+      </a>
+    </div>
+    <div class="cta-row">
+      <div class="cta-meta"><span class="check">✓</span> ללא התחייבות</div>
+      <div class="cta-meta"><span class="check">✓</span> 30 ימי ניסיון חינם</div>
+      <div class="cta-meta"><span class="check">✓</span> ביטול בלחיצה</div>
+    </div>
+
+    <div class="proof">
+      <span class="stars">★★★★★</span>
+      <span><b>4.9/5</b> מעל 1,200 לקוחות מרוצים</span>
+      <span class="divider"></span>
+      <span>🏆 הCRM המומלץ ל-2026</span>
+      <span class="divider"></span>
+      <span>🔒 100% מאובטח ובעברית</span>
+    </div>
+  </div>
+</section>
+
+<!-- PAIN -->
+<section>
+  <div class="container">
+    <div class="eyebrow">מוכר לך?</div>
+    <h2 class="section-title">אם אחת מהבעיות האלה <span class="grad">גוזלת לך לקוחות</span> בכל שבוע — תמשיך לקרוא</h2>
+    <p class="section-sub">בעלי עסקים שעובדים איתנו זיהו את הדפוסים האלה לפני שהם החליפו ל-Crazy CRM. אתה תזהה את עצמך לפחות באחד מהם.</p>
+
+    <div class="pain-grid">
+      <div class="pain-card"><div class="pain-icon">📋</div><h3>אתה מנהל לידים באקסל</h3><p>גיליונות מתפזרים, אתה שוכח לחזור, ולידים חמים שווים אלפי שקלים פשוט נופלים בין הכיסאות.</p></div>
+      <div class="pain-card"><div class="pain-icon">📱</div><h3>אתה רודף אחרי לקוחות בוואטסאפ</h3><p>שיחות מתפזרות בעשרות צ׳אטים, ואין לך מושג מי דיבר עם מי, מתי, ולמה.</p></div>
+      <div class="pain-card"><div class="pain-icon">⏰</div><h3>אתה לא מספיק לחזור לכולם</h3><p>לידים מגיעים מ-3 ערוצים שונים, ועד שאתה חוזר — המתחרה כבר סגר את העסקה.</p></div>
+      <div class="pain-card"><div class="pain-icon">💸</div><h3>אתה מבזבז כסף על פרסום</h3><p>משקיע אלפי שקלים בקמפיינים, אבל בלי מערכת שמסגור — חצי מהכסף נשרף.</p></div>
+      <div class="pain-card"><div class="pain-icon">🤯</div><h3>אתה מבזבז שעות על משימות חוזרות</h3><p>שולח את אותה הצעת מחיר, אותם תזכורות, אותם מיילים — ידנית, כל יום מחדש.</p></div>
+      <div class="pain-card"><div class="pain-icon">📉</div><h3>אין לך מושג מה באמת עובד</h3><p>אין דוחות, אין נתונים, אין דרך לדעת איזה ערוץ מביא לך לקוחות באמת.</p></div>
+    </div>
+  </div>
+</section>
+
+<!-- SOLUTION -->
+<section style="background:linear-gradient(180deg,transparent,rgba(123,43,255,.07),transparent);">
+  <div class="container">
+    <div class="eyebrow">הפתרון</div>
+    <h2 class="section-title">תכירו את <span class="grad">Crazy CRM</span> — המערכת שמשלבת AI, אוטומציה ופייפליין במקום אחד</h2>
+    <p class="section-sub">הכל ידיד-משתמש, הכל בעברית, הכל מתחבר לוואטסאפ, פייסבוק, גוגל וכרטיסי האשראי שלך — מהיום הראשון.</p>
+
+    <div class="features">
+      <div class="feature"><div class="ic">🤖</div><h3>AI שעונה ללקוחות במקומך</h3><p>סוכן חכם שמקבל לידים מהאתר/פייסבוק, עונה תוך 30 שניות, מקבע פגישות ביומן ומעדכן את הCRM — בלי שתרים אצבע.</p></div>
+      <div class="feature"><div class="ic">⚡</div><h3>אוטומציות לכל תהליך</h3><p>שלח הצעת מחיר אוטומטית, תזכורת לחתימה, מייל אחרי-מכירה — תאר את התהליך פעם אחת, והמערכת מריצה אותו מליון פעם.</p></div>
+      <div class="feature"><div class="ic">💬</div><h3>אינטגרציה מלאה לוואטסאפ</h3><p>כל שיחה, כל לקוח, כל הסטוריה — מסונכרנים אוטומטית בכרטיס הלקוח. אף הודעה לא נופלת.</p></div>
+      <div class="feature"><div class="ic">📊</div><h3>פייפליין ויזואלי שמראה הכל</h3><p>גרור-ושחרר לקוחות בין שלבים, ראה בדיוק איפה כל עסקה תקועה, וקבל התראה לפני שלקוח חם מתקרר.</p></div>
+      <div class="feature"><div class="ic">🎯</div><h3>דוחות שמראים מה עובד</h3><p>איזה ערוץ מביא לקוחות שמשלמים? איזה איש מכירות סוגר הכי הרבה? קבל תשובה בלחיצה.</p></div>
+      <div class="feature"><div class="ic">🚀</div><h3>הקמה ב-24 שעות</h3><p>הצוות שלנו מעלה את כל הלקוחות הקיימים, מחבר את כל הערוצים ובונה לך את התהליך — מחר אתה כבר עובד.</p></div>
+    </div>
+
+    <!-- DEMO MOCKUP -->
+    <div class="demo">
+      <div class="demo-window">
+        <div class="demo-bar">
+          <span class="dot r"></span><span class="dot y"></span><span class="dot g"></span>
+          <span class="url">crazycrm.co.il/dashboard</span>
+        </div>
+        <div class="demo-body">
+          <aside class="demo-side">
+            <div class="li active">📊 דשבורד</div>
+            <div class="li">👥 לידים</div>
+            <div class="li">💼 עסקאות</div>
+            <div class="li">🤖 אוטומציות</div>
+            <div class="li">📈 דוחות</div>
+            <div class="li">⚙️ הגדרות</div>
+          </aside>
+          <div class="demo-main">
+            <div class="demo-kpis">
+              <div class="kpi"><div class="lbl">לידים השבוע</div><div class="val a">147</div><div class="delta">▲ 38% מהשבוע שעבר</div></div>
+              <div class="kpi"><div class="lbl">עסקאות פתוחות</div><div class="val a">₪284,500</div><div class="delta">▲ 22% מהחודש שעבר</div></div>
+              <div class="kpi"><div class="lbl">זמן תגובה ממוצע</div><div class="val a">28 שנ׳</div><div class="delta">▲ AI עונה אוטומטית</div></div>
+            </div>
+            <div class="pipeline">
+              <div>
+                <div class="col-h"><span>חדש</span><span class="num">12</span></div>
+                <div class="lead"><div class="nm">דניאל אבני</div><div class="v">₪3,400</div><span class="tag">פייסבוק</span></div>
+                <div class="lead"><div class="nm">שירה כהן</div><div class="v">₪1,800</div><span class="tag">אתר</span></div>
+              </div>
+              <div>
+                <div class="col-h"><span>הוצע מחיר</span><span class="num">8</span></div>
+                <div class="lead"><div class="nm">יוסי לוי</div><div class="v">₪12,000</div><span class="tag">המלצה</span></div>
+                <div class="lead"><div class="nm">נועה גרין</div><div class="v">₪7,500</div><span class="tag">גוגל</span></div>
+              </div>
+              <div>
+                <div class="col-h"><span>במשא ומתן</span><span class="num">5</span></div>
+                <div class="lead"><div class="nm">תום פרץ</div><div class="v">₪22,000</div><span class="tag">חם</span></div>
+              </div>
+              <div>
+                <div class="col-h"><span>נסגר</span><span class="num">19</span></div>
+                <div class="lead"><div class="nm">מיכל בר</div><div class="v">₪9,400</div><span class="tag">✓ שולם</span></div>
+                <div class="lead"><div class="nm">רן אופיר</div><div class="v">₪16,200</div><span class="tag">✓ שולם</span></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- RESULTS / STATS -->
+<section>
+  <div class="container">
+    <div class="eyebrow">תוצאות אמיתיות</div>
+    <h2 class="section-title">המספרים מדברים <span class="grad">בשפה שלך</span></h2>
+    <p class="section-sub">ממוצעים של 412 עסקים שעבדו עם Crazy CRM ב-90 הימים הראשונים.</p>
+
+    <div class="stats">
+      <div class="stat"><div class="big">+187%</div><div class="lbl">עלייה בהכנסות חודשיות</div></div>
+      <div class="stat"><div class="big">×3.4</div><div class="lbl">יותר לידים מומרים ללקוחות</div></div>
+      <div class="stat"><div class="big">−12 שעות</div><div class="lbl">חיסכון בזמן ניהול בשבוע</div></div>
+      <div class="stat"><div class="big">98%</div><div class="lbl">לקוחות שהמליצו על המערכת</div></div>
+    </div>
+  </div>
+</section>
+
+<!-- COMPARISON -->
+<section>
+  <div class="container">
+    <div class="eyebrow">למה דווקא Crazy CRM</div>
+    <h2 class="section-title">כל מה ש<span class="grad">מערכות אחרות</span> לא יספרו לך</h2>
+    <div class="compare">
+      <table>
+        <thead>
+          <tr><th>פיצ׳ר</th><th>מערכות אחרות</th><th class="you">Crazy CRM</th></tr>
+        </thead>
+        <tbody>
+          <tr><td>ממשק בעברית מלאה (RTL)</td><td class="no">✕ חצי-מתורגם</td><td class="yes">✓ עברית טבעית</td></tr>
+          <tr><td>אינטגרציה לוואטסאפ עסקי</td><td class="no">✕ דרך תוסף בתשלום</td><td class="yes">✓ מובנה, מהיום הראשון</td></tr>
+          <tr><td>AI שעונה ללקוחות אוטומטית</td><td class="no">✕ לא קיים</td><td class="yes">✓ סוכן GPT-5 מובנה</td></tr>
+          <tr><td>זמן הקמה</td><td class="no">2-4 שבועות</td><td class="yes">24 שעות</td></tr>
+          <tr><td>תמיכה בעברית מאדם אמיתי</td><td class="no">צ׳אט בוט באנגלית</td><td class="yes">צוות תמיכה ישראלי</td></tr>
+          <tr><td>מחיר חודשי לעסק קטן</td><td class="no">₪450-1,200</td><td class="yes">החל מ-₪99</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</section>
+
+<!-- TESTIMONIALS -->
+<section style="background:linear-gradient(180deg,transparent,rgba(255,61,166,.06),transparent);">
+  <div class="container">
+    <div class="eyebrow">לקוחות אומרים</div>
+    <h2 class="section-title">+1,200 בעלי עסקים <span class="grad">כבר עברו</span> ל-Crazy CRM</h2>
+
+    <div class="testimonials">
+      <div class="testi">
+        <div class="stars">★★★★★</div>
+        <div class="quote">"תוך חודש הכפלתי את ההכנסה החודשית. הAI עונה ללידים מהפייסבוק תוך 30 שניות — מה שלקח לי בעבר יומיים. פשוט מטורף."</div>
+        <div class="who"><div class="avatar">א</div><div class="meta"><b>אסף רובין</b><span>בעלים, סטודיו לעיצוב</span></div></div>
+      </div>
+      <div class="testi">
+        <div class="stars">★★★★★</div>
+        <div class="quote">"החלפנו 3 מערכות שונות. Crazy CRM עושה הכל במקום אחד — וב-עברית. הצוות שלי קולט תוך יום, וזה לבד שווה זהב."</div>
+        <div class="who"><div class="avatar">ר</div><div class="meta"><b>רוני שטיין</b><span>מנכ"לית, רשת קליניקות</span></div></div>
+      </div>
+      <div class="testi">
+        <div class="stars">★★★★★</div>
+        <div class="quote">"ההשקעה החזירה את עצמה תוך 11 ימים. האוטומציות שולחות הצעות מחיר בלילה, ואני מתעורר בבוקר עם 3 חתימות חדשות."</div>
+        <div class="who"><div class="avatar">י</div><div class="meta"><b>יואב מזרחי</b><span>בעלים, חברת ייעוץ פיננסי</span></div></div>
+      </div>
+      <div class="testi">
+        <div class="stars">★★★★★</div>
+        <div class="quote">"הייתי סקפטית. אחרי 60 יום: עלייה של 240% בלידים שמומרים. אני לא חוזרת לאקסל לעולם."</div>
+        <div class="who"><div class="avatar">ש</div><div class="meta"><b>שני כהן</b><span>בעלים, סוכנות נדל"ן</span></div></div>
+      </div>
+      <div class="testi">
+        <div class="stars">★★★★★</div>
+        <div class="quote">"הקמה ב-24 שעות בדיוק כמו שהבטיחו. הצוות תמך ביד, ולקוחות הקיימים עלו בלי לאבד נתון אחד."</div>
+        <div class="who"><div class="avatar">מ</div><div class="meta"><b>מורן לוי</b><span>מנהלת מכירות, חברת תוכנה</span></div></div>
+      </div>
+      <div class="testi">
+        <div class="stars">★★★★★</div>
+        <div class="quote">"אני בעל מוסך. לא חשבתי שCRM יעזור לי. היום אני סוגר 40% יותר טיפולים — כי המערכת מזכירה ללקוחות לבד."</div>
+        <div class="who"><div class="avatar">ע</div><div class="meta"><b>עומר בן-דוד</b><span>בעלים, מוסך בן-דוד</span></div></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- HOST / ABOUT -->
+<section>
+  <div class="container">
+    <div class="host">
+      <div class="host-photo">CC</div>
+      <div>
+        <div class="eyebrow" style="text-align:start;margin-bottom:8px;">מי עומד מאחורי המערכת</div>
+        <h3>אלחי, מייסד Crazy CRM</h3>
+        <p>במשך 8 שנים בניתי מערכות אוטומציה ל-+300 עסקים בישראל — מסטארטאפים בלב תל אביב ועד מאפיות שכונתיות. ראיתי שוב ושוב את אותה הבעיה: בעלי עסקים מבזבזים חצי מהזמן שלהם על משימות שמחשב היה צריך לעשות במקומם.</p>
+        <p>Crazy CRM זו המערכת שהייתי בונה לעצמי לו הייתי מתחיל היום מאפס. היא נבנתה ב-2025 על טכנולוגיית AI הכי מתקדמת בעולם, אבל היא קלה לשימוש כמו וואטסאפ.</p>
+        <p>המטרה שלי פשוטה: לתת לכל בעל עסק בישראל את הכלים שעד היום היו רק לחברות הענק.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- OFFER / PRICE -->
+<section id="cta">
+  <div class="container">
+    <div class="eyebrow">הצעת השקה — 48 שעות בלבד</div>
+    <h2 class="section-title">קבעו עכשיו שיחת <span class="grad">אסטרטגיה חינם</span> (שווי ₪497)</h2>
+    <p class="section-sub">במהלך השיחה (30 דקות) ננתח את העסק שלך, נראה איפה הכסף בורח, ונבנה לך תוכנית פעולה אישית — בלי עלות ובלי התחייבות.</p>
+
+    <div class="offer">
+      <div class="badge">⚡ הצעת השקה</div>
+      <div class="price">חינם 100%</div>
+      <div class="price-sub">שווי השיחה: <s>₪497</s> · ללא כרטיס אשראי · ללא התחייבות</div>
+
+      <ul class="list">
+        <li>ניתוח אישי של תהליך המכירות הקיים שלך</li>
+        <li>זיהוי 3 נקודות שבהן אתה מאבד הכי הרבה לידים</li>
+        <li>תוכנית פעולה מותאמת — שאפשר ליישם גם בלעדינו</li>
+        <li>הדגמה חיה של Crazy CRM על הנתונים שלך</li>
+        <li>30 ימי ניסיון חינם + הקמה מלאה ע"י הצוות שלנו</li>
+        <li>בונוס: ספריית 50+ אוטומציות מוכנות לעסק שלך</li>
+      </ul>
+
+      <a href="#" class="btn-cta" onclick="openCalendar(event)">
+        <span>קבע שיחה חינם עכשיו</span>
+        <span class="arrow">←</span>
+      </a>
+      <div class="guarantee">🔒 100% בטוח · ביטול בלחיצה · אחריות החזר כספי מלא ל-30 יום</div>
+    </div>
+  </div>
+</section>
+
+<!-- FAQ -->
+<section>
+  <div class="container">
+    <div class="eyebrow">שאלות נפוצות</div>
+    <h2 class="section-title">כל מה שרצית לדעת <span class="grad">לפני שאתה מתחיל</span></h2>
+
+    <div class="faq">
+      <details><summary>מה זה Crazy CRM ולמי זה מתאים?</summary><div class="a">Crazy CRM היא מערכת ניהול לקוחות (CRM) שמשלבת AI, אוטומציה ופייפליין במקום אחד — בעברית מלאה. היא מתאימה לעסקים קטנים ובינוניים: יועצים, נדל"ן, סוכנויות, מאמנים, נותני שירות, חנויות אונליין וכל מי שמתפרנס מלקוחות.</div></details>
+      <details><summary>אני לא טכנולוגי. אצליח להשתמש בזה?</summary><div class="a">הממשק נבנה כדי שכל אחד יוכל להשתמש בו — אם אתה יודע להשתמש בוואטסאפ, אתה יודע להשתמש ב-Crazy CRM. בנוסף, הצוות שלנו מקים לך הכל ועובר איתך 1-on-1 על כל פיצ׳ר.</div></details>
+      <details><summary>כמה זמן לוקח להקים את המערכת?</summary><div class="a">24 שעות עבודה אצלנו. אתה שולח את הנתונים הקיימים (אקסל, גוגל קונטקטס, מערכת ישנה) — והצוות שלנו מעלה הכל, מחבר את כל הערוצים ובונה תהליך מותאם. מחר אתה כבר עובד.</div></details>
+      <details><summary>כמה זה עולה?</summary><div class="a">החל מ-₪99 לחודש לעסק קטן (עד 1,000 לקוחות, משתמש אחד). חבילות עסקיות גדולות יותר זמינות. בשיחת האסטרטגיה החינם נבנה לך הצעה מותאמת אישית — בלי הפתעות.</div></details>
+      <details><summary>מה ההבדל בין Crazy CRM ל-HubSpot/Salesforce?</summary><div class="a">המתחרים הגדולים נבנו לחברות אמריקאיות עם 200 עובדים. Crazy CRM נבנתה לעסק הישראלי: בעברית, עם וואטסאפ, עם אינטגרציה לכרטיסי אשראי בארץ, וב-1/10 מהמחיר.</div></details>
+      <details><summary>הנתונים שלי בטוחים?</summary><div class="a">בהחלט. הנתונים מאוחסנים בשרתי ISO 27001 בארץ, מוצפנים end-to-end, ועומדים בתקני GDPR והגנת הפרטיות הישראלית. אתה הבעלים של הנתונים — תמיד.</div></details>
+      <details><summary>מה אם זה לא יתאים לי?</summary><div class="a">יש לך 30 יום ניסיון מלא. אם תרגיש שהמערכת לא מתאימה — תקבל החזר כספי מלא, בלי שאלות. בנוסף, את הנתונים שלך תוכל להוריד בלחיצה כקובץ אקסל.</div></details>
+      <details><summary>אני יכול לבטל בכל רגע?</summary><div class="a">כן. אין התחייבות לתקופה, אין קנסות, אין חוזה. ביטול בלחיצה אחת מהממשק.</div></details>
+    </div>
+  </div>
+</section>
+
+<!-- FINAL CTA -->
+<section class="final-cta">
+  <div class="container">
+    <h2>תפסיק לאבד לקוחות. <span style="background:var(--grad-text);-webkit-background-clip:text;background-clip:text;color:transparent;">תתחיל לסגור עסקאות.</span></h2>
+    <p>בשיחה של 30 דקות נבנה לך תוכנית פעולה — והכל בחינם. נשארו 7 מקומות בחודש הזה.</p>
+    <a href="#" class="btn-cta" onclick="openCalendar(event)">
+      <span>אני בפנים — קבעו לי שיחה</span>
+      <span class="arrow">←</span>
+    </a>
+    <div style="margin-top:18px;color:var(--text-muted);font-size:13.5px;">⏱️ נשארו <b id="countdown" style="color:#ffd400;">47:59:12</b> להצעה הזו</div>
+  </div>
+</section>
+
+</main>
+
+<!-- FOOTER -->
+<footer>
+  <div class="container footer-inner">
+    <div>© 2026 Crazy CRM · כל הזכויות שמורות</div>
+    <div style="display:flex;gap:18px;flex-wrap:wrap;">
+      <a href="#">תנאי שימוש</a>
+      <a href="#">מדיניות פרטיות</a>
+      <a href="#">צור קשר</a>
+    </div>
+  </div>
+</footer>
+
+<!-- STICKY MOBILE CTA -->
+<a href="#cta" class="sticky-cta">⚡ קבעו שיחה חינם ←</a>
+
+<script>
+(function(){
+  // Lazy-load video poster → YouTube iframe (no third-party request until click)
+  var poster = document.getElementById('poster');
+  if (poster){
+    poster.addEventListener('click', function(){
+      var f = document.getElementById('videoFrame');
+      var iframe = document.createElement('iframe');
+      iframe.src = "https://www.youtube-nocookie.com/embed/dQw4w9WgXcQ?autoplay=1&rel=0&modestbranding=1";
+      iframe.title = "Crazy CRM VSL";
+      iframe.allow = "accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture";
+      iframe.allowFullscreen = true;
+      f.innerHTML = '';
+      f.appendChild(iframe);
+    });
+  }
+
+  // Countdown timer (48h)
+  var endKey = 'crazycrm_offer_end';
+  var end = parseInt(localStorage.getItem(endKey) || '0', 10);
+  if (!end || end < Date.now()) {
+    end = Date.now() + 48 * 60 * 60 * 1000;
+    localStorage.setItem(endKey, String(end));
+  }
+  var el = document.getElementById('countdown');
+  function pad(n){return n<10?'0'+n:''+n;}
+  function tick(){
+    var d = Math.max(0, end - Date.now());
+    var h = Math.floor(d / 3600000);
+    var m = Math.floor((d % 3600000)/60000);
+    var s = Math.floor((d % 60000)/1000);
+    if (el) el.textContent = pad(h)+':'+pad(m)+':'+pad(s);
+  }
+  tick();
+  setInterval(tick, 1000);
+
+  // Smooth scroll for in-page links
+  document.querySelectorAll('a[href^="#"]').forEach(function(a){
+    a.addEventListener('click', function(e){
+      var id = this.getAttribute('href').slice(1);
+      if (!id) return;
+      var t = document.getElementById(id);
+      if (t){ e.preventDefault(); t.scrollIntoView({behavior:'smooth', block:'start'}); }
+    });
+  });
+})();
+
+function openCalendar(e){
+  e.preventDefault();
+  // Replace with your real Calendly / TidyCal / Cal.com link:
+  window.open('https://calendly.com/your-handle/crazy-crm-strategy', '_blank', 'noopener');
+}
+</script>
+</body>
+</html>
