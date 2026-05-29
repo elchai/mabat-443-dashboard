@@ -7,7 +7,7 @@
 <meta name="description" content="Crazy CRM — מערכת ניהול לקוחות חכמה עם AI, אוטומציות, ופייפליין שמסגור עסקאות בשבילך. צפו בסרטון וקבעו שיחת אסטרטגיה ללא עלות.">
 <meta property="og:title" content="Crazy CRM | המערכת שמכפילה לך את ההכנסות">
 <meta property="og:description" content="גלו איך CRM אחד חכם מחליף את כל הגיליונות, השכחות והפגישות שמתפספסות.">
-<link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg viewBox='0 0 100 100' xmlns='http://www.w3.org/2000/svg'%3E%3Crect width='100' height='100' rx='22' fill='%230b0118'/%3E%3Ctext x='50' y='66' font-family='Arial Black,sans-serif' font-size='58' font-weight='900' text-anchor='middle' fill='url(%23g)'%3EC%3C/text%3E%3Cdefs%3E%3ClinearGradient id='g' x1='0' y1='0' x2='1' y2='1'%3E%3Cstop offset='0' stop-color='%23ff3da6'/%3E%3Cstop offset='1' stop-color='%237b2bff'/%3E%3C/linearGradient%3E%3C/defs%3E%3C/svg%3E">
+<link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg viewBox='0 0 64 64' xmlns='http://www.w3.org/2000/svg'%3E%3Cdefs%3E%3ClinearGradient id='g' x1='0' y1='0' x2='1' y2='1'%3E%3Cstop offset='0' stop-color='%23ff3da6'/%3E%3Cstop offset='.55' stop-color='%237b2bff'/%3E%3Cstop offset='1' stop-color='%2322d3ee'/%3E%3C/linearGradient%3E%3C/defs%3E%3Crect width='64' height='64' rx='18' fill='url(%23g)'/%3E%3Cpath d='M37 12 L21 36 L31 36 L27 52 L45 26 L35 26 Z' fill='%23fff'/%3E%3Ccircle cx='48' cy='17' r='4' fill='%23ffd400'/%3E%3C/svg%3E">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Heebo:wght@400;500;700;800;900&family=Rubik:wght@500;700;900&display=swap" rel="stylesheet">
@@ -82,15 +82,22 @@ main{position:relative;z-index:1;}
   border-bottom:1px solid var(--panel-line);
 }
 .topbar-inner{display:flex;align-items:center;justify-content:space-between;padding:14px 22px;max-width:var(--max);margin:0 auto;gap:14px;}
-.logo{display:flex;align-items:center;gap:10px;font-weight:900;letter-spacing:.5px;font-size:20px;}
+.logo{display:flex;align-items:center;gap:11px;font-weight:900;letter-spacing:.3px;font-size:20px;}
 .logo-mark{
-  width:38px;height:38px;border-radius:11px;
-  background:var(--grad-1);
-  display:grid;place-items:center;
-  font-family:'Rubik',sans-serif;font-weight:900;color:#fff;font-size:22px;
+  width:40px;height:40px;flex-shrink:0;
+  border-radius:12px;
   box-shadow:0 8px 24px -6px rgba(255,61,166,.6);
+  transition:transform .25s ease;
 }
-.logo-text{background:var(--grad-text);-webkit-background-clip:text;background-clip:text;color:transparent;}
+.logo:hover .logo-mark{transform:rotate(-6deg) scale(1.06);}
+.logo-text{display:flex;align-items:baseline;gap:7px;}
+.logo-text .b1{background:var(--grad-text);-webkit-background-clip:text;background-clip:text;color:transparent;}
+.logo-text .b2{
+  font-family:'Rubik',sans-serif;font-weight:900;font-size:15px;
+  letter-spacing:2px;color:#fff;
+  background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.15);
+  padding:2px 8px;border-radius:7px;
+}
 .topbar a.cta-mini{
   background:var(--grad-cta);
   color:#15082f;font-weight:800;
@@ -451,14 +458,25 @@ footer{padding:36px 0 28px;border-top:1px solid var(--panel-line);background:#04
 <div class="bg-wrap" aria-hidden="true"></div>
 
 <!-- ATTENTION BAR -->
-<div class="attention">⚡ הצעת השקה: 30 ימי ניסיון ללא עלות + הקמה חינם — נשארו מקומות מוגבלים</div>
+<div class="attention">⚡ הצעת השקה: 14 ימים חינם ללא עלות + הקמה חינם — נשארו מקומות מוגבלים</div>
 
 <!-- TOP BAR -->
 <header class="topbar">
   <div class="topbar-inner">
     <a class="logo" href="#">
-      <span class="logo-mark">C</span>
-      <span class="logo-text">Crazy CRM</span>
+      <svg class="logo-mark" viewBox="0 0 64 64" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+        <defs>
+          <linearGradient id="ccGrad" x1="0" y1="0" x2="1" y2="1">
+            <stop offset="0" stop-color="#ff3da6"/>
+            <stop offset=".55" stop-color="#7b2bff"/>
+            <stop offset="1" stop-color="#22d3ee"/>
+          </linearGradient>
+        </defs>
+        <rect width="64" height="64" rx="18" fill="url(#ccGrad)"/>
+        <path d="M37 12 L21 36 L31 36 L27 52 L45 26 L35 26 Z" fill="#fff"/>
+        <circle cx="48" cy="17" r="4" fill="#ffd400"/>
+      </svg>
+      <span class="logo-text"><span class="b1">Crazy</span><span class="b2">CRM</span></span>
     </a>
     <a href="#cta" class="cta-mini">קביעת שיחה חינם ←</a>
   </div>
@@ -497,7 +515,7 @@ footer{padding:36px 0 28px;border-top:1px solid var(--panel-line);background:#04
     </div>
     <div class="cta-row">
       <div class="cta-meta"><span class="check">✓</span> ללא התחייבות</div>
-      <div class="cta-meta"><span class="check">✓</span> 30 ימי ניסיון חינם</div>
+      <div class="cta-meta"><span class="check">✓</span> 14 ימים חינם</div>
       <div class="cta-meta"><span class="check">✓</span> ביטול בלחיצה</div>
     </div>
 
@@ -709,7 +727,7 @@ footer{padding:36px 0 28px;border-top:1px solid var(--panel-line);background:#04
         <li>זיהוי 3 נקודות שבהן אתה מאבד הכי הרבה לידים</li>
         <li>תוכנית פעולה מותאמת — שאפשר ליישם גם בלעדינו</li>
         <li>הדגמה חיה של Crazy CRM על הנתונים שלך</li>
-        <li>30 ימי ניסיון חינם + הקמה מלאה ע"י הצוות שלנו</li>
+        <li>14 ימים חינם + הקמה מלאה ע"י הצוות שלנו</li>
         <li>בונוס: ספריית 50+ אוטומציות מוכנות לעסק שלך</li>
       </ul>
 
@@ -735,7 +753,7 @@ footer{padding:36px 0 28px;border-top:1px solid var(--panel-line);background:#04
       <details><summary>כמה זה עולה?</summary><div class="a">החל מ-₪99 לחודש לעסק קטן (עד 1,000 לקוחות, משתמש אחד). חבילות עסקיות גדולות יותר זמינות. בשיחת האסטרטגיה החינם נבנה לך הצעה מותאמת אישית — בלי הפתעות.</div></details>
       <details><summary>מה ההבדל בין Crazy CRM ל-HubSpot/Salesforce?</summary><div class="a">המתחרים הגדולים נבנו לחברות אמריקאיות עם 200 עובדים. Crazy CRM נבנתה לעסק הישראלי: בעברית, עם וואטסאפ, עם אינטגרציה לכרטיסי אשראי בארץ, וב-1/10 מהמחיר.</div></details>
       <details><summary>הנתונים שלי בטוחים?</summary><div class="a">בהחלט. הנתונים מאוחסנים בשרתי ISO 27001 בארץ, מוצפנים end-to-end, ועומדים בתקני GDPR והגנת הפרטיות הישראלית. אתה הבעלים של הנתונים — תמיד.</div></details>
-      <details><summary>מה אם זה לא יתאים לי?</summary><div class="a">יש לך 30 יום ניסיון מלא. אם תרגיש שהמערכת לא מתאימה — תקבל החזר כספי מלא, בלי שאלות. בנוסף, את הנתונים שלך תוכל להוריד בלחיצה כקובץ אקסל.</div></details>
+      <details><summary>מה אם זה לא יתאים לי?</summary><div class="a">יש לך 14 ימים חינם להתנסות מלאה. אם תרגיש שהמערכת לא מתאימה — פשוט לא ממשיכים, בלי שאלות ובלי חיוב. בנוסף, את הנתונים שלך תוכל להוריד בלחיצה כקובץ אקסל.</div></details>
       <details><summary>אני יכול לבטל בכל רגע?</summary><div class="a">כן. אין התחייבות לתקופה, אין קנסות, אין חוזה. ביטול בלחיצה אחת מהממשק.</div></details>
     </div>
   </div>
@@ -759,7 +777,21 @@ footer{padding:36px 0 28px;border-top:1px solid var(--panel-line);background:#04
 <!-- FOOTER -->
 <footer>
   <div class="container footer-inner">
-    <div>© 2026 Crazy CRM · כל הזכויות שמורות</div>
+    <div style="display:flex;align-items:center;gap:10px;">
+      <svg width="30" height="30" viewBox="0 0 64 64" xmlns="http://www.w3.org/2000/svg" aria-hidden="true" style="border-radius:9px;">
+        <defs>
+          <linearGradient id="ccGradF" x1="0" y1="0" x2="1" y2="1">
+            <stop offset="0" stop-color="#ff3da6"/>
+            <stop offset=".55" stop-color="#7b2bff"/>
+            <stop offset="1" stop-color="#22d3ee"/>
+          </linearGradient>
+        </defs>
+        <rect width="64" height="64" rx="18" fill="url(#ccGradF)"/>
+        <path d="M37 12 L21 36 L31 36 L27 52 L45 26 L35 26 Z" fill="#fff"/>
+        <circle cx="48" cy="17" r="4" fill="#ffd400"/>
+      </svg>
+      <span>© 2026 Crazy CRM · כל הזכויות שמורות</span>
+    </div>
     <div style="display:flex;gap:18px;flex-wrap:wrap;">
       <a href="#">תנאי שימוש</a>
       <a href="#">מדיניות פרטיות</a>
