@@ -7,7 +7,7 @@
 <meta name="description" content="Crazy CRM — מערכת ניהול לקוחות חכמה עם AI, אוטומציות, ופייפליין שמסגור עסקאות בשבילך. צפו בסרטון וקבעו שיחת אסטרטגיה ללא עלות.">
 <meta property="og:title" content="Crazy CRM | המערכת שמכפילה לך את ההכנסות">
 <meta property="og:description" content="גלו איך CRM אחד חכם מחליף את כל הגיליונות, השכחות והפגישות שמתפספסות.">
-<link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg viewBox='0 0 64 64' xmlns='http://www.w3.org/2000/svg'%3E%3Crect width='64' height='64' rx='14' fill='%23000'/%3E%3Cpath d='M4 30 L7 22 L9 28 L12 18 L14 26 L17 14 L20 24 L23 10 L26 22 L29 8 L32 20 L35 8 L38 22 L41 10 L44 24 L47 14 L50 26 L52 18 L55 28 L57 22 L60 30 L58 40 L54 48 L48 52 L42 54 L36 56 L32 54 L28 56 L22 54 L16 52 L10 48 L6 40 Z' fill='%232aa3ff'/%3E%3Ccircle cx='22' cy='28' r='9' fill='%23f5ecd9'/%3E%3Ccircle cx='41' cy='28' r='9' fill='%23f5ecd9'/%3E%3Ccircle cx='23.5' cy='29.5' r='3.4' fill='%230a0a10'/%3E%3Ccircle cx='42.5' cy='29.5' r='3.4' fill='%230a0a10'/%3E%3Cpath d='M24 41 Q32 48 40 41 L38 45 Q35 50 32 50 Q29 50 26 45 Z' fill='%230a0a10'/%3E%3Cpath d='M29 43 Q28 51 32 51 Q36 51 35 43 Z' fill='%23ff7a1a'/%3E%3C/svg%3E">
+<link rel="icon" type="image/jpeg" href="assets/logo.jpg">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Heebo:wght@400;500;700;800;900&family=Rubik:wght@500;700;900&display=swap" rel="stylesheet">
@@ -86,22 +86,15 @@ main{position:relative;z-index:1;}
   border-bottom:1px solid var(--panel-line);
 }
 .topbar-inner{display:flex;align-items:center;justify-content:space-between;padding:14px 22px;max-width:var(--max);margin:0 auto;gap:14px;}
-.logo{display:flex;align-items:center;gap:11px;font-weight:900;letter-spacing:.3px;font-size:20px;}
+.logo{display:flex;align-items:center;}
 .logo-mark{
-  width:40px;height:40px;flex-shrink:0;
-  border-radius:12px;
-  box-shadow:0 8px 24px -6px rgba(42,163,255,.6);
+  width:54px;height:54px;flex-shrink:0;
+  border-radius:11px;
+  box-shadow:0 8px 24px -6px rgba(42,163,255,.45);
   transition:transform .25s ease;
+  object-fit:cover;
 }
-.logo:hover .logo-mark{transform:rotate(-6deg) scale(1.06);}
-.logo-text{display:flex;align-items:baseline;gap:7px;}
-.logo-text .b1{background:var(--grad-text);-webkit-background-clip:text;background-clip:text;color:transparent;}
-.logo-text .b2{
-  font-family:'Rubik',sans-serif;font-weight:900;font-size:15px;
-  letter-spacing:2px;color:#fff;
-  background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.15);
-  padding:2px 8px;border-radius:7px;
-}
+.logo:hover .logo-mark{transform:rotate(-4deg) scale(1.05);}
 .topbar a.cta-mini{
   background:var(--grad-cta);
   color:#0a1422;font-weight:800;
@@ -475,18 +468,8 @@ footer{padding:36px 0 28px;border-top:1px solid var(--panel-line);background:#04
 <!-- TOP BAR -->
 <header class="topbar">
   <div class="topbar-inner">
-    <a class="logo" href="#">
-      <svg class="logo-mark" viewBox="0 0 64 64" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
-        <rect width="64" height="64" rx="14" fill="#000"/>
-        <path d="M4 30 L7 22 L9 28 L12 18 L14 26 L17 14 L20 24 L23 10 L26 22 L29 8 L32 20 L35 8 L38 22 L41 10 L44 24 L47 14 L50 26 L52 18 L55 28 L57 22 L60 30 L58 40 L54 48 L48 52 L42 54 L36 56 L32 54 L28 56 L22 54 L16 52 L10 48 L6 40 Z" fill="#2aa3ff"/>
-        <circle cx="22" cy="28" r="9" fill="#f5ecd9"/>
-        <circle cx="41" cy="28" r="9" fill="#f5ecd9"/>
-        <circle cx="23.5" cy="29.5" r="3.4" fill="#0a0a10"/>
-        <circle cx="42.5" cy="29.5" r="3.4" fill="#0a0a10"/>
-        <path d="M24 41 Q32 48 40 41 L38 45 Q35 50 32 50 Q29 50 26 45 Z" fill="#0a0a10"/>
-        <path d="M29 43 Q28 51 32 51 Q36 51 35 43 Z" fill="#ff7a1a"/>
-      </svg>
-      <span class="logo-text"><span class="b1">Crazy</span><span class="b2">CRM</span></span>
+    <a class="logo" href="#" aria-label="Crazy CRM">
+      <img class="logo-mark" src="assets/logo.jpg" alt="Crazy CRM" width="54" height="54">
     </a>
     <a href="#cta" class="cta-mini">קביעת שיחה חינם ←</a>
   </div>
@@ -788,16 +771,7 @@ footer{padding:36px 0 28px;border-top:1px solid var(--panel-line);background:#04
 <footer>
   <div class="container footer-inner">
     <div style="display:flex;align-items:center;gap:10px;">
-      <svg width="32" height="32" viewBox="0 0 64 64" xmlns="http://www.w3.org/2000/svg" aria-hidden="true" style="border-radius:7px;">
-        <rect width="64" height="64" rx="14" fill="#000"/>
-        <path d="M4 30 L7 22 L9 28 L12 18 L14 26 L17 14 L20 24 L23 10 L26 22 L29 8 L32 20 L35 8 L38 22 L41 10 L44 24 L47 14 L50 26 L52 18 L55 28 L57 22 L60 30 L58 40 L54 48 L48 52 L42 54 L36 56 L32 54 L28 56 L22 54 L16 52 L10 48 L6 40 Z" fill="#2aa3ff"/>
-        <circle cx="22" cy="28" r="9" fill="#f5ecd9"/>
-        <circle cx="41" cy="28" r="9" fill="#f5ecd9"/>
-        <circle cx="23.5" cy="29.5" r="3.4" fill="#0a0a10"/>
-        <circle cx="42.5" cy="29.5" r="3.4" fill="#0a0a10"/>
-        <path d="M24 41 Q32 48 40 41 L38 45 Q35 50 32 50 Q29 50 26 45 Z" fill="#0a0a10"/>
-        <path d="M29 43 Q28 51 32 51 Q36 51 35 43 Z" fill="#ff7a1a"/>
-      </svg>
+      <img src="assets/logo.jpg" alt="Crazy CRM" width="36" height="36" style="border-radius:7px;">
       <span>© 2026 Crazy CRM · כל הזכויות שמורות</span>
     </div>
     <div style="display:flex;gap:18px;flex-wrap:wrap;">
