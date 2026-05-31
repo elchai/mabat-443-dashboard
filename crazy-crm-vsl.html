@@ -7,7 +7,7 @@
 <meta name="description" content="Crazy CRM — מערכת ניהול לקוחות חכמה עם AI, אוטומציות, ופייפליין שמסגור עסקאות בשבילך. צפו בסרטון וקבעו שיחת אסטרטגיה ללא עלות.">
 <meta property="og:title" content="Crazy CRM | המערכת שמכפילה לך את ההכנסות">
 <meta property="og:description" content="גלו איך CRM אחד חכם מחליף את כל הגיליונות, השכחות והפגישות שמתפספסות.">
-<link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg viewBox='0 0 64 64' xmlns='http://www.w3.org/2000/svg'%3E%3Crect width='64' height='64' rx='14' fill='%23000'/%3E%3Cpath d='M32 8 L27 3 L26 11 L19 6 L20 16 L11 14 L15 23 L7 26 L14 32 L8 40 L17 40 L15 50 L24 46 L28 55 L32 48 L36 55 L40 46 L49 50 L47 40 L56 40 L50 32 L57 26 L49 23 L53 14 L44 16 L45 6 L38 11 L37 3 Z' fill='%232aa3ff'/%3E%3Ccircle cx='23' cy='27' r='8.5' fill='%23f5ecd9'/%3E%3Ccircle cx='41' cy='27' r='8.5' fill='%23f5ecd9'/%3E%3Ccircle cx='24.5' cy='28' r='3.3' fill='%230a0a10'/%3E%3Ccircle cx='42.5' cy='28' r='3.3' fill='%230a0a10'/%3E%3Cellipse cx='32' cy='43' rx='4.5' ry='6.5' fill='%23ff7a1a'/%3E%3C/svg%3E">
+<link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg viewBox='0 0 64 64' xmlns='http://www.w3.org/2000/svg'%3E%3Crect width='64' height='64' rx='14' fill='%23000'/%3E%3Cpath d='M4 30 L7 22 L9 28 L12 18 L14 26 L17 14 L20 24 L23 10 L26 22 L29 8 L32 20 L35 8 L38 22 L41 10 L44 24 L47 14 L50 26 L52 18 L55 28 L57 22 L60 30 L58 40 L54 48 L48 52 L42 54 L36 56 L32 54 L28 56 L22 54 L16 52 L10 48 L6 40 Z' fill='%232aa3ff'/%3E%3Ccircle cx='22' cy='28' r='9' fill='%23f5ecd9'/%3E%3Ccircle cx='41' cy='28' r='9' fill='%23f5ecd9'/%3E%3Ccircle cx='23.5' cy='29.5' r='3.4' fill='%230a0a10'/%3E%3Ccircle cx='42.5' cy='29.5' r='3.4' fill='%230a0a10'/%3E%3Cpath d='M24 41 Q32 48 40 41 L38 45 Q35 50 32 50 Q29 50 26 45 Z' fill='%230a0a10'/%3E%3Cpath d='M29 43 Q28 51 32 51 Q36 51 35 43 Z' fill='%23ff7a1a'/%3E%3C/svg%3E">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Heebo:wght@400;500;700;800;900&family=Rubik:wght@500;700;900&display=swap" rel="stylesheet">
@@ -136,14 +136,22 @@ main{position:relative;z-index:1;}
 h1.hero-title{
   font-family:'Rubik','Heebo',sans-serif;
   font-weight:900;
-  font-size:clamp(32px,5.2vw,62px);
-  line-height:1.08;letter-spacing:-.5px;
-  margin:0 auto 18px;max-width:980px;
+  font-size:clamp(30px,4.4vw,54px);
+  line-height:1.12;letter-spacing:-.5px;
+  margin:0 auto 18px;max-width:900px;
+  text-wrap:balance;
 }
 h1.hero-title .grad{background:var(--grad-text);-webkit-background-clip:text;background-clip:text;color:transparent;}
+h1.hero-title .blue{color:var(--blue);}
+h1.hero-title .orange{color:var(--orange);}
 h1.hero-title .hl{
-  display:inline-block;padding:0 .25em;border-radius:8px;
-  background:linear-gradient(180deg,transparent 55%,rgba(255,212,0,.45) 55%);
+  position:relative;display:inline-block;color:#fff;
+  padding:0 .1em;
+}
+h1.hero-title .hl::after{
+  content:"";position:absolute;left:0;right:0;bottom:.05em;height:.18em;
+  background:linear-gradient(90deg,transparent,#ff7a1a 15%,#ffd400 50%,#ff7a1a 85%,transparent);
+  border-radius:99px;z-index:-1;
 }
 
 .hero-sub{
@@ -470,12 +478,13 @@ footer{padding:36px 0 28px;border-top:1px solid var(--panel-line);background:#04
     <a class="logo" href="#">
       <svg class="logo-mark" viewBox="0 0 64 64" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
         <rect width="64" height="64" rx="14" fill="#000"/>
-        <path d="M32 8 L27 3 L26 11 L19 6 L20 16 L11 14 L15 23 L7 26 L14 32 L8 40 L17 40 L15 50 L24 46 L28 55 L32 48 L36 55 L40 46 L49 50 L47 40 L56 40 L50 32 L57 26 L49 23 L53 14 L44 16 L45 6 L38 11 L37 3 Z" fill="#2aa3ff"/>
-        <circle cx="23" cy="27" r="8.5" fill="#f5ecd9"/>
-        <circle cx="41" cy="27" r="8.5" fill="#f5ecd9"/>
-        <circle cx="24.5" cy="28" r="3.3" fill="#0a0a10"/>
-        <circle cx="42.5" cy="28" r="3.3" fill="#0a0a10"/>
-        <ellipse cx="32" cy="43" rx="4.5" ry="6.5" fill="#ff7a1a"/>
+        <path d="M4 30 L7 22 L9 28 L12 18 L14 26 L17 14 L20 24 L23 10 L26 22 L29 8 L32 20 L35 8 L38 22 L41 10 L44 24 L47 14 L50 26 L52 18 L55 28 L57 22 L60 30 L58 40 L54 48 L48 52 L42 54 L36 56 L32 54 L28 56 L22 54 L16 52 L10 48 L6 40 Z" fill="#2aa3ff"/>
+        <circle cx="22" cy="28" r="9" fill="#f5ecd9"/>
+        <circle cx="41" cy="28" r="9" fill="#f5ecd9"/>
+        <circle cx="23.5" cy="29.5" r="3.4" fill="#0a0a10"/>
+        <circle cx="42.5" cy="29.5" r="3.4" fill="#0a0a10"/>
+        <path d="M24 41 Q32 48 40 41 L38 45 Q35 50 32 50 Q29 50 26 45 Z" fill="#0a0a10"/>
+        <path d="M29 43 Q28 51 32 51 Q36 51 35 43 Z" fill="#ff7a1a"/>
       </svg>
       <span class="logo-text"><span class="b1">Crazy</span><span class="b2">CRM</span></span>
     </a>
@@ -491,7 +500,7 @@ footer{padding:36px 0 28px;border-top:1px solid var(--panel-line);background:#04
     <span class="kicker"><span class="dot"></span> CRM חכם עם AI שעובד במקומך 24/7</span>
     <h1 class="hero-title">
       איך <span class="hl">להכפיל את ההכנסות</span> בעסק שלך<br>
-      בלי <span class="grad">להוסיף שעות עבודה</span> ובלי לשכוח אף לקוח
+      בלי להוסיף שעות עבודה <span class="orange">ובלי לשכוח אף לקוח</span>
     </h1>
     <p class="hero-sub">
       Crazy CRM היא מערכת ניהול הלקוחות החכמה בישראל — היא מנהלת לך את הלידים, שולחת המשכים אוטומטיים, כותבת לך תזכורות בוואטסאפ ומסגור לך עסקאות בזמן שאתה ישן.
@@ -779,14 +788,15 @@ footer{padding:36px 0 28px;border-top:1px solid var(--panel-line);background:#04
 <footer>
   <div class="container footer-inner">
     <div style="display:flex;align-items:center;gap:10px;">
-      <svg width="30" height="30" viewBox="0 0 64 64" xmlns="http://www.w3.org/2000/svg" aria-hidden="true" style="border-radius:7px;">
+      <svg width="32" height="32" viewBox="0 0 64 64" xmlns="http://www.w3.org/2000/svg" aria-hidden="true" style="border-radius:7px;">
         <rect width="64" height="64" rx="14" fill="#000"/>
-        <path d="M32 8 L27 3 L26 11 L19 6 L20 16 L11 14 L15 23 L7 26 L14 32 L8 40 L17 40 L15 50 L24 46 L28 55 L32 48 L36 55 L40 46 L49 50 L47 40 L56 40 L50 32 L57 26 L49 23 L53 14 L44 16 L45 6 L38 11 L37 3 Z" fill="#2aa3ff"/>
-        <circle cx="23" cy="27" r="8.5" fill="#f5ecd9"/>
-        <circle cx="41" cy="27" r="8.5" fill="#f5ecd9"/>
-        <circle cx="24.5" cy="28" r="3.3" fill="#0a0a10"/>
-        <circle cx="42.5" cy="28" r="3.3" fill="#0a0a10"/>
-        <ellipse cx="32" cy="43" rx="4.5" ry="6.5" fill="#ff7a1a"/>
+        <path d="M4 30 L7 22 L9 28 L12 18 L14 26 L17 14 L20 24 L23 10 L26 22 L29 8 L32 20 L35 8 L38 22 L41 10 L44 24 L47 14 L50 26 L52 18 L55 28 L57 22 L60 30 L58 40 L54 48 L48 52 L42 54 L36 56 L32 54 L28 56 L22 54 L16 52 L10 48 L6 40 Z" fill="#2aa3ff"/>
+        <circle cx="22" cy="28" r="9" fill="#f5ecd9"/>
+        <circle cx="41" cy="28" r="9" fill="#f5ecd9"/>
+        <circle cx="23.5" cy="29.5" r="3.4" fill="#0a0a10"/>
+        <circle cx="42.5" cy="29.5" r="3.4" fill="#0a0a10"/>
+        <path d="M24 41 Q32 48 40 41 L38 45 Q35 50 32 50 Q29 50 26 45 Z" fill="#0a0a10"/>
+        <path d="M29 43 Q28 51 32 51 Q36 51 35 43 Z" fill="#ff7a1a"/>
       </svg>
       <span>© 2026 Crazy CRM · כל הזכויות שמורות</span>
     </div>
