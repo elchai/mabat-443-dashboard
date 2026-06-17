@@ -1,0 +1,415 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>מגה רובוט — השאירו פרטים ונחזור אליכם</title>
+  <meta name="description" content="מגה רובוט — השאירו פרטים ונציג יחזור אליכם בהקדם. פתרונות רובוטיקה ואוטומציה." />
+
+  <!-- Open Graph (לשיתוף בוואטסאפ/פייסבוק) -->
+  <meta property="og:title" content="מגה רובוט — השאירו פרטים" />
+  <meta property="og:description" content="פתרונות רובוטיקה ואוטומציה. השאירו פרטים ונחזור אליכם." />
+  <meta property="og:type" content="website" />
+
+  <!-- =====================================================================
+       ⚙️ הגדרות — ערכו את שני המשתנים הבאים בלבד
+       =====================================================================
+       1. CRAZYCRM_WEBHOOK_URL — כתובת ה-Webhook שתפיקו מתוך CrazyCRM
+          (CrazyCRM → אוטומציות / אינטגרציות → Webhook נכנס → העתיקו את ה-URL).
+          כל עוד הערך ריק, הטופס יעבוד ב"מצב הדגמה" ולא ישלח באמת.
+       2. LOGO_URL — כתובת קובץ הלוגו של מגה רובוט מתוך אתר הלקוח.
+          אם נשאר ריק / לא נטען — יוצג שם המותג כטקסט.
+       ===================================================================== -->
+  <script>
+    window.MEGAROBOT_CONFIG = {
+      CRAZYCRM_WEBHOOK_URL: "", // לדוגמה: "https://app.crazycrm.app/api/webhook/XXXXXXXX"
+      LOGO_URL: "",             // לדוגמה: "https://www.megarobot.co.il/wp-content/uploads/logo.png"
+      WHATSAPP_PHONE: "",       // אופציונלי, פורמט בינלאומי ללא +, לדוגמה: "972500000000"
+      SOURCE_NAME: "דף נחיתה — מגה רובוט" // יישלח ל-CRM בשדה source
+    };
+  </script>
+
+  <style>
+    :root {
+      --brand:        #0b3d91;   /* כחול עמוק */
+      --brand-2:      #1565c0;
+      --accent:       #00c2cb;   /* תכלת/ציאן */
+      --accent-strong:#00a3ab;
+      --ink:          #0f172a;
+      --muted:        #5b6b82;
+      --bg:           #f5f8fc;
+      --card:         #ffffff;
+      --line:         #e3eaf3;
+      --ok:           #16a34a;
+      --err:          #dc2626;
+      --radius:       16px;
+      --shadow:       0 12px 40px rgba(11,61,145,.12);
+      --font: "Heebo", "Assistant", "Segoe UI", system-ui, -apple-system, Arial, sans-serif;
+    }
+
+    * { box-sizing: border-box; }
+    html, body { margin: 0; padding: 0; }
+    body {
+      font-family: var(--font);
+      color: var(--ink);
+      background: var(--bg);
+      line-height: 1.6;
+      -webkit-font-smoothing: antialiased;
+    }
+    a { color: inherit; }
+    img { max-width: 100%; display: block; }
+
+    /* ===== Header ===== */
+    .site-header {
+      position: sticky; top: 0; z-index: 20;
+      background: rgba(255,255,255,.9);
+      backdrop-filter: blur(8px);
+      border-bottom: 1px solid var(--line);
+    }
+    .container { width: min(1120px, 92%); margin-inline: auto; }
+    .header-inner {
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 14px 0;
+    }
+    .brand { display: flex; align-items: center; gap: 12px; }
+    .brand img { height: 44px; width: auto; }
+    .brand .brand-text {
+      font-weight: 800; font-size: 1.35rem; letter-spacing: -.5px;
+      color: var(--brand);
+    }
+    .header-cta {
+      background: var(--accent); color: #022; font-weight: 700;
+      padding: 10px 18px; border-radius: 999px; text-decoration: none;
+      transition: transform .15s ease, box-shadow .15s ease;
+    }
+    .header-cta:hover { transform: translateY(-1px); box-shadow: 0 6px 18px rgba(0,194,203,.4); }
+
+    /* ===== Hero ===== */
+    .hero {
+      position: relative; overflow: hidden;
+      background:
+        radial-gradient(1000px 500px at 85% -10%, rgba(0,194,203,.18), transparent 60%),
+        linear-gradient(135deg, var(--brand) 0%, var(--brand-2) 100%);
+      color: #fff;
+    }
+    .hero-grid {
+      display: grid; grid-template-columns: 1.1fr .9fr; gap: 48px;
+      align-items: center; padding: 72px 0 84px;
+    }
+    .eyebrow {
+      display: inline-block; font-weight: 700; font-size: .85rem;
+      letter-spacing: 1px; text-transform: uppercase;
+      background: rgba(255,255,255,.14); padding: 6px 14px; border-radius: 999px;
+      margin-bottom: 18px;
+    }
+    .hero h1 {
+      font-size: clamp(2rem, 4.4vw, 3.2rem); line-height: 1.12;
+      margin: 0 0 18px; font-weight: 800; letter-spacing: -1px;
+    }
+    .hero p.lead { font-size: 1.18rem; opacity: .95; margin: 0 0 26px; max-width: 46ch; }
+    .hero ul.benefits { list-style: none; padding: 0; margin: 0 0 8px; display: grid; gap: 12px; }
+    .hero ul.benefits li { display: flex; align-items: center; gap: 12px; font-size: 1.05rem; }
+    .hero ul.benefits li::before {
+      content: "✓"; flex: 0 0 26px; height: 26px; display: grid; place-items: center;
+      background: var(--accent); color: #022; border-radius: 50%; font-weight: 900; font-size: .9rem;
+    }
+
+    /* ===== Form card ===== */
+    .lead-card {
+      background: var(--card); color: var(--ink);
+      border-radius: var(--radius); box-shadow: var(--shadow);
+      padding: 30px 28px; border: 1px solid rgba(255,255,255,.4);
+    }
+    .lead-card h2 { margin: 0 0 6px; font-size: 1.5rem; }
+    .lead-card .sub { margin: 0 0 20px; color: var(--muted); font-size: .98rem; }
+    .field { margin-bottom: 14px; }
+    .field label { display: block; font-weight: 600; font-size: .92rem; margin-bottom: 6px; }
+    .field label .req { color: var(--err); }
+    .field input, .field textarea {
+      width: 100%; padding: 12px 14px; border: 1.5px solid var(--line);
+      border-radius: 10px; font: inherit; background: #fbfdff; transition: border-color .15s, box-shadow .15s;
+    }
+    .field textarea { resize: vertical; min-height: 84px; }
+    .field input:focus, .field textarea:focus {
+      outline: none; border-color: var(--accent); box-shadow: 0 0 0 3px rgba(0,194,203,.18);
+    }
+    .field.invalid input, .field.invalid textarea { border-color: var(--err); }
+    .field .error-msg { color: var(--err); font-size: .82rem; margin-top: 4px; display: none; }
+    .field.invalid .error-msg { display: block; }
+
+    .submit-btn {
+      width: 100%; border: 0; cursor: pointer; font: inherit; font-weight: 800; font-size: 1.08rem;
+      color: #022; background: var(--accent); padding: 15px; border-radius: 12px; margin-top: 6px;
+      transition: transform .15s ease, box-shadow .15s ease, background .15s;
+    }
+    .submit-btn:hover { background: var(--accent-strong); transform: translateY(-1px); box-shadow: 0 10px 26px rgba(0,194,203,.4); }
+    .submit-btn:disabled { opacity: .65; cursor: not-allowed; transform: none; }
+    .form-note { font-size: .8rem; color: var(--muted); text-align: center; margin: 12px 0 0; }
+
+    .form-status { margin-top: 14px; padding: 12px 14px; border-radius: 10px; font-weight: 600; display: none; }
+    .form-status.show { display: block; }
+    .form-status.ok  { background: #e8f7ee; color: var(--ok); border: 1px solid #b9e6c8; }
+    .form-status.err { background: #fdeaea; color: var(--err); border: 1px solid #f3c0c0; }
+
+    /* ===== Trust / features ===== */
+    .features { padding: 64px 0; }
+    .features h2 { text-align: center; font-size: 1.9rem; margin: 0 0 8px; }
+    .features .sub { text-align: center; color: var(--muted); margin: 0 0 40px; }
+    .feature-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 22px; }
+    .feature {
+      background: var(--card); border: 1px solid var(--line); border-radius: var(--radius);
+      padding: 26px; text-align: center; transition: transform .2s ease, box-shadow .2s ease;
+    }
+    .feature:hover { transform: translateY(-4px); box-shadow: var(--shadow); }
+    .feature .ico { font-size: 2.2rem; margin-bottom: 12px; }
+    .feature h3 { margin: 0 0 8px; font-size: 1.18rem; }
+    .feature p { margin: 0; color: var(--muted); font-size: .96rem; }
+
+    /* ===== Footer ===== */
+    .site-footer { background: var(--ink); color: #cbd5e1; padding: 32px 0; text-align: center; font-size: .9rem; }
+    .site-footer a { color: var(--accent); text-decoration: none; }
+
+    /* WhatsApp float */
+    .wa-float {
+      position: fixed; inset-inline-start: 20px; bottom: 20px; z-index: 50;
+      background: #25d366; color: #fff; width: 56px; height: 56px; border-radius: 50%;
+      display: none; align-items: center; justify-content: center; box-shadow: 0 8px 24px rgba(0,0,0,.25);
+      text-decoration: none; font-size: 1.7rem;
+    }
+    .wa-float.show { display: flex; }
+
+    /* ===== Responsive ===== */
+    @media (max-width: 860px) {
+      .hero-grid { grid-template-columns: 1fr; gap: 32px; padding: 48px 0 56px; }
+      .feature-grid { grid-template-columns: 1fr; }
+      .header-cta { display: none; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Header -->
+  <header class="site-header">
+    <div class="container header-inner">
+      <div class="brand">
+        <img id="brand-logo" alt="מגה רובוט" hidden />
+        <span class="brand-text" id="brand-text">מגה רובוט</span>
+      </div>
+      <a href="#lead-form" class="header-cta">דברו איתנו</a>
+    </div>
+  </header>
+
+  <!-- Hero + Form -->
+  <section class="hero">
+    <div class="container hero-grid">
+      <div>
+        <span class="eyebrow">פתרונות רובוטיקה ואוטומציה</span>
+        <h1>מגה רובוט — הופכים את העתיד לפשוט</h1>
+        <p class="lead">רוצים לשמוע איך אנחנו יכולים לעזור לעסק שלכם? השאירו פרטים ונציג מקצועי יחזור אליכם בהקדם — ללא התחייבות.</p>
+        <ul class="benefits">
+          <li>מענה אישי ומהיר</li>
+          <li>ייעוץ והתאמה מדויקת לצרכים שלכם</li>
+          <li>ליווי מקצועי לכל אורך הדרך</li>
+        </ul>
+      </div>
+
+      <!-- Lead form -->
+      <div class="lead-card" id="lead-form">
+        <h2>השאירו פרטים</h2>
+        <p class="sub">נחזור אליכם בהקדם האפשרי 👇</p>
+
+        <form id="leadForm" novalidate>
+          <div class="field" data-field="fullName">
+            <label for="fullName">שם מלא <span class="req">*</span></label>
+            <input type="text" id="fullName" name="fullName" autocomplete="name" required />
+            <div class="error-msg">נא להזין שם מלא</div>
+          </div>
+
+          <div class="field" data-field="phone">
+            <label for="phone">טלפון <span class="req">*</span></label>
+            <input type="tel" id="phone" name="phone" inputmode="tel" autocomplete="tel" placeholder="050-0000000" required />
+            <div class="error-msg">נא להזין מספר טלפון תקין</div>
+          </div>
+
+          <div class="field" data-field="email">
+            <label for="email">אימייל</label>
+            <input type="email" id="email" name="email" autocomplete="email" placeholder="name@example.com" />
+            <div class="error-msg">כתובת אימייל לא תקינה</div>
+          </div>
+
+          <div class="field" data-field="company">
+            <label for="company">שם החברה</label>
+            <input type="text" id="company" name="company" autocomplete="organization" />
+            <div class="error-msg"></div>
+          </div>
+
+          <div class="field" data-field="message">
+            <label for="message">הודעה / פנייה חופשית</label>
+            <textarea id="message" name="message" placeholder="ספרו לנו במה נוכל לעזור..."></textarea>
+            <div class="error-msg"></div>
+          </div>
+
+          <!-- honeypot נגד ספאם -->
+          <input type="text" name="website" tabindex="-1" autocomplete="off"
+                 style="position:absolute;left:-9999px;width:1px;height:1px;opacity:0" aria-hidden="true" />
+
+          <button type="submit" class="submit-btn" id="submitBtn">שליחה</button>
+          <p class="form-note">בלחיצה על "שליחה" אתם מאשרים שניצור עמכם קשר.</p>
+
+          <div class="form-status" id="formStatus" role="status" aria-live="polite"></div>
+        </form>
+      </div>
+    </div>
+  </section>
+
+  <!-- Features -->
+  <section class="features">
+    <div class="container">
+      <h2>למה מגה רובוט?</h2>
+      <p class="sub">היתרונות שהופכים אותנו לבחירה הנכונה</p>
+      <div class="feature-grid">
+        <div class="feature">
+          <div class="ico">🤖</div>
+          <h3>טכנולוגיה מתקדמת</h3>
+          <p>פתרונות חדשניים שמותאמים בדיוק לצרכים שלכם.</p>
+        </div>
+        <div class="feature">
+          <div class="ico">⚡</div>
+          <h3>מהירות ויעילות</h3>
+          <p>חוסכים לכם זמן ומשאבים עם תהליכים אוטומטיים.</p>
+        </div>
+        <div class="feature">
+          <div class="ico">🤝</div>
+          <h3>ליווי אישי</h3>
+          <p>צוות מומחים שמלווה אתכם משלב הייעוץ ועד היישום.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Footer -->
+  <footer class="site-footer">
+    <div class="container">
+      <p>© <span id="year"></span> מגה רובוט · כל הזכויות שמורות</p>
+    </div>
+  </footer>
+
+  <!-- WhatsApp floating button (מופיע רק אם הוגדר טלפון) -->
+  <a class="wa-float" id="waFloat" target="_blank" rel="noopener" aria-label="וואטסאפ">💬</a>
+
+  <script>
+  (function () {
+    "use strict";
+    var CFG = window.MEGAROBOT_CONFIG || {};
+
+    // ---- Logo ----
+    if (CFG.LOGO_URL) {
+      var logo = document.getElementById("brand-logo");
+      logo.onload = function () { logo.hidden = false; document.getElementById("brand-text").hidden = true; };
+      logo.onerror = function () { logo.hidden = true; }; // נשאר טקסט
+      logo.src = CFG.LOGO_URL;
+    }
+
+    // ---- WhatsApp ----
+    if (CFG.WHATSAPP_PHONE) {
+      var wa = document.getElementById("waFloat");
+      wa.href = "https://wa.me/" + CFG.WHATSAPP_PHONE +
+                "?text=" + encodeURIComponent("היי, הגעתי מהאתר ואשמח לפרטים");
+      wa.classList.add("show");
+    }
+
+    document.getElementById("year").textContent = new Date().getFullYear();
+
+    // ---- Validation helpers ----
+    var form = document.getElementById("leadForm");
+    var statusEl = document.getElementById("formStatus");
+    var submitBtn = document.getElementById("submitBtn");
+
+    function setFieldError(name, isError) {
+      var wrap = form.querySelector('[data-field="' + name + '"]');
+      if (wrap) wrap.classList.toggle("invalid", !!isError);
+    }
+    function showStatus(type, msg) {
+      statusEl.className = "form-status show " + type;
+      statusEl.textContent = msg;
+    }
+    function clearStatus() { statusEl.className = "form-status"; statusEl.textContent = ""; }
+
+    function validate(data) {
+      var ok = true;
+      if (!data.fullName || data.fullName.trim().length < 2) { setFieldError("fullName", true); ok = false; }
+      else setFieldError("fullName", false);
+
+      var phoneDigits = (data.phone || "").replace(/[^\d]/g, "");
+      if (phoneDigits.length < 9) { setFieldError("phone", true); ok = false; }
+      else setFieldError("phone", false);
+
+      if (data.email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(data.email)) { setFieldError("email", true); ok = false; }
+      else setFieldError("email", false);
+
+      return ok;
+    }
+
+    form.addEventListener("submit", function (e) {
+      e.preventDefault();
+      clearStatus();
+
+      var fd = new FormData(form);
+      // honeypot — אם מולא, כנראה בוט: מתנהגים כאילו הצליח אבל לא שולחים
+      if (fd.get("website")) { showStatus("ok", "תודה! פנייתכם התקבלה."); form.reset(); return; }
+
+      var data = {
+        fullName: (fd.get("fullName") || "").trim(),
+        phone:    (fd.get("phone") || "").trim(),
+        email:    (fd.get("email") || "").trim(),
+        company:  (fd.get("company") || "").trim(),
+        message:  (fd.get("message") || "").trim(),
+        source:   CFG.SOURCE_NAME || "Landing Page",
+        page_url: window.location.href,
+        submitted_at: new Date().toISOString()
+      };
+
+      if (!validate(data)) { showStatus("err", "נא לתקן את השדות המסומנים."); return; }
+
+      // ---- מצב הדגמה: אין Webhook מוגדר ----
+      if (!CFG.CRAZYCRM_WEBHOOK_URL) {
+        console.log("[מצב הדגמה] לא הוגדר CRAZYCRM_WEBHOOK_URL. הליד שהיה נשלח:", data);
+        showStatus("ok", "תודה " + data.fullName.split(" ")[0] + "! (מצב הדגמה — הגדירו את ה-Webhook כדי לשלוח ל-CRM).");
+        form.reset();
+        return;
+      }
+
+      // ---- שליחה אמיתית ל-CrazyCRM ----
+      submitBtn.disabled = true;
+      var originalLabel = submitBtn.textContent;
+      submitBtn.textContent = "שולח...";
+
+      fetch(CFG.CRAZYCRM_WEBHOOK_URL, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(data)
+      })
+      .then(function (res) {
+        if (!res.ok) throw new Error("HTTP " + res.status);
+        showStatus("ok", "תודה " + data.fullName.split(" ")[0] + "! קיבלנו את הפרטים ונחזור אליכם בהקדם.");
+        form.reset();
+      })
+      .catch(function (err) {
+        console.error("שגיאה בשליחת הליד:", err);
+        showStatus("err", "אופס, משהו השתבש בשליחה. נסו שוב או צרו קשר טלפונית.");
+      })
+      .finally(function () {
+        submitBtn.disabled = false;
+        submitBtn.textContent = originalLabel;
+      });
+    });
+
+    // ניקוי שגיאה תוך כדי הקלדה
+    form.addEventListener("input", function (e) {
+      var wrap = e.target.closest("[data-field]");
+      if (wrap) wrap.classList.remove("invalid");
+    });
+  })();
+  </script>
+</body>
+</html>
